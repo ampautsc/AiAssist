@@ -76,6 +76,65 @@ npm start
 
 ---
 
+### Gmail & Calendar MCP Server
+
+**Location**: `gmailcal/`
+
+**Purpose**: Provides comprehensive integration with Gmail, Google Calendar, and Google Contacts APIs through OAuth2 authentication.
+
+**Features**:
+- 📬 Gmail email management (list, search, analyze, batch operations)
+- 📅 Google Calendar integration (list calendars, events, create events)
+- 👤 Google Contacts management (list, search, retrieve details)
+- 🔒 Secure OAuth2 authentication with token caching
+- 📊 Advanced email analysis (tasks, meetings, contacts extraction)
+- 🔄 Automatic token refresh and rate limiting
+
+**Quick Start**:
+```bash
+cd mcp-servers/gmailcal
+cp .env.example .env
+# Edit .env with OAuth2 credentials
+cargo build --release
+./target/release/mcp-gmailcal --help
+```
+
+**Setup Requirements**:
+1. Google Cloud Project with OAuth2 credentials
+2. Gmail API, Calendar API, and People API enabled
+3. OAuth consent screen configured with required scopes
+4. Refresh token obtained via OAuth flow
+
+**Testing**:
+```bash
+cd mcp-servers/gmailcal
+cargo test --release
+npx @modelcontextprotocol/inspector cargo run --release
+```
+
+**Documentation**: 
+- [INTEGRATION.md](./gmailcal/INTEGRATION.md) - Complete setup and usage guide
+- [Original Repository](https://github.com/2389-research/gmailcal-mcp-rs)
+
+**Configuration Example**:
+```json
+{
+  "mcpServers": {
+    "gmailcal": {
+      "command": "path/to/mcp-servers/gmailcal/target/release/mcp-gmailcal",
+      "args": ["--memory-only"],
+      "env": {
+        "GMAIL_CLIENT_ID": "your-client-id",
+        "GMAIL_CLIENT_SECRET": "your-client-secret",
+        "GMAIL_REFRESH_TOKEN": "your-refresh-token"
+      }
+    }
+  }
+}
+```
+
+---
+
 This directory contains configurations for MCP servers that enhance the assistant's capabilities.
 
 ### Minecraft Bedrock Addon Server
@@ -165,12 +224,55 @@ Helps with documentation generation and management.
 
 ## Adding New MCP Servers
 
-1. Research available MCP servers
-2. Evaluate security and utility
-3. Create configuration file
-4. Test thoroughly
-5. Document usage patterns
-6. Add to this README
+AiAssist provides a comprehensive template for integrating external MCP servers. This ensures consistent, well-documented, and maintainable integrations.
+
+### Quick Integration Steps
+
+1. **Research** the MCP server
+   - Review features and capabilities
+   - Check license compatibility
+   - Verify maintenance status
+
+2. **Clone and Setup**
+   - Clone into `mcp-servers/<server-name>/`
+   - Remove embedded `.git` directory
+   - Create configuration files
+
+3. **Build and Test**
+   - Build using native toolchain
+   - Run unit and integration tests
+   - Verify MCP protocol communication
+
+4. **Document**
+   - Create `INTEGRATION.md` in server directory
+   - Update main `mcp-servers/README.md`
+   - Add configuration examples
+
+5. **Validate**
+   - Test with MCP Inspector
+   - Review security considerations
+   - Verify all documentation
+
+### Integration Template
+
+For detailed step-by-step instructions, see: [MCP Integration Template](../docs/mcp-integration-template.md)
+
+This template provides:
+- ✅ Complete integration checklist
+- 📝 Documentation templates
+- 🔒 Security review guidelines
+- 🛠️ Language-specific considerations (TypeScript, Rust, Python, Go)
+- 📋 Configuration examples
+- 🐛 Troubleshooting guides
+
+### Example Integration
+
+The Gmail & Calendar MCP Server (`gmailcal/`) serves as a reference implementation of this pattern:
+- Rust-based MCP server
+- OAuth2 authentication
+- Multiple API integrations
+- Comprehensive documentation
+- See `gmailcal/INTEGRATION.md` for details
 
 ## Recommended MCP Servers
 
