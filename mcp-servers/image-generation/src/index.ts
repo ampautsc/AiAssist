@@ -146,8 +146,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error("No image data returned from API");
         }
         const imageData = response.data[0];
-        if (!imageData) {
-          throw new Error("No image data returned from API");
+        if (!imageData || !imageData.url) {
+          throw new Error("Invalid image data received from API");
         }
 
         return {

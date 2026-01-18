@@ -12,6 +12,33 @@ MCP servers are integrations that allow the AI assistant to:
 
 ## Available MCP Servers
 
+### Image Generation Server
+
+**Location**: `./image-generation/`
+
+**Purpose**: Generate high-quality images from text prompts using OpenAI's DALL-E 3 API and validate image quality using GPT-4 Vision.
+
+**Features**:
+- 🎨 Generate images from text descriptions
+- 🔍 Validate if images match prompts
+- 📝 Get detailed image descriptions
+- ⚙️ Configurable size, quality, and style
+
+**Quick Start**:
+```bash
+cd image-generation
+npm install
+npm run build
+export OPENAI_API_KEY=your-key-here
+npm start
+```
+
+**Documentation**: See [image-generation/README.md](./image-generation/README.md) and [image-generation/USAGE.md](./image-generation/USAGE.md)
+
+**API Research**: See [image-generation-api-research.md](./image-generation-api-research.md) for details on API selection and capabilities.
+
+---
+
 This directory contains configurations for MCP servers that enhance the assistant's capabilities.
 
 ## Configuration Structure

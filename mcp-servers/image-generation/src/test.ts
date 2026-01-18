@@ -143,7 +143,7 @@ async function describeImage(imageUrl: string) {
 
 async function runTests() {
   console.log("🚀 Starting Image Generation MCP Server Tests\n");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   // Check for API key
   if (!process.env.OPENAI_API_KEY) {
@@ -155,7 +155,7 @@ async function runTests() {
 
   // Test 1: Generate images for each test prompt
   console.log("\n\n📋 Test 1: Image Generation");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   for (const prompt of TEST_PROMPTS) {
     try {
@@ -168,7 +168,7 @@ async function runTests() {
 
   // Test 2: Validate generated images
   console.log("\n\n📋 Test 2: Image Validation");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   for (const result of results) {
     try {
@@ -181,7 +181,7 @@ async function runTests() {
 
   // Test 3: Describe one of the images
   console.log("\n\n📋 Test 3: Image Description");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   if (results.length > 0 && results[0]) {
     try {
@@ -193,7 +193,7 @@ async function runTests() {
 
   // Test 4: Test different sizes
   console.log("\n\n📋 Test 4: Different Image Sizes");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   try {
     await generateImage("A simple geometric pattern", "1792x1024");
@@ -204,7 +204,7 @@ async function runTests() {
 
   // Summary
   console.log("\n\n📊 Test Summary");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
   console.log(`✅ Total images generated: ${results.length}`);
   console.log(`✅ Total images validated: ${results.filter(r => r.validationResult).length}`);
   

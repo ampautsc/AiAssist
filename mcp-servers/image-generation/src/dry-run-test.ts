@@ -13,7 +13,7 @@ import {
 
 async function testServerStructure() {
   console.log("🔍 Testing Image Generation MCP Server Structure\n");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   // Create a test server instance
   const server = new Server(
@@ -49,7 +49,7 @@ async function testServerStructure() {
 
 async function validateToolSchemas() {
   console.log("\n🔍 Validating Tool Schemas\n");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   const schemas = {
     generate_image: {
@@ -79,7 +79,7 @@ async function validateToolSchemas() {
 
 async function testErrorHandling() {
   console.log("\n🔍 Testing Error Handling\n");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   const errorScenarios = [
     "Missing API key",
@@ -103,9 +103,9 @@ async function runDryRunTests() {
     await validateToolSchemas();
     await testErrorHandling();
 
-    console.log("\n" + "=" .repeat(60));
+    console.log("\n" + "=".repeat(60));
     console.log("🎉 All dry-run tests passed!");
-    console.log("=" .repeat(60));
+    console.log("=".repeat(60));
     console.log("\n✨ Server is ready to use!\n");
 
   } catch (error) {
