@@ -12,6 +12,43 @@ MCP servers are integrations that allow the AI assistant to:
 
 ## Available MCP Servers
 
+### GitHub MCP Server ✨
+**Location**: `github-mcp/`
+
+A comprehensive MCP server for interacting with GitHub's REST API. Enables complete control over repositories, issues, pull requests, releases, and more.
+
+**Features**:
+- 🏗️ **Repository Management**: Create, fork, search, list, and delete repositories
+- 📁 **File Operations**: Read, write, update, and delete files with Git history
+- 🌿 **Branch Management**: Create, list, and delete branches  
+- 💬 **Issue Tracking**: Create, update, list, and comment on issues
+- 🔀 **Pull Requests**: Full PR workflow - create, review, merge, comment
+- 🔍 **Search**: Search code, issues, PRs, users, and repositories
+- 📦 **Releases**: Create, update, list, and manage releases
+- ⚡ **Batch Operations**: Push multiple files in a single commit
+
+**Setup**:
+```bash
+cd github-mcp
+npm install
+npm run build
+export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
+```
+
+**Documentation**:
+- [`github-mcp/README.md`](github-mcp/README.md) - Complete feature documentation
+- [`github-mcp/GUIDE.md`](github-mcp/GUIDE.md) - Implementation and usage guide
+- [`github-mcp/CONFIGURATION.md`](github-mcp/CONFIGURATION.md) - Configuration examples
+- [`github-api-reference.md`](github-api-reference.md) - GitHub API endpoint reference
+
+**Quick Test**:
+```bash
+cd github-mcp
+node test.mjs
+```
+
+---
+
 ### Image Generation Server
 
 **Location**: `./image-generation/`
