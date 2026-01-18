@@ -11,7 +11,8 @@
     "build": "tsc",
     "start": "node build/index.js",
     "dev": "tsx src/index.ts",
-    "test": "tsx src/test.ts"
+    "test": "tsx src/test.ts",
+    "test:dry-run": "tsx src/dry-run-test.ts"
   },
   "keywords": ["mcp", "server", "image-generation", "dall-e", "ai"],
   "author": "",

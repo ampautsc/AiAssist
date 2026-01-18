@@ -16,6 +16,14 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import OpenAI from "openai";
 
+// Check for API key early
+if (!process.env.OPENAI_API_KEY) {
+  console.error("Error: OPENAI_API_KEY environment variable is not set");
+  console.error("Please set your OpenAI API key:");
+  console.error("  export OPENAI_API_KEY=your-api-key-here");
+  process.exit(1);
+}
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -297,12 +305,6 @@ Provide your analysis in the following JSON format:
 
 // Start the server
 async function main() {
-  // Check for API key
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("Error: OPENAI_API_KEY environment variable is not set");
-    process.exit(1);
-  }
-
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Image Generation MCP Server running on stdio");
