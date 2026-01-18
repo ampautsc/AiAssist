@@ -1,0 +1,4 @@
+pack.name=Box Turtle Addon
+pack.description=Adds Box Turtles to Minecraft Bedrock Edition
+entity.custom:box_turtle.name=Box Turtle
+item.spawn_egg.entity.custom:box_turtle.name=Spawn Box Turtle

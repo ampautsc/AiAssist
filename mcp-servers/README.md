@@ -23,7 +23,7 @@ A comprehensive MCP server for interacting with GitHub's REST API. Enables compl
 - 🌿 **Branch Management**: Create, list, and delete branches  
 - 💬 **Issue Tracking**: Create, update, list, and comment on issues
 - 🔀 **Pull Requests**: Full PR workflow - create, review, merge, comment
-- �� **Search**: Search code, issues, PRs, users, and repositories
+- 🔍 **Search**: Search code, issues, PRs, users, and repositories
 - 📦 **Releases**: Create, update, list, and manage releases
 - ⚡ **Batch Operations**: Push multiple files in a single commit
 
@@ -76,45 +76,7 @@ npm start
 
 ---
 
-### Minecraft Bedrock Addon Server
-
-Located in: `/mcp-servers/minecraft-bedrock-addon/`
-
-**Purpose**: Assists with creating Minecraft Bedrock Edition addons, including Resource Packs and Behavior Packs.
-
-**Capabilities**:
-- Create complete addon directory structures
-- Generate entities, items, blocks, and recipes
-- Manage texture references and localizations
-- Generate UUIDs for manifests
-- Validate addon structure
-
-**Setup**:
-```bash
-cd mcp-servers/minecraft-bedrock-addon
-npm install
-npm run build
-```
-
-**Configuration**:
-```json
-{
-  "mcpServers": {
-    "minecraft-bedrock": {
-      "command": "node",
-      "args": ["path/to/mcp-servers/minecraft-bedrock-addon/dist/index.js"]
-    }
-  }
-}
-```
-
-**Reference Documentation**: See `/docs/minecraft-bedrock-addon-reference.md` for detailed addon format specifications.
-
-**Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
-**Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
-=======
 This directory contains configurations for MCP servers that enhance the assistant's capabilities.
->>>>>>> origin/main
 
 ### Minecraft Bedrock Addon Server
 

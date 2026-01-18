@@ -1,0 +1,173 @@
+{
+  "format_version": "1.20.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "custom:box_turtle",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {
+      "adult": {
+        "minecraft:experience_reward": {
+          "on_death": "query.last_hit_by_player ? 1 + (query.equipment_count * Math.Random(1,3)) : 0"
+        },
+        "minecraft:scale": {
+          "value": 1.0
+        }
+      },
+      "baby": {
+        "minecraft:is_baby": {},
+        "minecraft:scale": {
+          "value": 0.4
+        },
+        "minecraft:ageable": {
+          "duration": 1200,
+          "feed_items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"],
+          "grow_up": {
+            "event": "minecraft:ageable_grow_up",
+            "target": "self"
+          }
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["turtle", "mob"]
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0,
+        "breathes_air": true,
+        "breathes_water": false
+      },
+      "minecraft:health": {
+        "value": 30,
+        "max": 30
+      },
+      "minecraft:hurt_on_condition": {
+        "damage_conditions": [
+          {
+            "filters": {
+              "test": "in_lava",
+              "subject": "self",
+              "operator": "==",
+              "value": true
+            },
+            "cause": "lava",
+            "damage_per_tick": 4
+          }
+        ]
+      },
+      "minecraft:movement": {
+        "value": 0.1
+      },
+      "minecraft:navigation.walk": {
+        "can_path_over_water": false,
+        "avoid_water": true,
+        "avoid_damage_blocks": true
+      },
+      "minecraft:jump.static": {},
+      "minecraft:can_climb": {},
+      "minecraft:collision_box": {
+        "width": 1.2,
+        "height": 0.4
+      },
+      "minecraft:nameable": {},
+      "minecraft:physics": {},
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:conditional_bandwidth_optimization": {},
+      "minecraft:behavior.panic": {
+        "priority": 1,
+        "speed_multiplier": 1.25
+      },
+      "minecraft:behavior.lay_egg": {
+        "priority": 3,
+        "speed_multiplier": 1.0,
+        "search_range": 16,
+        "search_height": 4,
+        "goal_radius": 1.5,
+        "on_lay": {
+          "event": "minecraft:laid_egg",
+          "target": "self"
+        }
+      },
+      "minecraft:behavior.breed": {
+        "priority": 4,
+        "speed_multiplier": 1.0
+      },
+      "minecraft:behavior.tempt": {
+        "priority": 5,
+        "speed_multiplier": 1.1,
+        "items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"]
+      },
+      "minecraft:behavior.random_stroll": {
+        "priority": 7,
+        "speed_multiplier": 1.0
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 8,
+        "look_distance": 6.0,
+        "probability": 0.02
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 9
+      },
+      "minecraft:breedable": {
+        "require_tame": false,
+        "breed_items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"],
+        "breeds_with": {
+          "mate_type": "custom:box_turtle",
+          "baby_type": "custom:box_turtle",
+          "breed_event": {
+            "event": "minecraft:entity_born",
+            "target": "baby"
+          }
+        }
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/box_turtle.json"
+      },
+      "minecraft:leashable": {
+        "soft_distance": 4.0,
+        "hard_distance": 6.0,
+        "max_distance": 10.0
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {
+        "randomize": [
+          {
+            "weight": 95,
+            "add": {
+              "component_groups": ["adult"]
+            }
+          },
+          {
+            "weight": 5,
+            "add": {
+              "component_groups": ["baby"]
+            }
+          }
+        ]
+      },
+      "minecraft:entity_born": {
+        "add": {
+          "component_groups": ["baby"]
+        }
+      },
+      "minecraft:ageable_grow_up": {
+        "remove": {
+          "component_groups": ["baby"]
+        },
+        "add": {
+          "component_groups": ["adult"]
+        }
+      },
+      "minecraft:laid_egg": {}
+    }
+  }
+}
