@@ -8,7 +8,7 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 - **manifest.json** - Behavior pack metadata and configuration
 - **entities/box_turtle.json** - Entity definition with AI behaviors, movement, breeding, and more
 - **spawn_rules/box_turtle_spawn.json** - Spawn rules for beaches, swamps, and forests
-- **loot_tables/entities/box_turtle.json** - Loot drops (turtle shell pieces and seagrass)
+- **loot_tables/entities/box_turtle.json** - Loot drops (scutes and seagrass)
 
 ### Resource Pack (`resource_packs/`)
 - **manifest.json** - Resource pack metadata and configuration
@@ -27,7 +27,7 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 - **Movement**: Slow on land (0.1), faster in water (0.12)
 - **Behavior**: Can be bred with seagrass, lays eggs, can be leashed
 - **Spawning**: Appears in beaches (common), swamps (uncommon), and forests (rare)
-- **Loot**: Drops turtle shell pieces and occasionally seagrass
+- **Loot**: Drops scutes (turtle shell pieces) and occasionally seagrass
 - **Lifespan**: Can be baby or adult, babies grow after 1200 ticks (60 seconds)
 - **Amphibious**: Can breathe both air and water
 
@@ -138,9 +138,10 @@ Requires Minecraft Bedrock Edition 1.20.0 or higher
 
 ## ⚠️ Known Limitations
 
-1. **Texture**: The included texture is a placeholder. Replace with a proper texture for production use.
-2. **Sounds**: Sound files are referenced but not included. Add OGG audio files in `resource_packs/sounds/mob/turtle/` directory.
-3. **Animations**: Animation definitions are referenced but not fully defined. Add detailed animations in a separate animation file.
+1. **Texture**: The included texture is a solid brown placeholder. Replace with a proper UV-mapped texture for production use.
+2. **Animations**: Animation references are defined in the entity file but actual animation files (.animation.json) are not included. The entity will use default/fallback animations. Add detailed animations in `resource_packs/animations/` directory for proper movement.
+3. **Sounds**: Sound definitions reference audio files but the actual OGG audio files are not included. Add OGG audio files in `resource_packs/sounds/mob/turtle/` directory. The entity will be silent until sounds are added.
+4. **Egg Laying**: The egg-laying behavior is defined but may require additional components (like `minecraft:home` and `minecraft:preferred_path`) for full functionality.
 
 ## 🐛 Troubleshooting
 
