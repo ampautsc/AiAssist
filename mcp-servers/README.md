@@ -23,7 +23,7 @@ A comprehensive MCP server for interacting with GitHub's REST API. Enables compl
 - 🌿 **Branch Management**: Create, list, and delete branches  
 - 💬 **Issue Tracking**: Create, update, list, and comment on issues
 - 🔀 **Pull Requests**: Full PR workflow - create, review, merge, comment
-- 🔍 **Search**: Search code, issues, PRs, users, and repositories
+- �� **Search**: Search code, issues, PRs, users, and repositories
 - 📦 **Releases**: Create, update, list, and manage releases
 - ⚡ **Batch Operations**: Push multiple files in a single commit
 
@@ -111,6 +111,10 @@ npm run build
 **Reference Documentation**: See `/docs/minecraft-bedrock-addon-reference.md` for detailed addon format specifications.
 
 **Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
+**Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
+=======
+This directory contains configurations for MCP servers that enhance the assistant's capabilities.
+>>>>>>> origin/main
 
 ### Minecraft Bedrock Addon Server
 
