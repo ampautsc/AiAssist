@@ -12,12 +12,21 @@ from typing import Optional, List, Dict, Any
 import uvicorn
 import asyncio
 
-from .mcp_server import (
-    get_mcp_server,
-    BlockPosition,
-    BlockData,
-    AreaData
-)
+# Handle both relative and absolute imports
+try:
+    from .mcp_server import (
+        get_mcp_server,
+        BlockPosition,
+        BlockData,
+        AreaData
+    )
+except ImportError:
+    from mcp_server import (
+        get_mcp_server,
+        BlockPosition,
+        BlockData,
+        AreaData
+    )
 
 # Initialize FastAPI app
 app = FastAPI(
