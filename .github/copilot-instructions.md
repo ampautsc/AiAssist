@@ -10,7 +10,7 @@ AiAssist is a personal AI assistant system designed for continuous learning and 
 
 This is a documentation and configuration repository (not a software project). It contains:
 
-- **`.github/copilot/`**: Legacy agent instructions (for reference only - use this file instead)
+- **`.github/copilot/`**: Legacy agent instructions (for reference only - `.github/copilot-instructions.md` is now the primary location)
 - **`docs/`**: System documentation, learning journal, and decision records
 - **`instructions/`**: Mode-specific guidance (desktop-mode.md, cloud-mode.md)
 - **`skills/`**: Reusable capability library organized by category
@@ -61,7 +61,8 @@ The Minecraft automation scripts require Python 3:
 ```bash
 cd scripts/minecraft
 pip install -r requirements.txt   # Install dependencies
-python realm_api.py               # Run scripts as needed
+# Note: Check individual script files for usage and required arguments
+python realm_api.py --help        # Example: check script usage
 ```
 
 ### No Repository-Level Build
@@ -204,9 +205,9 @@ This repository does not have GitHub Actions workflows or automated CI/CD. Chang
 
 - [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
 - [Model Context Protocol](https://github.com/modelcontextprotocol)
-- [Repository README](../README.md)
-- [System Overview](../docs/overview.md)
-- [Quick Start Guide](../docs/quick-start.md)
+- [Repository README](README.md)
+- [System Overview](docs/overview.md)
+- [Quick Start Guide](docs/quick-start.md)
 
 ## Trust These Instructions
 
