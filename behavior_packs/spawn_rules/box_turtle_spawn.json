@@ -18,11 +18,11 @@
           "max": "hard"
         },
         "minecraft:weight": {
-          "default": 8
+          "default": 10
         },
         "minecraft:herd": {
-          "min_size": 2,
-          "max_size": 5
+          "min_size": 1,
+          "max_size": 3
         },
         "minecraft:permute_type": [
           {
@@ -33,7 +33,7 @@
         "minecraft:biome_filter": {
           "test": "has_biome_tag",
           "operator": "==",
-          "value": "beach"
+          "value": "forest"
         }
       },
       {
@@ -52,36 +52,6 @@
         },
         "minecraft:herd": {
           "min_size": 1,
-          "max_size": 3
-        },
-        "minecraft:permute_type": [
-          {
-            "weight": 95,
-            "entity_type": "custom:box_turtle"
-          }
-        ],
-        "minecraft:biome_filter": {
-          "test": "has_biome_tag",
-          "operator": "==",
-          "value": "swamp"
-        }
-      },
-      {
-        "minecraft:spawns_on_surface": {},
-        "minecraft:brightness_filter": {
-          "min": 7,
-          "max": 15,
-          "adjust_for_weather": false
-        },
-        "minecraft:difficulty_filter": {
-          "min": "easy",
-          "max": "hard"
-        },
-        "minecraft:weight": {
-          "default": 3
-        },
-        "minecraft:herd": {
-          "min_size": 1,
           "max_size": 2
         },
         "minecraft:permute_type": [
@@ -93,7 +63,7 @@
         "minecraft:biome_filter": {
           "test": "has_biome_tag",
           "operator": "==",
-          "value": "forest"
+          "value": "plains"
         }
       }
     ]

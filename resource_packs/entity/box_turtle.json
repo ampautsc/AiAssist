@@ -14,16 +14,12 @@
       },
       "animations": {
         "walk": "animation.box_turtle.walk",
-        "swim": "animation.box_turtle.swim",
         "idle": "animation.box_turtle.idle"
       },
       "scripts": {
         "animate": [
           {
             "walk": "query.modified_move_speed"
-          },
-          {
-            "swim": "query.is_swimming"
           },
           "idle"
         ]

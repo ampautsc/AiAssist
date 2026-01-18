@@ -52,19 +52,6 @@
           "volume": 0.3
         }
       ]
-    },
-    "mob.box_turtle.swim": {
-      "category": "neutral",
-      "sounds": [
-        {
-          "name": "sounds/mob/turtle/swim1",
-          "volume": 0.4
-        },
-        {
-          "name": "sounds/mob/turtle/swim2",
-          "volume": 0.4
-        }
-      ]
     }
   }
 }

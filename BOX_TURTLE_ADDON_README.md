@@ -7,8 +7,8 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 ### Behavior Pack (`behavior_packs/`)
 - **manifest.json** - Behavior pack metadata and configuration
 - **entities/box_turtle.json** - Entity definition with AI behaviors, movement, breeding, and more
-- **spawn_rules/box_turtle_spawn.json** - Spawn rules for beaches, swamps, and forests
-- **loot_tables/entities/box_turtle.json** - Loot drops (scutes and seagrass)
+- **spawn_rules/box_turtle_spawn.json** - Spawn rules for forests and plains
+- **loot_tables/entities/box_turtle.json** - Loot drops (scutes)
 
 ### Resource Pack (`resource_packs/`)
 - **manifest.json** - Resource pack metadata and configuration
@@ -16,7 +16,7 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 - **models/entity/box_turtle.geo.json** - 3D geometry model
 - **entity/box_turtle.json** - Client entity definition with animations
 - **render_controllers/box_turtle.controller.json** - Rendering configuration
-- **sounds/sound_definitions.json** - Sound mappings (hurt, death, ambient, step, swim)
+- **sounds/sound_definitions.json** - Sound mappings (hurt, death, ambient, step)
 - **texts/en_US.lang** - English localization
 - **texts/languages.json** - Language definitions
 
@@ -24,23 +24,22 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 
 ### Box Turtle Characteristics:
 - **Health**: 30 HP (15 hearts)
-- **Movement**: Slow on land (0.1), faster in water (0.12)
-- **Behavior**: Can be bred with seagrass, lays eggs, can be leashed
-- **Spawning**: Appears in beaches (common), swamps (uncommon), and forests (rare)
-- **Loot**: Drops scutes (turtle shell pieces) and occasionally seagrass
+- **Movement**: Slow on land (0.1)
+- **Behavior**: Can be bred with vegetables (beetroot, carrot, apple), lays eggs, can be leashed
+- **Spawning**: Appears in forests (common) and plains (uncommon)
+- **Loot**: Drops scutes (turtle shell pieces)
 - **Lifespan**: Can be baby or adult, babies grow after 1200 ticks (60 seconds)
-- **Amphibious**: Can breathe both air and water
+- **Terrestrial**: Land-dwelling turtle that avoids water
 
 ### AI Behaviors:
-- Float in water
 - Panic when hurt
-- Random breach (jumping)
 - Lay eggs
 - Breeding
-- Tempted by seagrass
+- Tempted by vegetables (beetroot, carrot, apple)
 - Random strolling
 - Look at players
 - Random looking around
+- Avoid water
 
 ## 🚀 Installation & Testing
 
@@ -69,8 +68,8 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
    ```
    /summon custom:box_turtle
    ```
-   - Or find them naturally spawning in beach, swamp, or forest biomes
-   - Test breeding with seagrass
+   - Or find them naturally spawning in forest or plains biomes
+   - Test breeding with beetroot, carrot, or apple
    - Test leashing
    - Check loot drops
 
@@ -95,7 +94,7 @@ This addon adds Box Turtles to Minecraft Bedrock Edition, including custom behav
 Edit `behavior_packs/spawn_rules/box_turtle_spawn.json`:
 - Change `weight` values to make spawns more/less common
 - Modify `min_size` and `max_size` for herd sizes
-- Add/remove biome filters
+- Add/remove biome filters (currently spawns in forests and plains)
 
 ### Modifying Behavior
 Edit `behavior_packs/entities/box_turtle.json`:
@@ -149,7 +148,7 @@ Requires Minecraft Bedrock Edition 1.20.0 or higher
 - Ensure both packs are activated in world settings
 - Check that experimental features are enabled
 - Use `/summon custom:box_turtle` to test manually
-- Verify spawn rules match your biome
+- Verify spawn rules match your biome (forests and plains)
 
 ### Texture Issues
 - Confirm texture file is named correctly: `box_turtle_texture.png`

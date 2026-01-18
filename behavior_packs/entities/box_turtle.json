@@ -23,7 +23,7 @@
         },
         "minecraft:ageable": {
           "duration": 1200,
-          "feed_items": ["seagrass"],
+          "feed_items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"],
           "grow_up": {
             "event": "minecraft:ageable_grow_up",
             "target": "self"
@@ -39,7 +39,7 @@
         "total_supply": 15,
         "suffocate_time": 0,
         "breathes_air": true,
-        "breathes_water": true
+        "breathes_water": false
       },
       "minecraft:health": {
         "value": 30,
@@ -64,12 +64,8 @@
       },
       "minecraft:navigation.walk": {
         "can_path_over_water": false,
-        "avoid_water": false,
+        "avoid_water": true,
         "avoid_damage_blocks": true
-      },
-      "minecraft:movement.amphibious": {},
-      "minecraft:underwater_movement": {
-        "value": 0.12
       },
       "minecraft:jump.static": {},
       "minecraft:can_climb": {},
@@ -84,19 +80,9 @@
         "is_pushable_by_piston": true
       },
       "minecraft:conditional_bandwidth_optimization": {},
-      "minecraft:behavior.float": {
-        "priority": 0
-      },
       "minecraft:behavior.panic": {
         "priority": 1,
         "speed_multiplier": 1.25
-      },
-      "minecraft:behavior.random_breach": {
-        "priority": 2,
-        "interval": 50,
-        "xz_dist": 6,
-        "cooldown_time": 2.0,
-        "speed_multiplier": 1.2
       },
       "minecraft:behavior.lay_egg": {
         "priority": 3,
@@ -116,7 +102,7 @@
       "minecraft:behavior.tempt": {
         "priority": 5,
         "speed_multiplier": 1.1,
-        "items": ["seagrass"]
+        "items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"]
       },
       "minecraft:behavior.random_stroll": {
         "priority": 7,
@@ -132,7 +118,7 @@
       },
       "minecraft:breedable": {
         "require_tame": false,
-        "breed_items": ["seagrass"],
+        "breed_items": ["minecraft:beetroot", "minecraft:carrot", "minecraft:apple"],
         "breeds_with": {
           "mate_type": "custom:box_turtle",
           "baby_type": "custom:box_turtle",
