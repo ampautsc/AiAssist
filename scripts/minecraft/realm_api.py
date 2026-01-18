@@ -8,9 +8,10 @@ import requests
 import json
 import os
 import sys
-import time
+import zipfile
+import tempfile
+import argparse
 from typing import Optional, Dict, Any, List
-from pathlib import Path
 
 
 class RealmAPI:
@@ -253,9 +254,6 @@ class RealmAPI:
             True if successful, False otherwise
         """
         try:
-            import zipfile
-            import tempfile
-            
             if not os.path.exists(addon_file):
                 print(f"Addon file not found: {addon_file}")
                 return False
@@ -325,8 +323,6 @@ class RealmAPI:
 
 def main():
     """CLI entry point for Realm operations"""
-    import argparse
-    
     parser = argparse.ArgumentParser(description='Minecraft Bedrock Realms API Tool')
     parser.add_argument('--realm-name', required=True, help='Name of the realm')
     parser.add_argument('--world-file', help='Path to .mcworld file to upload')

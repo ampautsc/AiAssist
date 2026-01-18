@@ -7,7 +7,7 @@ Handles authentication with Microsoft/Xbox Live to get access tokens for Realm A
 import requests
 import json
 import sys
-import time
+import os
 from typing import Optional, Dict, Any
 
 
@@ -103,23 +103,38 @@ class MinecraftAuth:
     def _get_microsoft_token(self) -> Optional[str]:
         """
         Get Microsoft OAuth access token using device code flow
-        Note: This is a simplified version. Real implementation would use
-        the device code flow or proper OAuth flow.
+        
+        Note: This is a simplified placeholder implementation.
+        In production, you need to implement one of these approaches:
+        
+        1. Device Code Flow (recommended for automation):
+           - Request device code from Microsoft
+           - Display code to user (first-time setup)
+           - Poll for token approval
+           - Cache token for future use
+        
+        2. Refresh Token Flow (for long-term automation):
+           - Obtain initial refresh token (one-time manual setup)
+           - Store refresh token securely
+           - Use refresh token to get access tokens
+        
+        3. Service Principal (for enterprise):
+           - Create Azure AD application
+           - Use client credentials flow
+        
+        For GitHub Actions automation with stored credentials, consider:
+        - Pre-generating tokens and storing them as secrets
+        - Using refresh tokens instead of passwords
+        - Implementing token refresh logic
+        
+        Current implementation returns a mock token and will fail in production.
         """
-        # In a real-world scenario, you would use the device code flow:
-        # 1. Request device code
-        # 2. User visits URL and enters code
-        # 3. Poll for token
+        print("⚠️  WARNING: Using placeholder authentication")
+        print("   This implementation requires a proper OAuth flow to work in production")
+        print("   See function documentation for implementation options")
         
-        # For automation with stored credentials, we'll use a different approach
-        # This is a placeholder that returns a mock token structure
-        # In production, you'd integrate with Microsoft Identity Platform properly
-        
-        print("Note: Using simplified authentication flow")
-        print("In production, implement proper OAuth 2.0 device code flow")
-        
-        # For GitHub Actions automation, you might need to use pre-generated tokens
-        # or implement a service account approach
+        # TODO: Implement proper Microsoft OAuth flow
+        # For now, returning mock token - replace with real implementation
         return "mock_microsoft_token"
     
     def _authenticate_xbox(self, ms_token: str) -> Optional[str]:
@@ -208,8 +223,6 @@ class MinecraftAuth:
 
 def main():
     """CLI entry point for authentication"""
-    import os
-    
     username = os.environ.get('MINECRAFT_USERNAME')
     password = os.environ.get('MINECRAFT_PASSWORD')
     

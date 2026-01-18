@@ -134,8 +134,34 @@ The automation uses the Minecraft Bedrock Realms API. For more details, see:
 
 - Requires realm owner or admin access
 - File size limits apply per Minecraft Realm restrictions
-- Authentication uses simplified flow (see auth.py for production recommendations)
+- **Authentication uses simplified flow**: The current implementation includes a placeholder for Microsoft OAuth authentication. For production use, you need to implement one of the following:
+  - Device code flow with token caching
+  - Refresh token flow with pre-generated tokens
+  - Service principal authentication for enterprise scenarios
+  - See `scripts/minecraft/auth.py` for detailed implementation guidance
 - Some realm features may require additional API endpoints
+
+## Important Authentication Note
+
+⚠️ The authentication module (`scripts/minecraft/auth.py`) currently contains a placeholder implementation for Microsoft OAuth. To make this fully functional in production:
+
+1. **For Personal Use**: Implement the Device Code Flow
+   - User authenticates once via browser
+   - Token is cached and refreshed automatically
+   - Best for personal automation
+
+2. **For Automation**: Use Refresh Tokens
+   - Generate refresh token once manually
+   - Store as GitHub secret
+   - Use refresh token to obtain access tokens
+   - More reliable for CI/CD
+
+3. **For Enterprise**: Use Service Principal
+   - Create Azure AD application
+   - Use client credentials flow
+   - Best for organizational use
+
+See the function documentation in `auth.py` for detailed implementation guidance.
 
 ## Security Considerations
 

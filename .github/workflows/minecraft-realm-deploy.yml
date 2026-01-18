@@ -90,22 +90,22 @@ jobs:
           ADDON="${{ github.event.inputs.addon }}"
           
           # Auto-detect files if not manually specified
-          if [ -z "$WORLD_FILE" ] && [ -f minecraft-addons/*.mcworld ]; then
-            WORLD_FILE=$(ls minecraft-addons/*.mcworld 2>/dev/null | head -n 1)
+          if [ -z "$WORLD_FILE" ]; then
+            WORLD_FILE=$(find minecraft-addons -maxdepth 1 -name "*.mcworld" 2>/dev/null | head -n 1)
           fi
           
-          if [ -z "$ADDON" ] && [ -f minecraft-addons/*.mcaddon ]; then
-            ADDON=$(ls minecraft-addons/*.mcaddon 2>/dev/null | head -n 1)
+          if [ -z "$ADDON" ]; then
+            ADDON=$(find minecraft-addons -maxdepth 1 -name "*.mcaddon" 2>/dev/null | head -n 1)
           fi
           
           # Look for resource packs
           if [ -z "$RESOURCE_PACK" ] && [ -d minecraft-addons/resource-packs ]; then
-            RESOURCE_PACK=$(ls minecraft-addons/resource-packs/*.mcpack 2>/dev/null | head -n 1)
+            RESOURCE_PACK=$(find minecraft-addons/resource-packs -name "*.mcpack" 2>/dev/null | head -n 1)
           fi
           
           # Look for behavior packs
           if [ -z "$BEHAVIOR_PACK" ] && [ -d minecraft-addons/behavior-packs ]; then
-            BEHAVIOR_PACK=$(ls minecraft-addons/behavior-packs/*.mcpack 2>/dev/null | head -n 1)
+            BEHAVIOR_PACK=$(find minecraft-addons/behavior-packs -name "*.mcpack" 2>/dev/null | head -n 1)
           fi
           
           echo "world_file=${WORLD_FILE}" >> $GITHUB_OUTPUT
