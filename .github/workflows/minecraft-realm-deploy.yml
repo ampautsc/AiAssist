@@ -1,0 +1,169 @@
+name: Deploy Minecraft Bedrock Realm Addons
+
+on:
+  # Trigger on push to main branch when minecraft-addons directory changes
+  push:
+    branches:
+      - main
+    paths:
+      - 'minecraft-addons/**'
+      - '.github/workflows/minecraft-realm-deploy.yml'
+  
+  # Allow manual trigger with custom parameters
+  workflow_dispatch:
+    inputs:
+      realm_name:
+        description: 'Name of the Minecraft Realm'
+        required: true
+        type: string
+      world_file:
+        description: 'Path to .mcworld file (leave empty to skip)'
+        required: false
+        type: string
+      resource_pack:
+        description: 'Path to resource pack .mcpack file (leave empty to skip)'
+        required: false
+        type: string
+      behavior_pack:
+        description: 'Path to behavior pack .mcpack file (leave empty to skip)'
+        required: false
+        type: string
+      addon:
+        description: 'Path to .mcaddon file (leave empty to skip)'
+        required: false
+        type: string
+
+env:
+  # Default realm name (can be overridden)
+  DEFAULT_REALM_NAME: "My Realm"
+
+jobs:
+  deploy-addons:
+    name: Deploy Addons to Minecraft Realm
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/minecraft/requirements.txt
+      
+      - name: Authenticate with Microsoft/Minecraft
+        env:
+          MINECRAFT_USERNAME: ${{ secrets.MINECRAFT_USERNAME }}
+          MINECRAFT_PASSWORD: ${{ secrets.MINECRAFT_PASSWORD }}
+        run: |
+          echo "Authenticating with Microsoft account..."
+          python scripts/minecraft/auth.py
+          
+          # Verify tokens were created
+          if [ ! -f /tmp/minecraft_tokens.json ]; then
+            echo "Error: Authentication failed - tokens file not created"
+            exit 1
+          fi
+          
+          echo "Authentication successful"
+      
+      - name: Determine realm name and files
+        id: setup
+        run: |
+          # Determine realm name
+          if [ -n "${{ github.event.inputs.realm_name }}" ]; then
+            REALM_NAME="${{ github.event.inputs.realm_name }}"
+          else
+            REALM_NAME="${DEFAULT_REALM_NAME}"
+          fi
+          echo "realm_name=${REALM_NAME}" >> $GITHUB_OUTPUT
+          
+          # Check for files in minecraft-addons directory or use manual inputs
+          WORLD_FILE="${{ github.event.inputs.world_file }}"
+          RESOURCE_PACK="${{ github.event.inputs.resource_pack }}"
+          BEHAVIOR_PACK="${{ github.event.inputs.behavior_pack }}"
+          ADDON="${{ github.event.inputs.addon }}"
+          
+          # Auto-detect files if not manually specified
+          if [ -z "$WORLD_FILE" ]; then
+            WORLD_FILE=$(find minecraft-addons -maxdepth 1 -name "*.mcworld" 2>/dev/null | head -n 1)
+          fi
+          
+          if [ -z "$ADDON" ]; then
+            ADDON=$(find minecraft-addons -maxdepth 1 -name "*.mcaddon" 2>/dev/null | head -n 1)
+          fi
+          
+          # Look for resource packs
+          if [ -z "$RESOURCE_PACK" ] && [ -d minecraft-addons/resource-packs ]; then
+            RESOURCE_PACK=$(find minecraft-addons/resource-packs -name "*.mcpack" 2>/dev/null | head -n 1)
+          fi
+          
+          # Look for behavior packs
+          if [ -z "$BEHAVIOR_PACK" ] && [ -d minecraft-addons/behavior-packs ]; then
+            BEHAVIOR_PACK=$(find minecraft-addons/behavior-packs -name "*.mcpack" 2>/dev/null | head -n 1)
+          fi
+          
+          echo "world_file=${WORLD_FILE}" >> $GITHUB_OUTPUT
+          echo "resource_pack=${RESOURCE_PACK}" >> $GITHUB_OUTPUT
+          echo "behavior_pack=${BEHAVIOR_PACK}" >> $GITHUB_OUTPUT
+          echo "addon=${ADDON}" >> $GITHUB_OUTPUT
+          
+          # Display what will be deployed
+          echo "Realm Name: ${REALM_NAME}"
+          [ -n "$WORLD_FILE" ] && echo "World File: ${WORLD_FILE}"
+          [ -n "$ADDON" ] && echo "Addon: ${ADDON}"
+          [ -n "$RESOURCE_PACK" ] && echo "Resource Pack: ${RESOURCE_PACK}"
+          [ -n "$BEHAVIOR_PACK" ] && echo "Behavior Pack: ${BEHAVIOR_PACK}"
+      
+      - name: Deploy to Minecraft Realm
+        env:
+          REALM_NAME: ${{ steps.setup.outputs.realm_name }}
+          WORLD_FILE: ${{ steps.setup.outputs.world_file }}
+          RESOURCE_PACK: ${{ steps.setup.outputs.resource_pack }}
+          BEHAVIOR_PACK: ${{ steps.setup.outputs.behavior_pack }}
+          ADDON: ${{ steps.setup.outputs.addon }}
+        run: |
+          echo "Deploying to realm: ${REALM_NAME}"
+          
+          # Build the command
+          CMD="python scripts/minecraft/realm_api.py --realm-name \"${REALM_NAME}\""
+          
+          [ -n "$WORLD_FILE" ] && CMD="$CMD --world-file \"${WORLD_FILE}\""
+          [ -n "$ADDON" ] && CMD="$CMD --addon \"${ADDON}\""
+          [ -n "$RESOURCE_PACK" ] && CMD="$CMD --resource-pack \"${RESOURCE_PACK}\""
+          [ -n "$BEHAVIOR_PACK" ] && CMD="$CMD --behavior-pack \"${BEHAVIOR_PACK}\""
+          
+          echo "Executing: $CMD"
+          eval $CMD
+      
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Realm:** ${{ steps.setup.outputs.realm_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -n "${{ steps.setup.outputs.world_file }}" ]; then
+            echo "- ✓ World file deployed: ${{ steps.setup.outputs.world_file }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -n "${{ steps.setup.outputs.addon }}" ]; then
+            echo "- ✓ Addon deployed: ${{ steps.setup.outputs.addon }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -n "${{ steps.setup.outputs.resource_pack }}" ]; then
+            echo "- ✓ Resource pack deployed: ${{ steps.setup.outputs.resource_pack }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -n "${{ steps.setup.outputs.behavior_pack }}" ]; then
+            echo "- ✓ Behavior pack deployed: ${{ steps.setup.outputs.behavior_pack }}" >> $GITHUB_STEP_SUMMARY
+          fi
