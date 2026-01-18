@@ -47,9 +47,70 @@ cd github-mcp
 node test.mjs
 ```
 
-### Additional MCP Servers
+---
 
-This directory can contain additional MCP server configurations to enhance the assistant's capabilities.
+### Image Generation Server
+
+**Location**: `./image-generation/`
+
+**Purpose**: Generate high-quality images from text prompts using OpenAI's DALL-E 3 API and validate image quality using GPT-4 Vision.
+
+**Features**:
+- 🎨 Generate images from text descriptions
+- 🔍 Validate if images match prompts
+- 📝 Get detailed image descriptions
+- ⚙️ Configurable size, quality, and style
+
+**Quick Start**:
+```bash
+cd image-generation
+npm install
+npm run build
+export OPENAI_API_KEY=your-key-here
+npm start
+```
+
+**Documentation**: See [image-generation/README.md](./image-generation/README.md) and [image-generation/USAGE.md](./image-generation/USAGE.md)
+
+**API Research**: See [image-generation-api-research.md](./image-generation-api-research.md) for details on API selection and capabilities.
+
+---
+
+### Minecraft Bedrock Addon Server
+
+Located in: `/mcp-servers/minecraft-bedrock-addon/`
+
+**Purpose**: Assists with creating Minecraft Bedrock Edition addons, including Resource Packs and Behavior Packs.
+
+**Capabilities**:
+- Create complete addon directory structures
+- Generate entities, items, blocks, and recipes
+- Manage texture references and localizations
+- Generate UUIDs for manifests
+- Validate addon structure
+
+**Setup**:
+```bash
+cd mcp-servers/minecraft-bedrock-addon
+npm install
+npm run build
+```
+
+**Configuration**:
+```json
+{
+  "mcpServers": {
+    "minecraft-bedrock": {
+      "command": "node",
+      "args": ["path/to/mcp-servers/minecraft-bedrock-addon/dist/index.js"]
+    }
+  }
+}
+```
+
+**Reference Documentation**: See `/docs/minecraft-bedrock-addon-reference.md` for detailed addon format specifications.
+
+**Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
 
 ## Configuration Structure
 
