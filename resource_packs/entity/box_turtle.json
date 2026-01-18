@@ -1,0 +1,36 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "custom:box_turtle",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/box_turtle_texture"
+      },
+      "geometry": {
+        "default": "geometry.box_turtle"
+      },
+      "animations": {
+        "walk": "animation.box_turtle.walk",
+        "idle": "animation.box_turtle.idle"
+      },
+      "scripts": {
+        "animate": [
+          {
+            "walk": "query.modified_move_speed"
+          },
+          "idle"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.box_turtle"
+      ],
+      "spawn_egg": {
+        "base_color": "#6B4423",
+        "overlay_color": "#3D2815"
+      }
+    }
+  }
+}

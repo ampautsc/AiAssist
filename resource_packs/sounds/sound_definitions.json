@@ -1,0 +1,57 @@
+{
+  "format_version": "1.14.0",
+  "sound_definitions": {
+    "mob.box_turtle.hurt": {
+      "category": "neutral",
+      "sounds": [
+        {
+          "name": "sounds/mob/turtle/hurt1",
+          "volume": 0.5
+        },
+        {
+          "name": "sounds/mob/turtle/hurt2",
+          "volume": 0.5
+        }
+      ]
+    },
+    "mob.box_turtle.death": {
+      "category": "neutral",
+      "sounds": [
+        {
+          "name": "sounds/mob/turtle/death",
+          "volume": 0.6
+        }
+      ]
+    },
+    "mob.box_turtle.ambient": {
+      "category": "neutral",
+      "sounds": [
+        {
+          "name": "sounds/mob/turtle/idle1",
+          "volume": 0.4
+        },
+        {
+          "name": "sounds/mob/turtle/idle2",
+          "volume": 0.4
+        },
+        {
+          "name": "sounds/mob/turtle/idle3",
+          "volume": 0.4
+        }
+      ]
+    },
+    "mob.box_turtle.step": {
+      "category": "neutral",
+      "sounds": [
+        {
+          "name": "sounds/mob/turtle/walk1",
+          "volume": 0.3
+        },
+        {
+          "name": "sounds/mob/turtle/walk2",
+          "volume": 0.3
+        }
+      ]
+    }
+  }
+}
