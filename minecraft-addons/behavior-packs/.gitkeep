@@ -1,0 +1,20 @@
+# Behavior Packs
+
+Place your Minecraft Bedrock behavior pack `.mcpack` files here.
+
+Behavior packs contain:
+- Game logic
+- Entity behaviors
+- Item definitions
+- Block behaviors
+- Scripts
+
+## Example
+
+```
+behavior-packs/
+├── my-gameplay-mod.mcpack
+└── custom-entities.mcpack
+```
+
+The GitHub Actions workflow will automatically detect and deploy these packs to your realm.

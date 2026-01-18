@@ -1,0 +1,20 @@
+# Resource Packs
+
+Place your Minecraft Bedrock resource pack `.mcpack` files here.
+
+Resource packs contain:
+- Textures
+- Models
+- Sounds
+- UI elements
+- Particles
+
+## Example
+
+```
+resource-packs/
+├── my-texture-pack.mcpack
+└── cool-ui-pack.mcpack
+```
+
+The GitHub Actions workflow will automatically detect and deploy these packs to your realm.
