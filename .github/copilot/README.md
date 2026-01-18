@@ -4,7 +4,9 @@ This document describes GitHub Copilot configuration for the AiAssist repository
 
 ## Agent Instructions
 
-The core agent instructions are located in `.github/copilot/agent-instructions.md`. These instructions:
+> **Note**: The primary Copilot instructions are now in **`.github/copilot-instructions.md`** following GitHub's official best practices. The file `.github/copilot/agent-instructions.md` is maintained for backward compatibility.
+
+The core agent instructions are located in `.github/copilot-instructions.md` and define how Copilot should work with this repository. These instructions:
 
 - Define the primary directive: **Learn to be better at helping**
 - Establish operational protocols
@@ -33,7 +35,7 @@ When using GitHub Copilot in VS Code, Visual Studio, or JetBrains IDEs:
 ### Workspace Configuration
 
 The repository structure itself provides context for Copilot:
-- Agent instructions in `.github/copilot/`
+- Agent instructions in `.github/copilot-instructions.md` (primary) and `.github/copilot/` (legacy)
 - Organized documentation in `/docs`
 - Skills library in `/skills`
 - Task tracking in `/tasks`
@@ -43,7 +45,7 @@ The repository structure itself provides context for Copilot:
 When using GitHub Copilot in the browser or cloud environments:
 
 ### Agent Behavior
-- Automatically loads instructions from `.github/copilot/agent-instructions.md`
+- Automatically loads instructions from `.github/copilot-instructions.md`
 - Has access to full repository context
 - Can read and update all files
 - Follows mode-specific guidance from `/instructions/cloud-mode.md`
