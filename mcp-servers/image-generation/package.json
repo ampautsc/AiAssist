@@ -1,0 +1,28 @@
+{
+  "name": "@aiassist/image-generation-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for generating and validating images using OpenAI DALL-E",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "image-generation-mcp-server": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "tsx src/test.ts"
+  },
+  "keywords": ["mcp", "server", "image-generation", "dall-e", "ai"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "openai": "^6.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
