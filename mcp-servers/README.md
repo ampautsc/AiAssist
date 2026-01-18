@@ -14,6 +14,42 @@ MCP servers are integrations that allow the AI assistant to:
 
 This directory contains configurations for MCP servers that enhance the assistant's capabilities.
 
+### Minecraft Bedrock Addon Server
+
+Located in: `/mcp-servers/minecraft-bedrock-addon/`
+
+**Purpose**: Assists with creating Minecraft Bedrock Edition addons, including Resource Packs and Behavior Packs.
+
+**Capabilities**:
+- Create complete addon directory structures
+- Generate entities, items, blocks, and recipes
+- Manage texture references and localizations
+- Generate UUIDs for manifests
+- Validate addon structure
+
+**Setup**:
+```bash
+cd mcp-servers/minecraft-bedrock-addon
+npm install
+npm run build
+```
+
+**Configuration**:
+```json
+{
+  "mcpServers": {
+    "minecraft-bedrock": {
+      "command": "node",
+      "args": ["path/to/mcp-servers/minecraft-bedrock-addon/dist/index.js"]
+    }
+  }
+}
+```
+
+**Reference Documentation**: See `/docs/minecraft-bedrock-addon-reference.md` for detailed addon format specifications.
+
+**Usage Patterns**: See `/docs/mcp-usage.md` for common usage patterns and best practices.
+
 ## Configuration Structure
 
 Each MCP server configuration should include:
