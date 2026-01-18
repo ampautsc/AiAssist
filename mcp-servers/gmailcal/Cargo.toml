@@ -1,0 +1,45 @@
+[package]
+name = "mcp-gmailcal"
+version = "0.10.0"
+edition = "2021"
+description = "A MCP server for google mail, calendar, and contacts."
+license = "MIT"
+
+[dependencies]
+mcp-attr = "0.0.5"
+tokio = { version = "1.44.1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dotenv = "0.15.0"
+thiserror = "1.0"
+log = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+simplelog = "0.12"
+lazy_static = "1.4"
+env_logger = "0.10"
+time = { version = "0.3", features = ["macros", "formatting"] }
+reqwest = { version = "0.11", features = ["json"] }
+http = "0.2"
+clap = { version = "4.5", features = ["derive"] }
+axum = "0.7"
+url = "2.5"
+webbrowser = "0.8"
+rand = "0.8"
+base64 = "0.13"
+uuid = { version = "1.7", features = ["v4"] }
+aes-gcm = "0.10.3"
+dirs = "6.0.0"
+urlencoding = "2.1.3"
+
+[dev-dependencies]
+mockall = "0.11.4"
+mockito = "1.2.0"
+futures = "0.3"
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4.0"
+tokio = { version = "1.44.1", features = ["full"] }
+tempfile = "3.19.1"
+
+[[bench]]
+name = "benchmarks"
+harness = false
