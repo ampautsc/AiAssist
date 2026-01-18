@@ -1,0 +1,37 @@
+# Temporary files
+/tmp/
+*.tmp
+*.temp
+.DS_Store
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Environment files (if needed later)
+.env
+.env.local
+
+# Build artifacts (if any language-specific tools are added)
+node_modules/
+dist/
+build/
+target/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Personal notes that shouldn't be committed
+NOTES.md
+scratch/
