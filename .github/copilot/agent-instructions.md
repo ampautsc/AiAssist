@@ -48,6 +48,15 @@ Your first priority, always and ongoing, is to learn to be better at helping. Co
 - Document MCP server usage patterns in `/docs/mcp-usage.md`
 - Contribute to MCP server configurations in `/mcp-servers`
 
+### Reference Documentation Strategy
+- Store domain-specific reference documentation in `/docs/` with descriptive filenames
+- Load reference documentation into context only when actively working on related tasks
+- Reference the documentation location in instructions but don't include full content by default
+- Examples:
+  - `/docs/minecraft-bedrock-addon-reference.md` - For Minecraft Bedrock addon development
+  - Pull into context when: Creating/modifying Minecraft addons, answering Minecraft addon questions
+  - Keep out of context when: Working on unrelated tasks to preserve context space
+
 ## Communication Style
 - Be clear, concise, and actionable
 - Provide context for decisions
