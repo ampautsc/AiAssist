@@ -1,0 +1,77 @@
+{
+  "_comment": "Entity sensor pattern - FROM OFFICIAL DOCS. Properties go in subsensors array!",
+  "_source": "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/entityreference/examples/entitycomponents/minecraftcomponent_entity_sensor",
+  
+  "format_version": "1.21.40",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "namespace:sensor_entity",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "components": {
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:collision_box": {
+        "width": 0.1,
+        "height": 0.1
+      },
+      "minecraft:health": {
+        "value": 1,
+        "max": 1
+      },
+      
+      "minecraft:entity_sensor": {
+        "_comment": "CRITICAL: Properties go in subsensors array, NOT directly on component!",
+        "relative_range": false,
+        "find_players_only": false,
+        "subsensors": [
+          {
+            "range": [10, 10],
+            "minimum_count": 1,
+            "maximum_count": -1,
+            "cooldown": 1.0,
+            "require_all": false,
+            "event_filters": {
+              "any_of": [
+                { "test": "is_family", "subject": "other", "value": "player" },
+                { "test": "is_family", "subject": "other", "value": "monster" }
+              ]
+            },
+            "event": "namespace:detected_event"
+          },
+          {
+            "_comment": "Optional second subsensor for 'no entities' detection",
+            "range": [10, 10],
+            "minimum_count": 0,
+            "maximum_count": 0,
+            "cooldown": 1.0,
+            "event_filters": {
+              "any_of": [
+                { "test": "is_family", "subject": "other", "value": "player" }
+              ]
+            },
+            "event": "namespace:no_entities_event"
+          }
+        ]
+      },
+      
+      "minecraft:persistent": {}
+    },
+    "events": {
+      "namespace:detected_event": {
+        "queue_command": {
+          "command": "scriptevent namespace:my_event"
+        }
+      },
+      "namespace:no_entities_event": {
+        "queue_command": {
+          "command": "scriptevent namespace:no_entities"
+        }
+      }
+    }
+  }
+}

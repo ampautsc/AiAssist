@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:chrysalis",
+      "materials": {
+        "default": "shulker"
+      },
+      "textures": {
+        "default": "textures/entity/monarch_chrysalis"
+      },
+      "geometry": {
+        "default": "geometry.shulker"
+      },
+      "render_controllers": ["controller.render.shulker"],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 12
+      }
+    }
+  }
+}

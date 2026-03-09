@@ -1,0 +1,14 @@
+{
+  "mob.monarch.butterfly.idle": {
+    "category": "neutral",
+    "sounds": [
+      "sounds/mob/parrot/idle1"
+    ]
+  },
+  "mob.monarch.caterpillar.idle": {
+    "category": "neutral",
+    "sounds": [
+      "sounds/mob/silverfish/step1"
+    ]
+  }
+}

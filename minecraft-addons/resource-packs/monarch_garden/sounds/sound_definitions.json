@@ -1,0 +1,26 @@
+{
+  "mob.monarch.butterfly.idle": {
+    "category": "neutral",
+    "sounds": [
+      "sounds/mob/parrot/idle1"
+    ]
+  },
+  "mob.monarch.caterpillar.idle": {
+    "category": "neutral",
+    "sounds": [
+      "sounds/mob/silverfish/step1"
+    ]
+  },
+  "monarch.tent.zip_open": {
+    "category": "block",
+    "sounds": [
+      "sounds/tent/zip_open"
+    ]
+  },
+  "monarch.tent.zip_close": {
+    "category": "block",
+    "sounds": [
+      "sounds/tent/zip_close"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.seed.rain_check": {
+      "initial_state": "floating",
+      "states": {
+        "floating": {
+          "transitions": [
+            {
+              "falling": "query.is_in_water_or_rain"
+            }
+          ]
+        },
+        "falling": {
+          "on_entry": [
+            "@s monarch:start_falling"
+          ],
+          "transitions": [
+            {
+              "landed": "query.is_on_ground"
+            }
+          ]
+        },
+        "landed": {
+          "on_entry": [
+            "@s monarch:seed_landed"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:popup_tent",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/popup_tent"
+      },
+      "geometry": {
+        "default": "geometry.monarch.popup_tent"
+      },
+      "render_controllers": ["controller.render.monarch.popup_tent"],
+      "spawn_egg": {
+        "base_color": "#6B8E23",
+        "overlay_color": "#8B5A2B"
+      }
+    }
+  }
+}

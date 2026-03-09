@@ -1,0 +1,94 @@
+{
+  "_comment": "Official material_instances examples from Microsoft docs",
+  "_source": "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/blockcomponents/minecraftblock_material_instances",
+  
+  "_critical_note": "From 1.21.80 onward, you MUST use BOTH minecraft:geometry AND minecraft:material_instances together!",
+  
+  "render_methods": {
+    "opaque": "Regular solid block - no transparency",
+    "alpha_test": "Like spawner/monster - fully opaque OR fully transparent, no partial. Disables backface culling.",
+    "alpha_test_single_sided": "Like glass - same as alpha_test but WITH backface culling",
+    "blend": "Like stained glass - allows partial transparency/translucency",
+    "double_sided": "Completely disables backface culling",
+    "blend_to_opaque": "Stained glass near, opaque far (performance)",
+    "alpha_test_to_opaque": "Leaves - alpha_test near, opaque far",
+    "alpha_test_single_sided_to_opaque": "Sugar cane style"
+  },
+  
+  "examples": {
+    
+    "simple_single_texture": {
+      "_comment": "One texture for all faces - simplest pattern",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "my_block_texture",
+          "render_method": "opaque"
+        }
+      }
+    },
+    
+    "alpha_test_plant": {
+      "_comment": "For plants/crosses with transparency",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "my_plant",
+          "render_method": "alpha_test"
+        }
+      }
+    },
+    
+    "glowing_no_shadows": {
+      "_comment": "For light-emitting blocks - no face dimming or AO",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "glowing_block",
+          "render_method": "opaque",
+          "face_dimming": false,
+          "ambient_occlusion": false
+        }
+      }
+    },
+    
+    "per_face_textures": {
+      "_comment": "Different textures on different faces",
+      "minecraft:material_instances": {
+        "up": { "texture": "block_top" },
+        "down": { "texture": "block_bottom" },
+        "*": { "texture": "block_side" }
+      }
+    },
+    
+    "sushi_roll_pattern": {
+      "_comment": "Named material instances for custom geometry bones",
+      "minecraft:material_instances": {
+        "north": "sushi_side",
+        "south": "sushi_side",
+        "*": { "texture": "sushi_wrap" },
+        "sushi_side": { "texture": "tuna_roll" }
+      }
+    },
+    
+    "foliage_tinting": {
+      "_comment": "Leaf pile with biome tinting",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "leaf_pile",
+          "render_method": "alpha_test",
+          "tint_method": "default_foliage"
+        }
+      }
+    },
+    
+    "transparent_blend": {
+      "_comment": "Glass-like transparency",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "bubble_fish_blue",
+          "render_method": "blend",
+          "face_dimming": true,
+          "ambient_occlusion": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+entity.monarch:butterfly.name=Monarch Butterfly
+entity.monarch:caterpillar.name=Monarch Caterpillar
+entity.monarch:chrysalis.name=Monarch Chrysalis
+entity.monarch:milkweed_seed_entity.name=Milkweed Seed
+entity.monarch:popup_tent.name=Pop-up Tent
+tile.monarch:milkweed.name=Milkweed
+tile.monarch:landscape_torch.name=Landscape Torch
+item.monarch:milkweed_seeds.name=Milkweed Seeds
+item.monarch:landscape_torch.name=Landscape Torch
+item.monarch:popup_tent.name=Pop-up Tent
+action.interact.toggle_tent=Open/Close Tent
+
+## Educational Descriptions
+monarch.education.butterfly=Monarch butterflies migrate thousands of miles! They need milkweed to lay their eggs.
+monarch.education.caterpillar=Caterpillars ONLY eat milkweed leaves. They'll transform into a chrysalis soon!
+monarch.education.chrysalis=Inside the chrysalis, the caterpillar transforms into a butterfly. This takes about 10-14 days in real life!
+monarch.education.milkweed=Milkweed is the ONLY plant where monarchs lay eggs. Without it, monarchs can't survive!

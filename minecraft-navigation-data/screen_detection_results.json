@@ -1,0 +1,395 @@
+[
+  {
+    "click": 1,
+    "state": "before",
+    "screen": "worlds_list",
+    "confidence": 0.8,
+    "matches": [
+      "worlds",
+      "realms",
+      "creative",
+      "\\d{1,2}/\\d{1,2}/\\d{2,4}"
+    ],
+    "actions": [
+      "select_world",
+      "create_world",
+      "back"
+    ]
+  },
+  {
+    "click": 1,
+    "state": "after",
+    "screen": "world_edit",
+    "confidence": 0.6666666666666666,
+    "matches": [
+      "edit\\s+world",
+      "world\\s+name",
+      "game\\s+mode",
+      "achievements\\s+disabled"
+    ],
+    "actions": [
+      "play_world",
+      "edit_resource_packs",
+      "edit_behavior_packs",
+      "back"
+    ]
+  },
+  {
+    "click": 2,
+    "state": "before",
+    "screen": "world_edit",
+    "confidence": 0.6666666666666666,
+    "matches": [
+      "edit\\s+world",
+      "world\\s+name",
+      "game\\s+mode",
+      "achievements\\s+disabled"
+    ],
+    "actions": [
+      "play_world",
+      "edit_resource_packs",
+      "edit_behavior_packs",
+      "back"
+    ]
+  },
+  {
+    "click": 2,
+    "state": "after",
+    "screen": "world_edit",
+    "confidence": 0.6666666666666666,
+    "matches": [
+      "edit\\s+world",
+      "world\\s+name",
+      "game\\s+mode",
+      "achievements\\s+disabled"
+    ],
+    "actions": [
+      "play_world",
+      "edit_resource_packs",
+      "edit_behavior_packs",
+      "back"
+    ]
+  },
+  {
+    "click": 3,
+    "state": "before",
+    "screen": "world_edit",
+    "confidence": 0.6666666666666666,
+    "matches": [
+      "edit\\s+world",
+      "world\\s+name",
+      "game\\s+mode",
+      "achievements\\s+disabled"
+    ],
+    "actions": [
+      "play_world",
+      "edit_resource_packs",
+      "edit_behavior_packs",
+      "back"
+    ]
+  },
+  {
+    "click": 3,
+    "state": "after",
+    "screen": "main_menu",
+    "confidence": 0.75,
+    "matches": [
+      "play",
+      "marketplace",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 4,
+    "state": "before",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 4,
+    "state": "after",
+    "screen": "worlds_list",
+    "confidence": 0.2,
+    "matches": [
+      "worlds"
+    ],
+    "actions": [
+      "select_world",
+      "create_world",
+      "back"
+    ]
+  },
+  {
+    "click": 5,
+    "state": "before",
+    "screen": "worlds_list",
+    "confidence": 0.2,
+    "matches": [
+      "worlds"
+    ],
+    "actions": [
+      "select_world",
+      "create_world",
+      "back"
+    ]
+  },
+  {
+    "click": 5,
+    "state": "after",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 6,
+    "state": "before",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 6,
+    "state": "after",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 7,
+    "state": "before",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 7,
+    "state": "after",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 8,
+    "state": "before",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 8,
+    "state": "after",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 9,
+    "state": "before",
+    "screen": "main_menu",
+    "confidence": 0.5,
+    "matches": [
+      "play",
+      "achievements"
+    ],
+    "actions": [
+      "click_play",
+      "click_settings",
+      "exit"
+    ]
+  },
+  {
+    "click": 9,
+    "state": "after",
+    "screen": "worlds_list",
+    "confidence": 0.8,
+    "matches": [
+      "worlds",
+      "realms",
+      "creative",
+      "\\d{1,2}/\\d{1,2}/\\d{2,4}"
+    ],
+    "actions": [
+      "select_world",
+      "create_world",
+      "back"
+    ]
+  },
+  {
+    "click": 10,
+    "state": "before",
+    "screen": "worlds_list",
+    "confidence": 0.8,
+    "matches": [
+      "worlds",
+      "realms",
+      "creative",
+      "\\d{1,2}/\\d{1,2}/\\d{2,4}"
+    ],
+    "actions": [
+      "select_world",
+      "create_world",
+      "back"
+    ]
+  },
+  {
+    "click": 10,
+    "state": "after",
+    "screen": "in_game",
+    "confidence": 0.2,
+    "matches": [
+      "\\[.*\\]\\[.*\\]"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  },
+  {
+    "click": 11,
+    "state": "before",
+    "screen": "in_game",
+    "confidence": 0.6,
+    "matches": [
+      "content\\s+log",
+      "history",
+      "\\[.*\\]\\[.*\\]"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  },
+  {
+    "click": 11,
+    "state": "after",
+    "screen": "in_game",
+    "confidence": 0.4,
+    "matches": [
+      "history",
+      "\\[.*\\]\\[.*\\]"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  },
+  {
+    "click": 12,
+    "state": "before",
+    "screen": "in_game",
+    "confidence": 0.2,
+    "matches": [
+      "history"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  },
+  {
+    "click": 12,
+    "state": "after",
+    "screen": "in_game",
+    "confidence": 0.2,
+    "matches": [
+      "history"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  },
+  {
+    "click": 13,
+    "state": "before",
+    "screen": "unknown",
+    "confidence": 0.0,
+    "matches": [],
+    "actions": []
+  },
+  {
+    "click": 13,
+    "state": "after",
+    "screen": "in_game",
+    "confidence": 0.6,
+    "matches": [
+      "content\\s+log",
+      "history",
+      "coordinates"
+    ],
+    "actions": [
+      "open_pause_menu",
+      "run_command"
+    ]
+  }
+]

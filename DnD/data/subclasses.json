@@ -1,0 +1,410 @@
+{
+  "Fighter": {
+    "subclass_level": 3,
+    "subclass_name": "Martial Archetype",
+    "fighting_style_level": 1,
+    "fighting_styles": [
+      {
+        "name": "Archery",
+        "description": "You gain a +2 bonus to attack rolls you make with ranged weapons."
+      },
+      {
+        "name": "Defense",
+        "description": "While you are wearing armor, you gain a +1 bonus to AC."
+      },
+      {
+        "name": "Dueling",
+        "description": "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."
+      },
+      {
+        "name": "Great Weapon Fighting",
+        "description": "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die."
+      },
+      {
+        "name": "Protection",
+        "description": "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll."
+      },
+      {
+        "name": "Two-Weapon Fighting",
+        "description": "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
+      }
+    ],
+    "subclasses": {
+      "Champion": {
+        "description": "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection.",
+        "features": {
+          "3": [
+            {
+              "name": "Improved Critical",
+              "description": "Your weapon attacks score a critical hit on a roll of 19 or 20."
+            }
+          ],
+          "7": [
+            {
+              "name": "Remarkable Athlete",
+              "description": "You can add half your proficiency bonus (rounded up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus."
+            }
+          ],
+          "10": [
+            {
+              "name": "Additional Fighting Style",
+              "description": "You can choose a second option from the Fighting Style class feature."
+            }
+          ],
+          "15": [
+            {
+              "name": "Superior Critical",
+              "description": "Your weapon attacks score a critical hit on a roll of 18-20."
+            }
+          ],
+          "18": [
+            {
+              "name": "Survivor",
+              "description": "At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left."
+            }
+          ]
+        }
+      },
+      "Battle Master": {
+        "description": "Those who emulate the archetypal Battle Master employ martial techniques passed down through generations.",
+        "features": {
+          "3": [
+            {
+              "name": "Combat Superiority",
+              "description": "You learn three maneuvers of your choice and gain four superiority dice (d8s). You regain all expended dice when you finish a short or long rest."
+            },
+            {
+              "name": "Student of War",
+              "description": "You gain proficiency with one type of artisan's tools of your choice."
+            }
+          ],
+          "7": [
+            {
+              "name": "Know Your Enemy",
+              "description": "If you spend at least 1 minute observing or interacting with another creature, you can learn certain information about its capabilities."
+            }
+          ],
+          "10": [
+            {
+              "name": "Improved Combat Superiority",
+              "description": "Your superiority dice turn into d10s. At 18th level, they turn into d12s."
+            }
+          ],
+          "15": [
+            {
+              "name": "Relentless",
+              "description": "When you roll initiative and have no superiority dice remaining, you regain 1 superiority die."
+            }
+          ]
+        }
+      },
+      "Eldritch Knight": {
+        "description": "The archetypal Eldritch Knight combines the martial mastery common to all fighters with a careful study of magic.",
+        "spellcasting": true,
+        "features": {
+          "3": [
+            {
+              "name": "Spellcasting",
+              "description": "You learn two cantrips and three 1st-level spells from the wizard spell list."
+            },
+            {
+              "name": "Weapon Bond",
+              "description": "You learn a ritual that creates a magical bond between yourself and one weapon."
+            }
+          ],
+          "7": [
+            {
+              "name": "War Magic",
+              "description": "When you use your action to cast a cantrip, you can make one weapon attack as a bonus action."
+            }
+          ],
+          "10": [
+            {
+              "name": "Eldritch Strike",
+              "description": "A creature you hit with a weapon attack has disadvantage on the next saving throw it makes against a spell you cast before the end of your next turn."
+            }
+          ],
+          "15": [
+            {
+              "name": "Arcane Charge",
+              "description": "When you use your Action Surge, you can teleport up to 30 feet to an unoccupied space you can see."
+            }
+          ],
+          "18": [
+            {
+              "name": "Improved War Magic",
+              "description": "When you use your action to cast a spell, you can make one weapon attack as a bonus action."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Wizard": {
+    "subclass_level": 2,
+    "subclass_name": "Arcane Tradition",
+    "subclasses": {
+      "Abjuration": {
+        "description": "The School of Abjuration emphasizes magic that blocks, banishes, or protects.",
+        "features": {
+          "2": [
+            {
+              "name": "Abjuration Savant",
+              "description": "The gold and time you must spend to copy an abjuration spell into your spellbook is halved."
+            },
+            {
+              "name": "Arcane Ward",
+              "description": "You can weave magic around yourself for protection. When you cast an abjuration spell of 1st level or higher, you can simultaneously use a strand of the spell's magic to create a magical ward."
+            }
+          ],
+          "6": [
+            {
+              "name": "Projected Ward",
+              "description": "When a creature that you can see within 30 feet of you takes damage, you can use your reaction to cause your Arcane Ward to absorb that damage."
+            }
+          ],
+          "10": [
+            {
+              "name": "Improved Abjuration",
+              "description": "When you cast an abjuration spell that requires you to make an ability check as a part of casting that spell, you add your proficiency bonus to that ability check."
+            }
+          ],
+          "14": [
+            {
+              "name": "Spell Resistance",
+              "description": "You have advantage on saving throws against spells and resistance to damage from spells."
+            }
+          ]
+        }
+      },
+      "Evocation": {
+        "description": "You focus your study on magic that creates powerful elemental effects.",
+        "features": {
+          "2": [
+            {
+              "name": "Evocation Savant",
+              "description": "The gold and time you must spend to copy an evocation spell into your spellbook is halved."
+            },
+            {
+              "name": "Sculpt Spells",
+              "description": "You can create pockets of relative safety within the effects of your evocation spells."
+            }
+          ],
+          "6": [
+            {
+              "name": "Potent Cantrip",
+              "description": "Your damaging cantrips affect even creatures that avoid the brunt of the effect."
+            }
+          ],
+          "10": [
+            {
+              "name": "Empowered Evocation",
+              "description": "You can add your Intelligence modifier to the damage roll of any wizard evocation spell you cast."
+            }
+          ],
+          "14": [
+            {
+              "name": "Overchannel",
+              "description": "When you cast a wizard spell of 5th level or lower that deals damage, you can deal maximum damage with that spell."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Cleric": {
+    "subclass_level": 1,
+    "subclass_name": "Divine Domain",
+    "subclasses": {
+      "Life Domain": {
+        "description": "The Life domain focuses on the vibrant positive energy that sustains all life.",
+        "bonus_proficiencies": ["Heavy armor"],
+        "domain_spells": {
+          "1": ["Bless", "Cure Wounds"],
+          "3": ["Lesser Restoration", "Spiritual Weapon"],
+          "5": ["Beacon of Hope", "Revivify"],
+          "7": ["Death Ward", "Guardian of Faith"],
+          "9": ["Mass Cure Wounds", "Raise Dead"]
+        },
+        "features": {
+          "1": [
+            {
+              "name": "Disciple of Life",
+              "description": "Your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."
+            }
+          ],
+          "2": [
+            {
+              "name": "Channel Divinity: Preserve Life",
+              "description": "You can use your Channel Divinity to heal the badly injured. As an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level."
+            }
+          ],
+          "6": [
+            {
+              "name": "Blessed Healer",
+              "description": "The healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level."
+            }
+          ],
+          "8": [
+            {
+              "name": "Divine Strike",
+              "description": "You gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns, you can cause the attack to deal an extra 1d8 radiant damage. When you reach 14th level, the extra damage increases to 2d8."
+            }
+          ],
+          "17": [
+            {
+              "name": "Supreme Healing",
+              "description": "When you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die."
+            }
+          ]
+        }
+      },
+      "War Domain": {
+        "description": "War has many manifestations. It can make heroes of ordinary people. It can be desperate and horrific.",
+        "bonus_proficiencies": ["Heavy armor", "Martial weapons"],
+        "domain_spells": {
+          "1": ["Divine Favor", "Shield of Faith"],
+          "3": ["Magic Weapon", "Spiritual Weapon"],
+          "5": ["Crusader's Mantle", "Spirit Guardians"],
+          "7": ["Freedom of Movement", "Stoneskin"],
+          "9": ["Flame Strike", "Hold Monster"]
+        },
+        "features": {
+          "1": [
+            {
+              "name": "War Priest",
+              "description": "When you use the Attack action, you can make one weapon attack as a bonus action. You can use this feature a number of times equal to your Wisdom modifier (minimum of once)."
+            }
+          ],
+          "2": [
+            {
+              "name": "Channel Divinity: Guided Strike",
+              "description": "When you make an attack roll, you can use your Channel Divinity to gain a +10 bonus to the roll."
+            }
+          ],
+          "6": [
+            {
+              "name": "Channel Divinity: War God's Blessing",
+              "description": "When a creature within 30 feet of you makes an attack roll, you can use your reaction to grant that creature a +10 bonus to the roll."
+            }
+          ],
+          "8": [
+            {
+              "name": "Divine Strike",
+              "description": "Once on each of your turns, you can cause the attack to deal an extra 1d8 damage of the same type as the weapon. At 14th level, the extra damage increases to 2d8."
+            }
+          ],
+          "17": [
+            {
+              "name": "Avatar of Battle",
+              "description": "You gain resistance to bludgeoning, piercing, and slashing damage from nonmagical weapons."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Rogue": {
+    "subclass_level": 3,
+    "subclass_name": "Roguish Archetype",
+    "subclasses": {
+      "Thief": {
+        "description": "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype.",
+        "features": {
+          "3": [
+            {
+              "name": "Fast Hands",
+              "description": "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools, or take the Use an Object action."
+            },
+            {
+              "name": "Second-Story Work",
+              "description": "Climbing no longer costs you extra movement, and when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."
+            }
+          ],
+          "9": [
+            {
+              "name": "Supreme Sneak",
+              "description": "You have advantage on Dexterity (Stealth) checks if you move no more than half your speed on the same turn."
+            }
+          ],
+          "13": [
+            {
+              "name": "Use Magic Device",
+              "description": "You can use any spell scroll or magic item."
+            }
+          ],
+          "17": [
+            {
+              "name": "Thief's Reflexes",
+              "description": "You can take two turns during the first round of any combat. You take your first turn at your normal initiative and your second turn at your initiative minus 10."
+            }
+          ]
+        }
+      },
+      "Assassin": {
+        "description": "You focus your training on the grim art of death. Those who adhere to this archetype are diverse.",
+        "bonus_proficiencies": ["Disguise kit", "Poisoner's kit"],
+        "features": {
+          "3": [
+            {
+              "name": "Assassinate",
+              "description": "You have advantage on attack rolls against any creature that hasn't taken a turn in combat yet. Any hit you score against a creature that is surprised is a critical hit."
+            }
+          ],
+          "9": [
+            {
+              "name": "Infiltration Expertise",
+              "description": "You can unfailingly create false identities for yourself. You must spend seven days and 25 gp to establish the history, profession, and affiliations for an identity."
+            }
+          ],
+          "13": [
+            {
+              "name": "Impostor",
+              "description": "You gain the ability to unerringly mimic another person's speech, writing, and behavior."
+            }
+          ],
+          "17": [
+            {
+              "name": "Death Strike",
+              "description": "When you attack and hit a creature that is surprised, it must make a Constitution saving throw (DC 8 + your Dexterity modifier + your proficiency bonus). On a failed save, double the damage of your attack against the creature."
+            }
+          ]
+        }
+      },
+      "Arcane Trickster": {
+        "description": "Some rogues enhance their skills of stealth and agility with magic.",
+        "spellcasting": true,
+        "features": {
+          "3": [
+            {
+              "name": "Spellcasting",
+              "description": "You learn three cantrips from the wizard spell list. You also learn three 1st-level spells from the wizard list."
+            },
+            {
+              "name": "Mage Hand Legerdemain",
+              "description": "When you cast mage hand, you can make the spectral hand invisible, and you can perform additional tasks with it."
+            }
+          ],
+          "9": [
+            {
+              "name": "Magical Ambush",
+              "description": "If you are hidden from a creature when you cast a spell on it, the creature has disadvantage on any saving throw it makes against the spell this turn."
+            }
+          ],
+          "13": [
+            {
+              "name": "Versatile Trickster",
+              "description": "You gain the ability to distract targets with your mage hand. As a bonus action, you can designate a creature within 5 feet of the spectral hand created by the spell."
+            }
+          ],
+          "17": [
+            {
+              "name": "Spell Thief",
+              "description": "You gain the ability to magically steal the knowledge of how to cast a spell from another spellcaster."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

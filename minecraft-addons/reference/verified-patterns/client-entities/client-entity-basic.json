@@ -1,0 +1,30 @@
+{
+  "_comment": "Basic visible client entity - FROM WORKING MONARCH BUTTERFLY",
+  
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "namespace:entity_name",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/entity_name"
+      },
+      "geometry": {
+        "default": "geometry.namespace.entity_name"
+      },
+      "render_controllers": ["controller.render.default"],
+      "animations": {
+        "idle": "animation.entity_name.idle"
+      },
+      "scripts": {
+        "animate": ["idle"]
+      },
+      "spawn_egg": {
+        "base_color": "#FFFFFF",
+        "overlay_color": "#000000"
+      }
+    }
+  }
+}

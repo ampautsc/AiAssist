@@ -1,0 +1,68 @@
+{
+  "_comment": "Block with states and permutations - FROM WORKING MILKWEED",
+  
+  "format_version": "1.21.40",
+  "minecraft:block": {
+    "description": {
+      "identifier": "namespace:block_name",
+      "menu_category": {
+        "category": "nature"
+      },
+      "states": {
+        "namespace:my_state": [0, 1, 2, 3]
+      }
+    },
+    "components": {
+      "minecraft:custom_components": ["namespace:my_component"],
+      "minecraft:geometry": "minecraft:geometry.cross",
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.5
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "default_texture",
+          "render_method": "alpha_test"
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [-6, 0, -6],
+        "size": [12, 16, 12]
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": ["up"],
+            "block_filter": ["minecraft:grass_block", "minecraft:dirt"]
+          }
+        ]
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('namespace:my_state') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "texture_state_0",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('namespace:my_state') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "texture_state_1",
+              "render_method": "alpha_test"
+            }
+          },
+          "minecraft:light_emission": 7
+        }
+      }
+    ]
+  }
+}

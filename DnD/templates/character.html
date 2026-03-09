@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ character.name }} - Character Sheet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ character.name }}</h1>
+            <div>
+                <a href="/level-up/{{ filename }}" class="btn btn-success">
+                    <i class="bi bi-arrow-up-circle"></i> Level Up
+                </a>
+                <a href="/" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Character Info Card -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="bi bi-person-badge"></i> Character Info</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Race:</strong> {{ character.race }}</p>
+                <p><strong>Class:</strong> {{ character.class }}</p>
+                <p><strong>Level:</strong> {{ character.level }}</p>
+                <p><strong>Background:</strong> {{ character.background }}</p>
+                <p><strong>Alignment:</strong> {{ character.alignment }}</p>
+                <p><strong>XP:</strong> {{ character.xp|default(0) }}</p>
+            </div>
+        </div>
+
+        <!-- Ability Scores Card -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5><i class="bi bi-bullseye"></i> Ability Scores</h5>
+            </div>
+            <div class="card-body">
+                {% for ability, score in character.abilities.items() %}
+                <div class="d-flex justify-content-between mb-2">
+                    <strong>{{ ability|upper }}:</strong>
+                    <span>{{ score }} ({{ ((score - 10) // 2)|default(0) }})</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Combat Stats -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="bi bi-shield"></i> Combat Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ character.hp|default(10) }}</h2>
+                    <p class="text-muted">Hit Points</p>
+                </div>
+                <hr>
+                <p><strong>AC:</strong> {{ character.ac|default(10) }}</p>
+                <p><strong>Initiative:</strong> +{{ character.initiative|default(0) }}</p>
+                <p><strong>Speed:</strong> {{ character.speed|default(30) }} ft</p>
+                <p><strong>Prof. Bonus:</strong> +{{ character.proficiency_bonus|default(2) }}</p>
+                <p><strong>Hit Dice:</strong> {{ character.hit_dice|default('1d8') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features & Traits -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5><i class="bi bi-star"></i> Features & Traits</h5>
+            </div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                {% if character.features %}
+                    {% for feature in character.features %}
+                    <div class="mb-2">
+                        <strong>{{ feature.name }}</strong>
+                        <p class="small text-muted">{{ feature.description }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No features yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skills & Proficiencies -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-warning">
+                <h5><i class="bi bi-tools"></i> Skills</h5>
+            </div>
+            <div class="card-body">
+                {% if character.skills %}
+                    {% for skill, proficient in character.skills.items() %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" {% if proficient %}checked{% endif %} disabled>
+                        <label class="form-check-label">{{ skill }}</label>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No skills selected</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-warning">
+                <h5><i class="bi bi-backpack"></i> Equipment</h5>
+            </div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                {% if character.equipment %}
+                    <ul class="list-unstyled">
+                        {% for item in character.equipment %}
+                        <li><i class="bi bi-dot"></i> {{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No equipment</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

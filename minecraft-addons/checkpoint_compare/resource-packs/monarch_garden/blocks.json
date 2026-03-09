@@ -1,0 +1,7 @@
+{
+  "format_version": "1.21.40",
+  "monarch:milkweed": {
+    "textures": "milkweed",
+    "sound": "grass"
+  }
+}

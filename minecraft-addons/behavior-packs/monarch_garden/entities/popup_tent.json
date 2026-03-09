@@ -1,0 +1,100 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:popup_tent",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false,
+      "scripts": {
+        "animate": ["setup_check"]
+      },
+      "animations": {
+        "setup_check": "controller.animation.tent.setup"
+      }
+    },
+    "component_groups": {
+      "monarch:door_closed": {
+        "minecraft:variant": {
+          "value": 0
+        }
+      },
+      "monarch:door_open": {
+        "minecraft:variant": {
+          "value": 1
+        }
+      },
+      "monarch:setup_complete": {
+        "minecraft:mark_variant": {
+          "value": 1
+        }
+      }
+    },
+    "components": {
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1.0
+      },
+      "minecraft:collision_box": {
+        "width": 3.0,
+        "height": 2.5
+      },
+      "minecraft:persistent": {},
+      "minecraft:health": {
+        "value": 20,
+        "max": 20
+      },
+      "minecraft:variant": {
+        "value": 0
+      },
+      "minecraft:interact": {
+        "interactions": [
+          {
+            "on_interact": {
+              "event": "monarch:toggle_door",
+              "target": "self"
+            },
+            "interact_text": "action.interact.toggle_tent",
+            "swing": true
+          }
+        ]
+      },
+      "minecraft:loot": {
+        "table": "loot_tables/entities/popup_tent.json"
+      }
+    },
+    "events": {
+      "monarch:toggle_door": {
+        "queue_command": {
+          "command": "scriptevent monarch:tent_interact"
+        }
+      },
+      "monarch:open_door": {
+        "remove": { "component_groups": ["monarch:door_closed"] },
+        "add": { "component_groups": ["monarch:door_open"] }
+      },
+      "monarch:close_door": {
+        "remove": { "component_groups": ["monarch:door_open"] },
+        "add": { "component_groups": ["monarch:door_closed"] }
+      },
+      "monarch:setup_barriers": {
+        "add": { "component_groups": ["monarch:setup_complete"] },
+        "queue_command": {
+          "command": "scriptevent monarch:tent_setup"
+        }
+      },
+      "monarch:cleanup": {
+        "queue_command": {
+          "command": "scriptevent monarch:tent_cleanup"
+        }
+      }
+    }
+  }
+}

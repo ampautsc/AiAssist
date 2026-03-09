@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Build Calculator - D&D 5e{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-calculator"></i> Build Calculator & Comparison Tool</h1>
+        <p class="lead">Compare different character builds, calculate DPR, and optimize your choices</p>
+    </div>
+</div>
+
+<!-- Build Input Form -->
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-plus-circle"></i> Create Build</h4>
+            </div>
+            <div class="card-body">
+                <form id="buildForm">
+                    <div class="mb-3">
+                        <label class="form-label">Build Name</label>
+                        <input type="text" class="form-control" id="buildName" value="My Build">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Character Level</label>
+                        <input type="number" class="form-control" id="level" value="8" min="1" max="20">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Class</label>
+                        <select class="form-select" id="classSelect">
+                            <option value="bard">Bard</option>
+                            <option value="fighter">Fighter</option>
+                            <option value="ranger">Ranger</option>
+                            <option value="rogue">Rogue</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subclass</label>
+                        <select class="form-select" id="subclassSelect">
+                            <option value="valor">College of Valor</option>
+                            <option value="lore">College of Lore</option>
+                            <option value="swords">College of Swords</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Primary Ability Score (DEX/STR)</label>
+                        <input type="number" class="form-control" id="abilityScore" value="18" min="8" max="20">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Weapon</label>
+                        <select class="form-select" id="weaponSelect">
+                            <option value="longbow">Longbow (1d8)</option>
+                            <option value="shortbow">Shortbow (1d6)</option>
+                            <option value="hand_crossbow">Hand Crossbow (1d6)</option>
+                            <option value="light_crossbow">Light Crossbow (1d8)</option>
+                            <option value="heavy_crossbow">Heavy Crossbow (1d10)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Magic Weapon Bonus</label>
+                        <select class="form-select" id="magicBonus">
+                            <option value="0">None</option>
+                            <option value="1">+1</option>
+                            <option value="2">+2</option>
+                            <option value="3">+3</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Feats</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sharpshooter">
+                            <label class="form-check-label" for="sharpshooter">
+                                Sharpshooter (-5 to hit, +10 damage)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="crossbowExpert">
+                            <label class="form-check-label" for="crossbowExpert">
+                                Crossbow Expert (bonus action attack)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Extra Attack</label>
+                        <input type="number" class="form-control" id="attacksPerRound" value="2" min="1" max="4">
+                        <small class="text-muted">Total attacks per action</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Target AC</label>
+                        <input type="number" class="form-control" id="targetAC" value="16" min="10" max="25">
+                    </div>
+
+                    <button type="button" class="btn btn-primary w-100" onclick="addBuild()">
+                        <i class="bi bi-plus-circle"></i> Add to Comparison
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Build Templates -->
+        <div class="card shadow mt-3">
+            <div class="card-header bg-info text-white">
+                <h5><i class="bi bi-lightning"></i> Quick Templates</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="loadTemplate('valorSharpshooter')">
+                    Valor Bard + Sharpshooter
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="loadTemplate('valorCrossbowExpert')">
+                    Valor Bard + Crossbow Expert
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="loadTemplate('loreBard')">
+                    Lore Bard (Spell Focus)
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="loadTemplate('swordsBard')">
+                    Swords Bard (Melee)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Build Comparison Results -->
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4><i class="bi bi-bar-chart"></i> Build Comparison</h4>
+            </div>
+            <div class="card-body">
+                <div id="comparisonResults">
+                    <p class="text-muted text-center">Add builds to compare them side by side</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DPR Chart -->
+        <div class="card shadow mt-3">
+            <div class="card-header bg-warning">
+                <h5><i class="bi bi-graph-up"></i> DPR Visualization</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dprChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script src="{{ url_for('static', filename='js/build-calculator.js') }}"></script>
+{% endblock %}

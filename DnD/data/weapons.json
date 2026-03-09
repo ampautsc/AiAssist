@@ -1,0 +1,197 @@
+{
+  "simple_ranged": {
+    "Light Crossbow": {
+      "cost": "25 gp",
+      "damage": "1d8",
+      "damage_type": "piercing",
+      "weight": "5 lb",
+      "properties": ["Ammunition (range 80/320)", "Loading", "Two-handed"],
+      "proficiency_required": "Simple"
+    },
+    "Shortbow": {
+      "cost": "25 gp",
+      "damage": "1d6",
+      "damage_type": "piercing",
+      "weight": "2 lb",
+      "properties": ["Ammunition (range 80/320)", "Two-handed"],
+      "proficiency_required": "Simple"
+    },
+    "Dart": {
+      "cost": "5 cp",
+      "damage": "1d4",
+      "damage_type": "piercing",
+      "weight": "1/4 lb",
+      "properties": ["Finesse", "Thrown (range 20/60)"],
+      "proficiency_required": "Simple"
+    },
+    "Sling": {
+      "cost": "1 sp",
+      "damage": "1d4",
+      "damage_type": "bludgeoning",
+      "weight": "—",
+      "properties": ["Ammunition (range 30/120)"],
+      "proficiency_required": "Simple"
+    }
+  },
+  "martial_ranged": {
+    "Longbow": {
+      "cost": "50 gp",
+      "damage": "1d8",
+      "damage_type": "piercing",
+      "weight": "2 lb",
+      "properties": ["Ammunition (range 150/600)", "Heavy", "Two-handed"],
+      "proficiency_required": "Martial"
+    },
+    "Hand Crossbow": {
+      "cost": "75 gp",
+      "damage": "1d6",
+      "damage_type": "piercing",
+      "weight": "3 lb",
+      "properties": ["Ammunition (range 30/120)", "Light", "Loading"],
+      "proficiency_required": "Martial"
+    },
+    "Heavy Crossbow": {
+      "cost": "50 gp",
+      "damage": "1d10",
+      "damage_type": "piercing",
+      "weight": "18 lb",
+      "properties": ["Ammunition (range 100/400)", "Heavy", "Loading", "Two-handed"],
+      "proficiency_required": "Martial"
+    },
+    "Blowgun": {
+      "cost": "10 gp",
+      "damage": "1",
+      "damage_type": "piercing",
+      "weight": "1 lb",
+      "properties": ["Ammunition (range 25/100)", "Loading"],
+      "proficiency_required": "Martial"
+    },
+    "Net": {
+      "cost": "1 gp",
+      "damage": "—",
+      "damage_type": "—",
+      "weight": "3 lb",
+      "properties": ["Special", "Thrown (range 5/15)"],
+      "proficiency_required": "Martial",
+      "special": "A Large or smaller creature hit by a net is restrained until it is freed"
+    }
+  },
+  "simple_melee": {
+    "Dagger": {
+      "cost": "2 gp",
+      "damage": "1d4",
+      "damage_type": "piercing",
+      "weight": "1 lb",
+      "properties": ["Finesse", "Light", "Thrown (range 20/60)"],
+      "proficiency_required": "Simple"
+    },
+    "Club": {
+      "cost": "1 sp",
+      "damage": "1d4",
+      "damage_type": "bludgeoning",
+      "weight": "2 lb",
+      "properties": ["Light"],
+      "proficiency_required": "Simple"
+    },
+    "Quarterstaff": {
+      "cost": "2 sp",
+      "damage": "1d6",
+      "damage_type": "bludgeoning",
+      "weight": "4 lb",
+      "properties": ["Versatile (1d8)"],
+      "proficiency_required": "Simple"
+    },
+    "Mace": {
+      "cost": "5 gp",
+      "damage": "1d6",
+      "damage_type": "bludgeoning",
+      "weight": "4 lb",
+      "properties": [],
+      "proficiency_required": "Simple"
+    }
+  },
+  "martial_melee": {
+    "Longsword": {
+      "cost": "15 gp",
+      "damage": "1d8",
+      "damage_type": "slashing",
+      "weight": "3 lb",
+      "properties": ["Versatile (1d10)"],
+      "proficiency_required": "Martial"
+    },
+    "Greatsword": {
+      "cost": "50 gp",
+      "damage": "2d6",
+      "damage_type": "slashing",
+      "weight": "6 lb",
+      "properties": ["Heavy", "Two-handed"],
+      "proficiency_required": "Martial"
+    },
+    "Rapier": {
+      "cost": "25 gp",
+      "damage": "1d8",
+      "damage_type": "piercing",
+      "weight": "2 lb",
+      "properties": ["Finesse"],
+      "proficiency_required": "Martial"
+    },
+    "Shortsword": {
+      "cost": "10 gp",
+      "damage": "1d6",
+      "damage_type": "piercing",
+      "weight": "2 lb",
+      "properties": ["Finesse", "Light"],
+      "proficiency_required": "Martial"
+    }
+  },
+  "ammunition": {
+    "Arrows (20)": {
+      "cost": "1 gp",
+      "weight": "1 lb"
+    },
+    "Crossbow Bolts (20)": {
+      "cost": "1 gp",
+      "weight": "1.5 lb"
+    },
+    "Blowgun Needles (50)": {
+      "cost": "1 gp",
+      "weight": "1 lb"
+    },
+    "Sling Bullets (20)": {
+      "cost": "4 cp",
+      "weight": "1.5 lb"
+    }
+  },
+  "magic_weapons": {
+    "+1 Weapon": {
+      "rarity": "Uncommon",
+      "bonus_to_hit": 1,
+      "bonus_to_damage": 1,
+      "description": "You have a +1 bonus to attack and damage rolls made with this magic weapon."
+    },
+    "+2 Weapon": {
+      "rarity": "Rare",
+      "bonus_to_hit": 2,
+      "bonus_to_damage": 2,
+      "description": "You have a +2 bonus to attack and damage rolls made with this magic weapon."
+    },
+    "+3 Weapon": {
+      "rarity": "Very Rare",
+      "bonus_to_hit": 3,
+      "bonus_to_damage": 3,
+      "description": "You have a +3 bonus to attack and damage rolls made with this magic weapon."
+    },
+    "Flame Tongue": {
+      "rarity": "Rare",
+      "requires_attunement": true,
+      "special_damage": "2d6 fire",
+      "description": "You can use a bonus action to speak this magic sword's command word, causing flames to erupt from the blade. These flames shed bright light in a 40-foot radius. While the sword is ablaze, it deals an extra 2d6 fire damage."
+    },
+    "Oathbow": {
+      "rarity": "Very Rare",
+      "requires_attunement": true,
+      "weapon_type": "Longbow",
+      "description": "When you nock an arrow, you can use a bonus action to say 'Swift defeat to my enemies' in Elvish. Choose one creature you can see within 60 feet as your sworn enemy. You deal an extra 3d6 piercing damage to the target on a hit. You have advantage on attack rolls against it."
+    }
+  }
+}

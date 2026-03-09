@@ -1,0 +1,10 @@
+{
+  "format_version": "1.20.0",
+  "minecraft:spawn_rules": {
+    "description": {
+      "identifier": "monarch:milkweed_seed_entity",
+      "population_control": "ambient"
+    },
+    "conditions": []
+  }
+}

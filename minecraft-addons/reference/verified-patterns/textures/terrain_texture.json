@@ -1,0 +1,27 @@
+{
+  "_comment": "terrain_texture.json defines textures for blocks",
+  "_location": "resource-packs/pack_name/textures/terrain_texture.json",
+  "_texture_path_note": "Paths are relative to textures folder, no extension",
+  
+  "resource_pack_name": "pack_name",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "my_block_texture": {
+      "textures": "textures/blocks/my_block"
+    },
+    "my_block_lit": {
+      "textures": "textures/blocks/my_block_lit"
+    },
+    "my_block_off": {
+      "textures": "textures/blocks/my_block_off"
+    },
+    "my_plant_stage_0": {
+      "textures": "textures/blocks/my_plant_stage_0"
+    },
+    "my_plant_stage_1": {
+      "textures": "textures/blocks/my_plant_stage_1"
+    }
+  }
+}
