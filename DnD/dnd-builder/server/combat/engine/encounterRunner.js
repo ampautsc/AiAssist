@@ -1,336 +1,543 @@
 /**
- * Encounter Runner
+ * Encounter Runner — synchronous turn-by-turn combat engine.
  *
- * Orchestrates a full D&D 5e combat encounter.
- *
- * Usage:
- *   const { runEncounter } = require('./encounterRunner')
- *   const result = await runEncounter(party, enemies, mapTiles, options)
- *
- * Returns a complete EncounterResult:
- *   {
- *     sessionId, partyId,
- *     outcome: 'victory' | 'tpk' | 'fled' | 'timeout',
- *     rounds,
- *     combatLog: [...],
- *     positionSnapshots: [...],
- *     xpEarned, lootDropped
- *   }
- *
- * The runner fires an optional onEvent(event) callback after each meaningful
- * action so the WebSocket hub can stream events to clients in real time.
+ * Exports:
+ *   rollInitiative(combatants) → sorted initiative array
+ *   resetTurnState(creature) → void
+ *   processStartOfTurn(creature, allCombatants, log) → void
+ *   processEndOfTurnSaves(creature, allCombatants, log) → void
+ *   checkVictory(combatants, round) → { over, winner }
+ *   resolveWeaponAttack(attacker, action, allCombatants, log) → void
+ *   resolveBreathWeapon(attacker, action, allCombatants, log) → void
+ *   resolveShakeAwake(actor, action, log) → void
+ *   resolveDragonFear(actor, action, allCombatants, log) → void
+ *   buildAnalytics(combatants) → analytics[]
+ *   runEncounter({ combatants, getDecision, maxRounds, verbose }) → result
  */
 
 'use strict'
 
-const { v4: uuidv4 }   = require('uuid')
-const mechanics         = require('./mechanics')
-const { chooseTactic }  = require('../ai/tactics')
-const creatures         = require('../data/creatures')
+const dice      = require('./dice')
+const mech      = require('./mechanics')
+const { resolveSpell } = require('./spellResolver')
 
-const MAX_ROUNDS = 50  // safety cap to prevent infinite loops
+const DEFAULT_MAX_ROUNDS = 20
 
-// ── Helper: clone HP object ───────────────────────────────────────────────────
-function cloneHp(hp) {
-  return { ...hp }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// INITIATIVE
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Helper: build combatant list from party + enemies ─────────────────────────
-function buildCombatants(party, enemies) {
-  const combatants = []
-
-  for (const member of party) {
-    combatants.push({
-      id:           member.id ?? uuidv4(),
-      type:         'character',
-      name:         member.name,
-      hp:           cloneHp(member.hitPoints ?? member.hp),
-      abilityScores: member.abilityScores,
-      armorClass:   member.armorClass ?? 10,
-      proficiencyBonus: member.proficiencyBonus ?? 2,
-      actions:      member.actions ?? [],
-      position:     member.position ?? { q: 0, r: 0 },
-      conditions:   [],
-      damageImmunities:  [],
-      damageResistances: [],
-      isAlive:      true,
-    })
-  }
-
-  for (const enemy of enemies) {
-    const template = typeof enemy === 'string' ? creatures.getCreature(enemy) : enemy
-    if (!template) { console.warn(`[Encounter] Unknown creature: ${enemy}`); continue }
-    combatants.push({
-      id:               uuidv4(),
-      type:             'creature',
-      creatureId:       template.id,
-      name:             template.name,
-      hp:               { max: template.hitPointsAverage, current: template.hitPointsAverage, temporary: 0 },
-      abilityScores:    template.abilityScores,
-      armorClass:       template.armorClass,
-      proficiencyBonus: Math.ceil((template.challengeRating || 0.25) / 4) + 1,
-      actions:          template.actions ?? [],
-      traits:           template.traits ?? [],
-      position:         template.position ?? { q: 6, r: 3 },
-      conditions:       [],
-      damageImmunities:  template.damageImmunities  ?? [],
-      damageResistances: template.damageResistances ?? [],
-      xp:               template.experiencePoints ?? 0,
-      lootTable:        template.lootTable ?? [],
-      isAlive:          true,
-    })
-  }
-
-  return combatants
-}
-
-// ── Roll initiative for all combatants ───────────────────────────────────────
-function rollInitiativeOrder(combatants) {
+function rollInitiative(combatants) {
   return combatants
     .map(c => ({
-      id:       c.id,
-      type:     c.type,
-      name:     c.name,
-      ...mechanics.rollInitiative(c.abilityScores.dexterity),
+      id:   c.id,
+      name: c.name,
+      creature: c,
+      roll:  dice.d20(),
+      mod:   c.dexMod !== undefined ? c.dexMod : mech.abilityModifier(c.dex || 10),
     }))
-    .sort((a, b) => {
-      if (b.total !== a.total) return b.total - a.total
-      // Tiebreak: dexterity score
-      return 0
-    })
+    .map(e => ({ ...e, total: e.roll + e.mod }))
+    .sort((a, b) => b.total - a.total)
 }
 
-// ── Pick best attack action for a combatant ───────────────────────────────────
-function getBestAction(attacker) {
-  const melee = (attacker.actions ?? []).find(a => a.type === 'meleeWeaponAttack')
-  const ranged = (attacker.actions ?? []).find(a => a.type === 'rangedWeaponAttack')
-  return melee ?? ranged ?? null
+// ─────────────────────────────────────────────────────────────────────────────
+// TURN STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function resetTurnState(creature) {
+  creature.usedAction        = false
+  creature.usedBonusAction   = false
+  creature.movementRemaining = creature.speed || 30
+  creature.reactedThisRound  = false
+  mech.removeCondition(creature, 'vm_disadvantage')
+  mech.removeCondition(creature, 'dodging')
 }
 
-// ── Pick a living target for a creature ───────────────────────────────────────
-function pickTarget(attacker, combatants) {
-  const enemies = combatants.filter(c => c.isAlive && c.type !== attacker.type)
-  if (enemies.length === 0) return null
-  // Creatures target lowest HP (aggressive tactic); characters target a random enemy
-  if (attacker.type === 'creature') {
-    return enemies.reduce((a, b) => (a.hp.current < b.hp.current ? a : b))
-  }
-  return enemies[Math.floor(Math.random() * enemies.length)]
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// START-OF-TURN PROCESSING
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Resolve a single attack ────────────────────────────────────────────────────
-function resolveAttack(attacker, target, action) {
-  const attackBonus = (action.attackBonus ?? 0)
-  const attackResult = mechanics.rollAttack(attackBonus, target.armorClass)
-
-  let damage = 0
-  let damageType = 'bludgeoning'
-  const damageRolls = []
-
-  if (attackResult.hit && action.damage?.length > 0) {
-    for (const dmgDef of action.damage) {
-      const { count, sides } = mechanics.parseDiceNotation(dmgDef.dice ?? '1d4')
-      const dmgResult = mechanics.rollDamage(
-        `${count}d${sides}`,
-        dmgDef.modifier ?? 0,
-        attackResult.critical,
-      )
-      damageRolls.push(dmgResult)
-      damage += dmgResult.total
-      damageType = dmgDef.type ?? damageType
+function processStartOfTurn(creature, allCombatants, log) {
+  // Paralyzed + flying → fall
+  if (creature.flying && mech.hasCondition(creature, 'paralyzed')) {
+    creature.flying = false
+    if (creature.gemFlight) {
+      creature.gemFlight.active = false
+      creature.gemFlight.roundsRemaining = 0
     }
-    // Apply damage and mutate target HP
-    const result = mechanics.applyDamage(target, damage, damageType)
-    target.hp.current    = result.newHp
-    target.hp.temporary  = result.newTemp
-    if (target.hp.current === 0) target.isAlive = false
+    mech.addCondition(creature, 'prone')
+    const fallDmg = mech.rollDamage('2d6', 0, false).total
+    creature.currentHP = Math.max(0, creature.currentHP - fallDmg)
+    log.push(`  ${creature.name} is paralyzed and falls! ${fallDmg} falling damage. HP: ${creature.currentHP}/${creature.maxHP}`)
+    return
   }
 
-  return {
-    attackBonus,
-    roll:       attackResult.roll,
-    total:      attackResult.total,
-    hit:        attackResult.hit,
-    critical:   attackResult.critical,
-    fumble:     attackResult.fumble,
-    damage,
-    damageType,
-    damageRolls,
+  // Gem flight duration
+  if (creature.gemFlight && creature.gemFlight.active) {
+    creature.gemFlight.roundsRemaining--
+    if (creature.gemFlight.roundsRemaining <= 0) {
+      creature.gemFlight.active = false
+      creature.flying = false
+      log.push(`  ${creature.name}'s Gem Flight expires.`)
+    }
+  }
+
+  // Concentration timer
+  if (creature.concentrating && creature.concentrationRoundsRemaining > 0) {
+    creature.concentrationRoundsRemaining--
+    if (creature.concentrationRoundsRemaining <= 0) {
+      log.push(`  ${creature.name}'s ${creature.concentrating} expires.`)
+      mech.breakConcentration(creature, allCombatants)
+    }
   }
 }
 
-// ── Build a human-readable log entry description ──────────────────────────────
-function describeAction(attacker, target, action, result) {
-  const verb = action?.type === 'rangedWeaponAttack' ? 'shoots' : 'attacks'
-  if (result.critical)    return `CRITICAL! ${attacker.name} ${verb} ${target?.name ?? '?'} with ${action?.name ?? 'attack'} — hits for ${result.damage} ${result.damageType} damage!`
-  if (result.fumble)      return `${attacker.name} fumbles the attack on ${target?.name ?? '?'}!`
-  if (!result.hit)        return `${attacker.name} ${verb} ${target?.name ?? '?'} but misses (rolled ${result.total} vs AC ${target?.armorClass}).`
-  if (target && !target.isAlive) return `${attacker.name} delivers a killing blow to ${target.name} for ${result.damage} ${result.damageType} damage!`
-  return `${attacker.name} hits ${target?.name ?? '?'} for ${result.damage} ${result.damageType} damage!`
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// END-OF-TURN SAVES
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── Main encounter runner ─────────────────────────────────────────────────────
-
-/**
- * Run a complete encounter simulation.
- *
- * @param {object[]} party    - Array of character objects
- * @param {string[]|object[]} enemies - Creature IDs or stat-block objects
- * @param {object}  options
- * @param {Function} [options.onEvent]  - Callback(event) for real-time streaming
- * @param {string}  [options.partyId]
- * @returns {Promise<object>} EncounterResult
- */
-async function runEncounter(party, enemies, options = {}) {
-  const { onEvent, partyId = uuidv4() } = options
-  const sessionId = uuidv4()
-
-  const emit = (type, payload) => {
-    if (typeof onEvent === 'function') onEvent({ type, payload })
+function processEndOfTurnSaves(creature, allCombatants, log) {
+  // Paralyzed → WIS save vs Hold Person DC
+  if (mech.hasCondition(creature, 'paralyzed')) {
+    const caster = allCombatants.find(c => c.concentrating === 'Hold Person')
+    if (caster) {
+      const dc    = caster.spellSaveDC || 10
+      const mod   = creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)
+      const roll  = dice.d20() + mod
+      if (roll >= dc) {
+        mech.removeCondition(creature, 'paralyzed')
+        log.push(`  ${creature.name} WIS save vs Hold Person: [${roll} vs DC ${dc}] SUCCESS — no longer paralyzed.`)
+      } else {
+        log.push(`  ${creature.name} WIS save vs Hold Person: [${roll} vs DC ${dc}] FAIL — still paralyzed.`)
+      }
+    }
   }
 
-  const combatants   = buildCombatants(party, enemies)
-  const initiative   = rollInitiativeOrder(combatants)
-  const combatLog    = []
-  const positionSnapshots = []
+  // Frightened → WIS save vs Dragon Fear DC
+  if (mech.hasCondition(creature, 'frightened')) {
+    const source = allCombatants.find(c => c.dragonFear && c.id !== creature.id)
+    if (source && source.dragonFear) {
+      const dc   = source.dragonFear.dc || 10
+      const mod  = creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)
+      const roll = dice.d20() + mod
+      log.push(`  ${creature.name} WIS save vs Dragon Fear: [${roll} vs DC ${dc}]`)
+      if (roll >= dc) {
+        mech.removeCondition(creature, 'frightened')
+        log.push(`    → ${creature.name} no longer frightened.`)
+      } else {
+        log.push(`    → ${creature.name} still frightened.`)
+      }
+    }
+  }
+}
 
-  emit('ENCOUNTER_START', {
-    sessionId,
-    partyId,
-    initiative: initiative.map(i => ({ id: i.id, name: i.name, total: i.total })),
+// ─────────────────────────────────────────────────────────────────────────────
+// VICTORY CHECK
+// ─────────────────────────────────────────────────────────────────────────────
+
+function checkVictory(combatants, round) {
+  const partySide  = combatants.filter(c => c.side === 'party')
+  const enemySide  = combatants.filter(c => c.side === 'enemy')
+
+  const partyAlive  = partySide.filter(c  => mech.isAlive(c))
+  const enemyAlive  = enemySide.filter(c  => mech.isAlive(c))
+
+  if (partyAlive.length === 0)  return { over: true,  winner: 'enemy' }
+  if (enemyAlive.length === 0)  return { over: true,  winner: 'party' }
+
+  // If all remaining enemies are incapacitated at round 15+, it's a draw
+  if (round >= 15) {
+    const allEnemyIncapacitated = enemyAlive.every(c => mech.isIncapacitated(c))
+    if (allEnemyIncapacitated) return { over: true, winner: 'draw' }
+  }
+
+  return { over: false, winner: null }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTION RESOLUTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function resolveWeaponAttack(attacker, action, allCombatants, log) {
+  const target = action.target
+  const weapon = action.weapon || attacker.weapon
+  if (!target || !weapon) return
+
+  const isParalyzed = mech.hasCondition(target, 'paralyzed')
+  const within5ft   = mech.distanceBetween(attacker, target) <= 5
+  const hasAdv      = mech.hasCondition(attacker, 'invisible') || (isParalyzed && within5ft)
+  const forceCrit   = isParalyzed && within5ft
+
+  const atkResult = mech.makeAttackRoll(weapon.attackBonus || 0, target.ac, hasAdv, false)
+  const isCrit    = forceCrit || atkResult.isCrit
+  const hits      = isCrit || atkResult.hits
+
+  attacker.attacksMade = (attacker.attacksMade || 0) + 1
+
+  if (hits) {
+    attacker.attacksHit = (attacker.attacksHit || 0) + 1
+    const dmg = mech.rollDamage(weapon.damageDice, weapon.damageBonus || 0, isCrit)
+    target.currentHP = Math.max(0, target.currentHP - dmg.total)
+    attacker.totalDamageDealt = (attacker.totalDamageDealt || 0) + dmg.total
+    target.totalDamageTaken   = (target.totalDamageTaken   || 0) + dmg.total
+    const critStr = isCrit ? 'CRITICAL ' : ''
+    log.push(`  ${attacker.name} attacks ${target.name} with ${weapon.name}: [d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] ${critStr}HIT! ${dmg.total} damage. ${target.name} HP: ${target.currentHP}/${target.maxHP}`)
+    if (target.concentrating) {
+      const conSave = mech.concentrationSave(target, dmg.total)
+      if (!conSave.success) {
+        log.push(`    → ${target.name} loses concentration on ${target.concentrating}! [CON save ${conSave.total} vs DC ${conSave.dc}]`)
+        mech.breakConcentration(target, allCombatants)
+      }
+    }
+  } else {
+    log.push(`  ${attacker.name} attacks ${target.name} with ${weapon.name}: [d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] MISS.`)
+  }
+}
+
+function resolveMultiattack(attacker, action, allCombatants, log) {
+  const target = action.target
+  if (!target || !mech.isAlive(target)) return
+
+  const count  = attacker.multiattack || 1
+  const weapon = attacker.weapon
+  if (!weapon) return
+
+  for (let i = 0; i < count; i++) {
+    if (!mech.isAlive(target)) break
+    resolveWeaponAttack(attacker, { target, weapon }, allCombatants, log)
+  }
+}
+
+function resolveBreathWeapon(attacker, action, allCombatants, log) {
+  const bw = attacker.breathWeapon
+  if (!bw || bw.uses <= 0) return
+
+  bw.uses--
+  const targets = action.targets || []
+
+  log.push(`  ${attacker.name} uses BREATH WEAPON (DC ${bw.dc} ${bw.save} save, ${bw.damage})!`)
+
+  for (const target of targets) {
+    if (!mech.isAlive(target)) continue
+    const saveMod = target.saves ? target.saves[bw.save] : 0
+    const roll    = dice.d20() + (saveMod || 0)
+    const dmg     = mech.rollDamage(bw.damage, 0, false)
+    if (roll >= bw.dc) {
+      const half = Math.floor(dmg.total / 2)
+      target.currentHP = Math.max(0, target.currentHP - half)
+      attacker.totalDamageDealt = (attacker.totalDamageDealt || 0) + half
+      target.totalDamageTaken   = (target.totalDamageTaken   || 0) + half
+      log.push(`    → ${target.name} DEX save [${roll} vs DC ${bw.dc}] SUCCESS — ${half} half damage. HP: ${target.currentHP}/${target.maxHP}`)
+    } else {
+      target.currentHP = Math.max(0, target.currentHP - dmg.total)
+      attacker.totalDamageDealt = (attacker.totalDamageDealt || 0) + dmg.total
+      target.totalDamageTaken   = (target.totalDamageTaken   || 0) + dmg.total
+      log.push(`    → ${target.name} DEX save [${roll} vs DC ${bw.dc}] FAIL — ${dmg.total} full damage. HP: ${target.currentHP}/${target.maxHP}`)
+    }
+  }
+}
+
+function resolveShakeAwake(actor, action, log) {
+  const target = action.target
+  if (!target) return
+  mech.removeAllConditions(target, 'charmed_hp', 'incapacitated')
+  log.push(`  ${actor.name} shakes awake ${target.name}.`)
+}
+
+function resolveDragonFear(actor, action, allCombatants, log) {
+  const df = actor.dragonFear
+  if (!df) return
+  if (df.uses <= 0) {
+    log.push(`  ${actor.name} Dragon Fear has no uses remaining.`)
+    return
+  }
+  df.uses--
+  const targets = action.targets || []
+  for (const target of targets) {
+    if (!mech.isAlive(target)) continue
+    if (mech.hasCondition(target, 'frightened')) {
+      log.push(`  ${target.name} Already frightened.`)
+      continue
+    }
+    if (target.immunities && target.immunities.conditions && target.immunities.conditions.includes('frightened')) {
+      log.push(`  ${target.name} Immune to frightened.`)
+      continue
+    }
+    const mod  = target.saves ? target.saves.wis : mech.abilityModifier(target.wis || 10)
+    const roll = dice.d20() + mod
+    if (roll >= df.dc) {
+      log.push(`  ${target.name} WIS save vs Dragon Fear [${roll} vs DC ${df.dc}] SUCCESS.`)
+    } else {
+      mech.addCondition(target, 'frightened')
+      log.push(`  ${target.name} WIS save vs Dragon Fear [${roll} vs DC ${df.dc}] FAIL — FRIGHTENED!`)
+    }
+  }
+}
+
+function resolveGemFlight(actor, log) {
+  if (!actor.gemFlight || actor.gemFlight.uses <= 0) return
+  actor.gemFlight.uses--
+  actor.gemFlight.active = true
+  actor.gemFlight.roundsRemaining = actor.gemFlight.maxRounds || 10
+  actor.flying = true
+  log.push(`  ${actor.name} activates Gem Flight! (${actor.gemFlight.uses} uses remaining)`)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALYTICS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildAnalytics(combatants) {
+  return combatants.map(c => {
+    const made = c.attacksMade || 0
+    const hit  = c.attacksHit  || 0
+    return {
+      id:          c.id,
+      name:        c.name,
+      side:        c.side,
+      survived:    mech.isAlive(c),
+      finalHP:     c.currentHP,
+      maxHP:       c.maxHP,
+      damageDealt: c.totalDamageDealt || 0,
+      damageTaken: c.totalDamageTaken || 0,
+      attacksMade: made,
+      attacksHit:  hit,
+      hitRate:     made > 0 ? Math.round((hit / made) * 100) : 0,
+      spellsCast:  c.spellsCast || 0,
+    }
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTION DISPATCHER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function resolveAction(actor, action, allCombatants, log) {
+  if (!action) return
+
+  const actionType = action.type
+
+  // Determine if this is a spell (has .spell field but no .type, or type === 'cast_spell')
+  const isSpell = action.spell && (actionType === 'cast_spell' || !actionType)
+
+  if (actionType === 'dodge') {
+    mech.addCondition(actor, 'dodging')
+    log.push(`  ${actor.name} takes the Dodge action.`)
+    return
+  }
+
+  if (actionType === 'attack') {
+    resolveWeaponAttack(actor, action, allCombatants, log)
+    return
+  }
+
+  if (actionType === 'multiattack') {
+    resolveMultiattack(actor, action, allCombatants, log)
+    return
+  }
+
+  if (actionType === 'breath_weapon') {
+    resolveBreathWeapon(actor, action, allCombatants, log)
+    return
+  }
+
+  if (actionType === 'shake_awake') {
+    resolveShakeAwake(actor, action, log)
+    return
+  }
+
+  if (actionType === 'dragon_fear') {
+    resolveDragonFear(actor, action, allCombatants, log)
+    return
+  }
+
+  if (isSpell) {
+    resolveSpell(actor, action, allCombatants, log)
+    return
+  }
+}
+
+function resolveBonusAction(actor, bonusAction, allCombatants, log) {
+  if (!bonusAction) return
+
+  const spell = bonusAction.spell
+
+  if (bonusAction.type === 'gem_flight') {
+    resolveGemFlight(actor, log)
+    return
+  }
+
+  if (bonusAction.type === 'cast_healing_word' || spell === 'Healing Word') {
+    resolveSpell(actor, { spell: 'Healing Word', level: bonusAction.level || 1, target: actor }, allCombatants, log)
+    return
+  }
+
+  if (spell === 'Spiritual Weapon') {
+    actor.spiritualWeapon = { active: true, level: bonusAction.level || 2 }
+    const slots = bonusAction.level || 2
+    if (actor.spellSlots && actor.spellSlots[slots] > 0) {
+      actor.spellSlots[slots]--
+    }
+    log.push(`  ${actor.name} casts Spiritual Weapon as bonus action.`)
+    return
+  }
+
+  if (spell === 'Misty Step') {
+    if (actor.spellSlots && actor.spellSlots[2] > 0) {
+      actor.spellSlots[2]--
+      log.push(`  ${actor.name} casts Misty Step as bonus action.`)
+    }
+    return
+  }
+
+  if (spell) {
+    resolveSpell(actor, bonusAction, allCombatants, log)
+    return
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENCOUNTER RUNNER
+// ─────────────────────────────────────────────────────────────────────────────
+
+function runEncounter(options) {
+  const {
+    combatants,
+    getDecision,
+    maxRounds   = DEFAULT_MAX_ROUNDS,
+    verbose     = false,
+  } = options
+
+  const log         = []
+  const snapshots   = []
+  let   winner      = null
+  let   round       = 0
+
+  const snap = (phase) => ({
+    round,
+    phase,
+    combatants: combatants.map(c => ({
+      id:         c.id,
+      name:       c.name,
+      side:       c.side,
+      currentHP:  c.currentHP,
+      maxHP:      c.maxHP,
+      conditions: [...(c.conditions || [])],
+      position:   c.position ? { ...c.position } : { x: 0, y: 0 },
+      flying:     !!c.flying,
+    })),
   })
 
-  let round   = 0
-  let outcome = 'timeout'
+  // Initial snapshot (round 0)
+  snapshots.push(snap('start'))
 
-  // ── Round loop ──────────────────────────────────────────────────────────────
-  while (round < MAX_ROUNDS) {
+  const initiative = rollInitiative(combatants)
+
+  while (round < maxRounds && !winner) {
     round++
-    emit('ROUND_START', { round })
+    log.push(`\n=== ROUND ${round} ===`)
 
-    // Capture position snapshot at start of each round
-    positionSnapshots.push({
-      round,
-      positions: combatants
-        .filter(c => c.isAlive)
-        .map(c => ({ id: c.id, type: c.type, name: c.name, ...c.position, color: c.type === 'character' ? '#4fc3f7' : '#e57373', label: c.name.charAt(0).toUpperCase() })),
-    })
+    for (const entry of initiative) {
+      const actor = combatants.find(c => c.id === entry.id)
+      if (!actor || !mech.isAlive(actor)) continue
+      if (mech.isIncapacitated(actor)) {
+        log.push(`  ${actor.name} is incapacitated — skipping turn.`)
+        continue
+      }
 
-    let turnIndex = 0
-    for (const initEntry of initiative) {
-      const actor = combatants.find(c => c.id === initEntry.id)
-      if (!actor || !actor.isAlive) continue
+      resetTurnState(actor)
+      processStartOfTurn(actor, combatants, log)
 
-      // Check win/loss after each turn
-      const aliveCharacters = combatants.filter(c => c.type === 'character' && c.isAlive)
-      const aliveEnemies    = combatants.filter(c => c.type === 'creature'  && c.isAlive)
+      if (!mech.isAlive(actor)) continue
 
-      if (aliveCharacters.length === 0) { outcome = 'tpk'; break }
-      if (aliveEnemies.length    === 0) { outcome = 'victory'; break }
+      log.push(`\n  --- ${actor.name}'s turn ---`)
 
-      emit('TURN_START', { round, actorId: actor.id, actorName: actor.name })
+      // Get decision
+      let decision = null
+      try {
+        decision = getDecision(actor, combatants, round, log)
+      } catch (err) {
+        log.push(`  ERROR in getDecision for ${actor.name}: ${err.message}`)
+      }
 
-      let actionResult = null
-
-      if (actor.type === 'creature') {
-        // AI tactic selection
-        const tactic = chooseTactic(actor, combatants)
-        const target = tactic.targetId
-          ? combatants.find(c => c.id === tactic.targetId)
-          : pickTarget(actor, combatants)
-
-        if (tactic.action === 'attack' && target) {
-          const action = getBestAction(actor)
-          if (action) {
-            actionResult = resolveAttack(actor, target, action)
-            const logEntry = {
-              round,
-              turn: turnIndex,
-              actorId:   actor.id,
-              actorName: actor.name,
-              action:    'attack',
-              targetId:  target.id,
-              targetName: target.name,
-              ...actionResult,
-              description: describeAction(actor, target, action, actionResult),
-            }
-            combatLog.push(logEntry)
-            emit('COMBAT_EVENT', logEntry)
+      if (decision) {
+        // Resolve movement
+        if (decision.movement && decision.movement.type === 'move_toward' && decision.movement.target) {
+          const target = decision.movement.target
+          const dx = Math.sign((target.position?.x || 0) - (actor.position?.x || 0))
+          const dy = Math.sign((target.position?.y || 0) - (actor.position?.y || 0))
+          if (actor.position) {
+            actor.position = { x: actor.position.x + dx, y: actor.position.y + dy }
           }
-        } else if (tactic.action === 'move') {
-          // Update position
-          actor.position = tactic.newPosition ?? actor.position
-          emit('MAP_UPDATE', { actorId: actor.id, position: actor.position })
+        }
+
+        // Resolve main action
+        if (decision.action) {
+          resolveAction(actor, decision.action, combatants, log)
+          actor.usedAction = true
+        }
+
+        // Resolve bonus action
+        if (decision.bonusAction && !actor.usedBonusAction) {
+          resolveBonusAction(actor, decision.bonusAction, combatants, log)
+          actor.usedBonusAction = true
         }
       } else {
-        // Player character — in a real server these actions come from WebSocket
-        // For simulation we auto-attack the nearest enemy
-        const target = pickTarget(actor, combatants)
-        if (target) {
-          const action = getBestAction(actor)
-          if (action) {
-            actionResult = resolveAttack(actor, target, action)
-            const logEntry = {
-              round,
-              turn: turnIndex,
-              actorId:   actor.id,
-              actorName: actor.name,
-              action:    'attack',
-              targetId:  target.id,
-              targetName: target.name,
-              ...actionResult,
-              description: describeAction(actor, target, action, actionResult),
-            }
-            combatLog.push(logEntry)
-            emit('COMBAT_EVENT', logEntry)
-          }
-        }
+        log.push(`  ${actor.name} takes no action.`)
       }
 
-      turnIndex++
+      processEndOfTurnSaves(actor, combatants, log)
+
+      // Check victory after each turn
+      const vc = checkVictory(combatants, round)
+      if (vc.over) {
+        winner = vc.winner
+        break
+      }
     }
 
-    // End-of-round win/loss check
-    const aliveChars    = combatants.filter(c => c.type === 'character' && c.isAlive)
-    const aliveCreatures = combatants.filter(c => c.type === 'creature'  && c.isAlive)
-    if (aliveChars.length === 0)    { outcome = 'tpk';     break }
-    if (aliveCreatures.length === 0) { outcome = 'victory'; break }
-  }
+    // End-of-round snapshot
+    snapshots.push(snap('end'))
 
-  // ── Compute rewards ──────────────────────────────────────────────────────────
-  const defeatedEnemies = combatants.filter(c => c.type === 'creature' && !c.isAlive)
-  const xpEarned = defeatedEnemies.reduce((sum, c) => sum + (c.xp ?? 0), 0)
-
-  const lootDropped = []
-  for (const enemy of defeatedEnemies) {
-    for (const lootEntry of (enemy.lootTable ?? [])) {
-      if (Math.random() <= (lootEntry.chance ?? 0)) {
-        lootDropped.push({
-          source:   enemy.name,
-          itemId:   lootEntry.itemId ?? null,
-          currency: lootEntry.currency ?? null,
-          amount:   lootEntry.amount ?? 1,
-        })
-      }
+    if (!winner) {
+      const vc = checkVictory(combatants, round)
+      if (vc.over) winner = vc.winner
     }
   }
 
-  const result = {
-    sessionId,
-    partyId,
-    outcome,
-    rounds: round,
-    combatLog,
-    positionSnapshots,
-    xpEarned,
-    lootDropped,
-    survivingCharacters: combatants.filter(c => c.type === 'character' && c.isAlive).map(c => ({ id: c.id, name: c.name, hp: c.hp })),
-    defeatedEnemies: defeatedEnemies.map(c => ({ id: c.id, name: c.name })),
+  if (!winner) winner = 'draw'
+
+  log.push(`\n=== ENCOUNTER ENDED — Winner: ${winner.toUpperCase()} after ${round} rounds ===`)
+
+  return {
+    winner,
+    rounds:           round,
+    log,
+    analytics:        buildAnalytics(combatants),
+    positionSnapshots: snapshots,
+    combatants,
   }
-
-  emit('ENCOUNTER_END', { outcome, xpEarned, lootDropped, rounds: round })
-
-  return result
 }
 
-module.exports = { runEncounter, buildCombatants, rollInitiativeOrder, resolveAttack }
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGACY EXPORTS (kept for backward compatibility)
+// ─────────────────────────────────────────────────────────────────────────────
+
+module.exports = {
+  rollInitiative,
+  resetTurnState,
+  processStartOfTurn,
+  processEndOfTurnSaves,
+  checkVictory,
+  resolveWeaponAttack,
+  resolveMultiattack,
+  resolveBreathWeapon,
+  resolveShakeAwake,
+  resolveDragonFear,
+  buildAnalytics,
+  runEncounter,
+  // Legacy names
+  rollInitiativeOrder: rollInitiative,
+  resolveAttack:       resolveWeaponAttack,
+  buildCombatants:     (party, enemies) => [...(party || []), ...(enemies || [])],
+}
