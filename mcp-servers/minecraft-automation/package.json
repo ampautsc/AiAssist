@@ -12,7 +12,7 @@
     "test:integration": "npm run build && node build/src/tests/integration-test.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0"
+    "@modelcontextprotocol/sdk": "^1.27.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
