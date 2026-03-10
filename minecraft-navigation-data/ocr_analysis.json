@@ -1,0 +1,347 @@
+[
+  {
+    "click": 1,
+    "coordinates": "(747, 833)",
+    "time": "18:35:30",
+    "before_text": [
+      "< EDIT WORLD",
+      "World name",
+      "My World",
+      "Game mode",
+      "Sura Cre:",
+      "ef",
+      "Create, build, and explore without limits. fou can fl",
+      "Difficulty",
+      "Flay on Realms",
+      "@ Achievements disabled",
+      "Hostile mobs spawn and deal standard damage. Hur",
+      "a nf"
+    ],
+    "after_text": [
+      "< EDIT WORLD",
+      "Ee",
+      "Play on Realms",
+      "@ Achievements disabled",
+      "it General",
+      "ta Advanced",
+      "SH Multiplayer",
+      "World name",
+      "My World",
+      "Game mode",
+      "Sura Cre:",
+      "Create, build, and explore without limits. fou can fl",
+      "monsters.",
+      "Difficulty",
+      "Hostile mobs spawn and deal standard damage. Hur",
+      "a nf"
+    ]
+  },
+  {
+    "click": 2,
+    "coordinates": "(743, 516)",
+    "time": "18:35:42",
+    "before_text": [
+      "< EDIT WORLD",
+      "Ee",
+      "Play on Realms",
+      "@ Achievements disabled",
+      "it General",
+      "ta Advanced",
+      "SH Multiplayer",
+      "World name",
+      "My World",
+      "Game mode",
+      "Sura Cre:",
+      "Create, build, and explore without limits. fou can fl",
+      "monsters.",
+      "Difficulty",
+      "Hostile mobs spawn and deal standard damage. Hur",
+      "a nf"
+    ],
+    "after_text": [
+      "< EDIT WORLD",
+      "Shared packs",
+      "Ee Players are asked to download all local packs in ¢",
+      "@ Achievements disabled",
+      "Monarch Garden Resource Fack",
+      "© General",
+      "Global",
+      "Advanced yy ‘",
+      "Tal : 3",
+      "SS Hinecraft texture pack",
+      "a",
+      "SH Multiplayer",
+      "Global packs are applied to all of your worlds. The:"
+    ]
+  },
+  {
+    "click": 3,
+    "coordinates": "(372, 527)",
+    "time": "18:36:01",
+    "before_text": [
+      "< EDIT WORLD",
+      "Shared packs",
+      "Ee Players are asked to download all local packs in ¢",
+      "@ Achievements disabled",
+      "Monarch Garden Resource Fack",
+      "© General",
+      "Global",
+      "fH Advanced SF",
+      "a",
+      "Hinecraft texture pack",
+      "SH Multiplayer",
+      "Global packs are applied to all of your worlds. The:"
+    ],
+    "after_text": [
+      "< EDIT WORLD",
+      "Shared packs",
+      "Ee Players are asked to download all local packs in ¢",
+      "Ravenfeatns ~",
+      "Ho active re:",
+      "@ Achievements disabled Do you want to change the look of your world? T",
+      "© General",
+      "Global",
+      "ta Advanced sd",
+      ", Hinecraft texture pack",
+      "SH Multiplayer =",
+      "Global packs are applied to all of your worlds. The:"
+    ]
+  },
+  {
+    "click": 4,
+    "coordinates": "(550, 525)",
+    "time": "18:36:18",
+    "before_text": [
+      "< EDIT WORLD",
+      "Shared packs",
+      "Ee Players are asked to download all local packs in ¢",
+      "Ravenfeatns ~",
+      "Ho active re:",
+      "@ Achievements disabled Do you want to change the look of your world? T",
+      "© General",
+      "Global",
+      "ta Advanced sd",
+      ", Hinecraft texture pack",
+      "SH Multiplayer =",
+      "Global packs are applied to all of your worlds. The:"
+    ],
+    "after_text": [
+      "< EDIT WORLD",
+      "a Active",
+      "TL Monarch Garden Behavior Pack",
+      "rLar",
+      "@ Achievements disabled",
+      "i General",
+      "ta Advanced",
+      "SH Multiplayer"
+    ]
+  },
+  {
+    "click": 5,
+    "coordinates": "(1637, 347)",
+    "time": "18:36:31",
+    "before_text": [
+      "< EDIT WORLD",
+      "a Active",
+      "TL Monarch Garden Behavior Pack",
+      "rLar",
+      "@ Achievements disabled",
+      "i General",
+      "ta Advanced",
+      "SH Multiplayer"
+    ],
+    "after_text": [
+      "| Hold on!",
+      "Removing packs from previously played worlds may result",
+      "permanent data loss. We strongly recommend making a coy",
+      "your world first!",
+      "ntinue"
+    ]
+  },
+  {
+    "click": 6,
+    "coordinates": "(1652, 217)",
+    "time": "18:36:44",
+    "before_text": [
+      "| Hold on!",
+      "Removing packs from previously played worlds may result",
+      "permanent data loss. We strongly recommend making a coy",
+      "your world first!",
+      "ntinue"
+    ],
+    "after_text": [
+      "< EDIT WORLD",
+      "a Active",
+      "No active be",
+      "PLaY Change how items and mobs in your worl",
+      "@ Achievements disabled",
+      "i General",
+      "ta Advanced",
+      "SH Multiplayer"
+    ]
+  },
+  {
+    "click": 7,
+    "coordinates": "(943, 602)",
+    "time": "18:36:51",
+    "before_text": [
+      "< EDIT WORLD",
+      "re Active",
+      "No active be",
+      "PLaY Change how items and mobs in your worl",
+      "@ Achievements disabled",
+      "i General",
+      "ta Advanced",
+      "SH Multiplayer"
+    ],
+    "after_text": [
+      "BM Worlds ¢3) @ Fiealms",
+      "Creative [eee",
+      "My World Fe My World ¢13 Fe Addon Test",
+      "61/18/26 61/18/26 61/08/26"
+    ]
+  },
+  {
+    "click": 8,
+    "coordinates": "(19, 16)",
+    "time": "18:37:03",
+    "before_text": [
+      "BM Worlds ¢3) @ Fiealms",
+      "Creative [eee",
+      "My World Fe My World ¢13 Fe Addon Test",
+      "61/18/26 61/18/26 61/08/26"
+    ],
+    "after_text": [
+      "MINELRR"
+    ]
+  },
+  {
+    "click": 9,
+    "coordinates": "(198, 543)",
+    "time": "18:37:14",
+    "before_text": [
+      "Accessibility",
+      "How toa Flay",
+      "Controls",
+      "Reyboard & Mouse",
+      "a | Text To Speech wit",
+      "| Oo Text To Speech Fo",
+      "| O Text To Speech Fo",
+      "Text to speech! 164",
+      "a | Chat Instructions |",
+      "Text Background Opacity:",
+      "Controls backgrounds fo",
+      "the “tithe command"
+    ],
+    "after_text": [
+      "a | Text To Speech wit",
+      "| Oo Text To Speech Fo",
+      "| O Text To Speech Fo",
+      "Text to speech! 164",
+      "Pe",
+      "a | Chat Instructions |",
+      "Text Background Opacity:",
+      "Controls backgrounds fo",
+      "the “tithe command"
+    ]
+  },
+  {
+    "click": 10,
+    "coordinates": "(1145, 857)",
+    "time": "18:37:22",
+    "before_text": [
+      "a | Text To Speech wit",
+      "| Oo Text To Speech Fo",
+      "| O Text To Speech Fo",
+      "Text to speech! 164",
+      "Pe",
+      "a | Chat Instructions |",
+      "Text Background Opacity:",
+      "Controls backgrounds fo",
+      "the “tithe command"
+    ],
+    "after_text": [
+      "Subscriptions",
+      "Crestor Settings",
+      "a | Enable Copy Coare",
+      "0 . p 5 n ssees=",
+      "Script Debugger Settings",
+      "| O Require Passcode",
+      "| O Attach Debugger o"
+    ]
+  },
+  {
+    "click": 11,
+    "coordinates": "(1146, 847)",
+    "time": "18:37:26",
+    "before_text": [
+      "[=] Subscriptions",
+      "hy-| Global Fesources",
+      "Crestor Settings",
+      "a | Enable Copy Coare",
+      "Script Debugger Settings",
+      "| O Require Passcode",
+      "| O Attach Debugger o"
+    ],
+    "after_text": [
+      "[=] Subscriptions",
+      "ea Global Fesources",
+      "| O Seript Spike Warnin",
+      "| O Slow Script Warnine",
+      "Device Info Settings",
+      "| O Enable Hemory Tier",
+      "Content Log Settings",
+      "a | Enable Content Lo:",
+      "a | Enable Content Lo:",
+      "mre Shey Cantent | oa |"
+    ]
+  },
+  {
+    "click": 12,
+    "coordinates": "(896, 825)",
+    "time": "18:37:32",
+    "before_text": [
+      "[=] Subscriptions",
+      "Eq Global Fesources",
+      "| O Seript Spike Warnin",
+      "| O Slow Script Warnine",
+      "Device Info Settings",
+      "| O Enable Hemory Tier",
+      "Content Log Settings",
+      "a | Enable Content Lo:",
+      "a | Enable Content Lo:",
+      "mre Shey Cantent | oa |"
+    ],
+    "after_text": [
+      "Device Info Settings",
+      "| O Enable Hemory Tier",
+      "Content Log Settings",
+      "a | Enable Content Lo:",
+      "a | Enable Content Lo:",
+      "a | Show Content Lag |",
+      "GUT Log Lewel"
+    ]
+  },
+  {
+    "click": 13,
+    "coordinates": "(863, 555)",
+    "time": "18:37:36",
+    "before_text": [
+      "AIAELR"
+    ],
+    "after_text": [
+      "Accessibility",
+      "How toa Flay",
+      "Controls",
+      "Reyboard & Mouse",
+      "a | Text To Speech wit",
+      "| Oo Text To Speech Fo",
+      "| O Text To Speech Fo",
+      "Text to speech! 164",
+      "a | Chat Instructions |",
+      "Text Background Opacity:",
+      "Controls backgrounds fo",
+      "the “tithe command"
+    ]
+  }
+]

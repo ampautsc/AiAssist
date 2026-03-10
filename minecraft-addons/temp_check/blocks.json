@@ -1,0 +1,15 @@
+{
+  "format_version": "1.21.40",
+  "monarch:milkweed": {
+    "textures": "milkweed",
+    "sound": "grass"
+  },
+  "monarch:landscape_torch": {
+    "textures": {
+      "up": "landscape_torch_hat",
+      "down": "landscape_torch_amber",
+      "side": "landscape_torch_post"
+    },
+    "sound": "stone"
+  }
+}

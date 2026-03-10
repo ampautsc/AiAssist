@@ -1,0 +1,175 @@
+/* Custom styles for D&D Character Creator */
+
+:root {
+    --primary-color: #8B0000;
+    --secondary-color: #DAA520;
+    --background-color: #f8f9fa;
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: bold;
+}
+
+.btn {
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Step container animations */
+.step-container {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ability score display */
+.ability-score {
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.ability-score h3 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.ability-score p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Character card styling */
+.character-card {
+    background: white;
+    border-left: 5px solid var(--primary-color);
+}
+
+/* Race/Class selection cards */
+.selection-card {
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.selection-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.selection-card.selected {
+    border-color: var(--primary-color);
+    background-color: #fff3cd;
+}
+
+/* Dice roller button */
+.dice-button {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    transition: transform 0.1s;
+}
+
+.dice-button:hover {
+    transform: scale(1.05);
+}
+
+.dice-button:active {
+    transform: scale(0.95);
+}
+
+/* Stat block styling */
+.stat-block {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-block h2 {
+    margin: 0;
+    font-size: 3rem;
+}
+
+.stat-block p {
+    margin: 5px 0 0 0;
+    font-size: 1rem;
+}
+
+/* Feature list */
+.feature-item {
+    padding: 10px;
+    border-left: 3px solid var(--secondary-color);
+    margin-bottom: 10px;
+    background: #f8f9fa;
+}
+
+.feature-item:hover {
+    background: #e9ecef;
+}
+
+/* Equipment list */
+.equipment-item {
+    padding: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.equipment-item:last-child {
+    border-bottom: none;
+}
+
+/* Print styles */
+@media print {
+    .navbar, .btn, footer {
+        display: none;
+    }
+    
+    .card {
+        page-break-inside: avoid;
+    }
+}

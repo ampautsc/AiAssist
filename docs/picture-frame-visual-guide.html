@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picture Frame Fundraiser - Visual Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .section h2 {
+            color: #5a4fcf;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        
+        .section h3 {
+            color: #444;
+            margin: 20px 0 15px 0;
+            font-size: 1.3em;
+        }
+        
+        /* Frame Anatomy Diagram */
+        .frame-anatomy {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .frame-diagram {
+            position: relative;
+            width: 350px;
+            height: 420px;
+        }
+        
+        .frame-outer {
+            position: absolute;
+            width: 300px;
+            height: 380px;
+            border: 35px solid #8B4513;
+            border-radius: 5px;
+            left: 25px;
+            top: 20px;
+            background: linear-gradient(145deg, #654321, #8B4513);
+            box-shadow: 
+                inset 3px 3px 10px rgba(0,0,0,0.3),
+                5px 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .frame-rabbet {
+            position: absolute;
+            width: 240px;
+            height: 320px;
+            border: 8px solid #5a4a3a;
+            left: 55px;
+            top: 50px;
+            background: #e8e8e8;
+        }
+        
+        .frame-glass {
+            position: absolute;
+            width: 224px;
+            height: 304px;
+            left: 63px;
+            top: 58px;
+            background: linear-gradient(135deg, rgba(200,220,255,0.3), rgba(255,255,255,0.5));
+            border: 1px solid rgba(150,150,150,0.5);
+        }
+        
+        .frame-mat {
+            position: absolute;
+            width: 200px;
+            height: 280px;
+            left: 75px;
+            top: 70px;
+            background: #f5f5f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .frame-artwork {
+            width: 140px;
+            height: 200px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .anatomy-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .label-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid;
+        }
+        
+        .label-item.wood { border-color: #8B4513; }
+        .label-item.rabbet { border-color: #5a4a3a; }
+        .label-item.glass { border-color: #87CEEB; }
+        .label-item.mat { border-color: #f5f5f0; background: #fff; }
+        .label-item.art { border-color: #ff6b6b; }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+        
+        /* Miter Cut Diagram */
+        .miter-diagram {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .miter-piece {
+            text-align: center;
+        }
+        
+        .miter-visual {
+            width: 200px;
+            height: 150px;
+            position: relative;
+            margin: 0 auto 15px auto;
+        }
+        
+        .wood-piece {
+            position: absolute;
+            background: linear-gradient(90deg, #DEB887, #D2B48C, #DEB887);
+            border: 2px solid #8B4513;
+        }
+        
+        .wood-horizontal {
+            width: 180px;
+            height: 40px;
+            top: 55px;
+            left: 10px;
+        }
+        
+        .angle-cut {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        
+        .angle-45-left {
+            border-width: 0 0 40px 40px;
+            border-color: transparent transparent #f0f0f0 transparent;
+            right: -2px;
+            top: 0;
+        }
+        
+        .angle-45-right {
+            border-width: 40px 40px 0 0;
+            border-color: transparent #f0f0f0 transparent transparent;
+            left: -2px;
+            top: 0;
+        }
+        
+        .angle-label {
+            position: absolute;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* Corner Assembly */
+        .corner-assembly {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .corner-diagram {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .corner-piece-h {
+            position: absolute;
+            width: 150px;
+            height: 35px;
+            background: linear-gradient(180deg, #DEB887, #D2B48C);
+            border: 2px solid #8B4513;
+            top: 30px;
+            left: 50px;
+        }
+        
+        .corner-piece-h::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: -2px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 39px 39px;
+            border-color: transparent transparent #D2B48C transparent;
+        }
+        
+        .corner-piece-v {
+            position: absolute;
+            width: 35px;
+            height: 150px;
+            background: linear-gradient(90deg, #DEB887, #D2B48C);
+            border: 2px solid #8B4513;
+            top: 50px;
+            left: 30px;
+        }
+        
+        .corner-piece-v::before {
+            content: '';
+            position: absolute;
+            top: -35px;
+            left: -2px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 39px 0 0 39px;
+            border-color: transparent transparent transparent #D2B48C;
+        }
+        
+        .glue-icon {
+            position: absolute;
+            top: 45px;
+            left: 45px;
+            font-size: 24px;
+        }
+        
+        .step-arrow {
+            font-size: 40px;
+            color: #667eea;
+        }
+        
+        .corner-complete {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .corner-joined-h {
+            position: absolute;
+            width: 150px;
+            height: 35px;
+            background: linear-gradient(180deg, #8B4513, #654321);
+            top: 30px;
+            left: 50px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .corner-joined-v {
+            position: absolute;
+            width: 35px;
+            height: 150px;
+            background: linear-gradient(90deg, #8B4513, #654321);
+            top: 50px;
+            left: 30px;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .corner-joint {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #8B4513, #654321);
+            top: 30px;
+            left: 30px;
+        }
+        
+        /* Layer Stack Diagram */
+        .layer-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+        }
+        
+        .layer {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .layer-visual {
+            width: 200px;
+            height: 40px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        .layer-visual.glass {
+            background: linear-gradient(135deg, #87CEEB, #b0d4e8);
+            height: 8px;
+        }
+        
+        .layer-visual.mat {
+            background: linear-gradient(135deg, #e8e4d9, #f5f1e6);
+            color: #333;
+            text-shadow: none;
+            height: 25px;
+        }
+        
+        .layer-visual.artwork {
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+            height: 15px;
+        }
+        
+        .layer-visual.backing {
+            background: linear-gradient(135deg, #a0a0a0, #808080);
+            height: 30px;
+        }
+        
+        .layer-visual.dustcover {
+            background: linear-gradient(135deg, #8B4513, #a0522d);
+            height: 5px;
+        }
+        
+        .layer-desc {
+            flex: 1;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .layer-num {
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tool-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .tool-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .tool-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .tool-use {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Step Cards */
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 20px 0;
+        }
+        
+        .step-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .step-card h4 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .step-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* Rabbet Diagram */
+        .rabbet-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .rabbet-cross-section {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .wood-cross {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            background: linear-gradient(180deg, #DEB887, #D2B48C);
+            border: 3px solid #8B4513;
+            top: 60px;
+            left: 25px;
+        }
+        
+        .rabbet-cut {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: #f0f0f0;
+            border: 2px dashed #666;
+            bottom: -3px;
+            right: -3px;
+        }
+        
+        .rabbet-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .rabbet-label.width {
+            bottom: 30px;
+            right: -60px;
+        }
+        
+        .rabbet-label.depth {
+            bottom: -25px;
+            right: 10px;
+        }
+        
+        .rabbet-explanation {
+            max-width: 400px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        /* Glazier Points */
+        .glazier-diagram {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .frame-back-view {
+            width: 300px;
+            height: 380px;
+            background: #d2b48c;
+            border: 4px solid #8B4513;
+            border-radius: 5px;
+            position: relative;
+        }
+        
+        .backing-board {
+            position: absolute;
+            width: 260px;
+            height: 340px;
+            background: #a0a0a0;
+            top: 16px;
+            left: 16px;
+        }
+        
+        .glazier-point {
+            position: absolute;
+            width: 15px;
+            height: 8px;
+            background: #333;
+            transform: rotate(90deg);
+        }
+        
+        .glazier-point.top-1 { top: 60px; left: 8px; }
+        .glazier-point.top-2 { top: 60px; right: 8px; }
+        .glazier-point.bottom-1 { bottom: 60px; left: 8px; }
+        .glazier-point.bottom-2 { bottom: 60px; right: 8px; }
+        .glazier-point.left-1 { left: 60px; top: 8px; transform: rotate(0deg); }
+        .glazier-point.left-2 { left: 60px; bottom: 8px; transform: rotate(0deg); }
+        .glazier-point.right-1 { right: 60px; top: 8px; transform: rotate(0deg); }
+        .glazier-point.right-2 { right: 60px; bottom: 8px; transform: rotate(0deg); }
+        
+        /* Hanging Hardware */
+        .hardware-options {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .hardware-option {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            width: 200px;
+        }
+        
+        .hardware-visual {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .sawtooth {
+            width: 80px;
+            height: 20px;
+            background: #666;
+            position: relative;
+            clip-path: polygon(0% 0%, 10% 100%, 20% 0%, 30% 100%, 40% 0%, 50% 100%, 60% 0%, 70% 100%, 80% 0%, 90% 100%, 100% 0%, 100% 100%, 0% 100%);
+        }
+        
+        .d-ring {
+            width: 40px;
+            height: 50px;
+            border: 6px solid #666;
+            border-radius: 0 0 20px 20px;
+            border-top: none;
+        }
+        
+        .wire-example {
+            display: flex;
+            align-items: flex-end;
+            gap: 60px;
+        }
+        
+        .wire-line {
+            position: absolute;
+            width: 80px;
+            height: 2px;
+            background: #333;
+            top: 70px;
+            left: 60px;
+            transform: rotate(-10deg);
+        }
+        
+        /* Tips Section */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tip-card {
+            padding: 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fff9e6, #fff3cd);
+            border-left: 5px solid #ffc107;
+        }
+        
+        .tip-card.danger {
+            background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+            border-left-color: #dc3545;
+        }
+        
+        .tip-card.success {
+            background: linear-gradient(135deg, #e6ffe6, #ccffcc);
+            border-left-color: #28a745;
+        }
+        
+        .tip-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .tip-card h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .tip-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            .section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            .frame-anatomy {
+                flex-direction: column;
+            }
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Picture Frame Fundraiser</h1>
+        <p class="subtitle">Complete Visual Guide to Building & Protecting Artwork</p>
+        
+        <!-- Section 1: Frame Anatomy -->
+        <div class="section">
+            <h2>📐 Frame Anatomy</h2>
+            <p>Understanding the parts of a picture frame:</p>
+            
+            <div class="frame-anatomy">
+                <div class="frame-diagram">
+                    <div class="frame-outer"></div>
+                    <div class="frame-rabbet"></div>
+                    <div class="frame-glass"></div>
+                    <div class="frame-mat">
+                        <div class="frame-artwork">YOUR ART</div>
+                    </div>
+                </div>
+                
+                <div class="anatomy-labels">
+                    <div class="label-item wood">
+                        <div class="color-box" style="background: #8B4513;"></div>
+                        <div>
+                            <strong>Wood Frame</strong><br>
+                            <small>The outer structure (1"×2" typical)</small>
+                        </div>
+                    </div>
+                    <div class="label-item rabbet">
+                        <div class="color-box" style="background: #5a4a3a;"></div>
+                        <div>
+                            <strong>Rabbet</strong><br>
+                            <small>Groove that holds everything</small>
+                        </div>
+                    </div>
+                    <div class="label-item glass">
+                        <div class="color-box" style="background: #87CEEB;"></div>
+                        <div>
+                            <strong>Glass/Acrylic</strong><br>
+                            <small>Protects from dust & damage</small>
+                        </div>
+                    </div>
+                    <div class="label-item mat">
+                        <div class="color-box" style="background: #f5f5f0; border: 1px solid #ddd;"></div>
+                        <div>
+                            <strong>Mat Board</strong><br>
+                            <small>Acid-free spacing & presentation</small>
+                        </div>
+                    </div>
+                    <div class="label-item art">
+                        <div class="color-box" style="background: linear-gradient(45deg, #ff6b6b, #feca57);"></div>
+                        <div>
+                            <strong>Artwork</strong><br>
+                            <small>Mounted with photo corners</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 2: Tools Needed -->
+        <div class="section">
+            <h2>🔧 Tools You'll Need</h2>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-icon">🪚</div>
+                    <div class="tool-name">Miter Saw</div>
+                    <div class="tool-use">45° angle cuts</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">📐</div>
+                    <div class="tool-name">Measuring Tape</div>
+                    <div class="tool-use">Precise dimensions</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🗜️</div>
+                    <div class="tool-name">Corner Clamps</div>
+                    <div class="tool-use">Hold while gluing</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🧴</div>
+                    <div class="tool-name">Wood Glue</div>
+                    <div class="tool-use">Join corners</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">📄</div>
+                    <div class="tool-name">Sandpaper</div>
+                    <div class="tool-use">120 & 220 grit</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🎨</div>
+                    <div class="tool-name">Stain/Paint</div>
+                    <div class="tool-use">Finishing</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">🖌️</div>
+                    <div class="tool-name">Foam Brushes</div>
+                    <div class="tool-use">Apply finish</div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon">✂️</div>
+                    <div class="tool-name">Mat Cutter</div>
+                    <div class="tool-use">Cut mat windows</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 3: Miter Cuts -->
+        <div class="section">
+            <h2>✂️ Cutting 45° Miters</h2>
+            <p>Each corner requires two 45° cuts that meet to form a 90° angle:</p>
+            
+            <div class="miter-diagram">
+                <div class="miter-piece">
+                    <div class="miter-visual">
+                        <div class="wood-piece wood-horizontal">
+                            <div class="angle-cut angle-45-left"></div>
+                            <span class="angle-label" style="right: 5px; top: -25px;">45°</span>
+                        </div>
+                    </div>
+                    <p><strong>Piece A</strong><br>Angled cut on right</p>
+                </div>
+                
+                <div style="font-size: 40px; color: #667eea;">+</div>
+                
+                <div class="miter-piece">
+                    <div class="miter-visual">
+                        <div class="wood-piece wood-horizontal">
+                            <div class="angle-cut angle-45-right"></div>
+                            <span class="angle-label" style="left: 5px; top: -25px;">45°</span>
+                        </div>
+                    </div>
+                    <p><strong>Piece B</strong><br>Angled cut on left</p>
+                </div>
+                
+                <div style="font-size: 40px; color: #667eea;">=</div>
+                
+                <div class="miter-piece">
+                    <div class="miter-visual" style="display: flex; align-items: center; justify-content: center;">
+                        <div style="font-size: 60px;">📐</div>
+                    </div>
+                    <p><strong>90° Corner</strong><br>Perfect joint!</p>
+                </div>
+            </div>
+            
+            <div class="tips-grid">
+                <div class="tip-card success">
+                    <div class="tip-icon">✅</div>
+                    <h4>Pro Tip</h4>
+                    <p>Always cut test pieces first to check your saw's accuracy. Even 1° off creates visible gaps!</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📏</div>
+                    <h4>Measure Twice</h4>
+                    <p>The old saying exists for a reason. Always double-check before cutting.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: The Rabbet -->
+        <div class="section">
+            <h2>🔲 The Rabbet (Groove)</h2>
+            <p>The rabbet is a step cut into the back of the frame that holds glass, mat, artwork, and backing:</p>
+            
+            <div class="rabbet-diagram">
+                <div class="rabbet-cross-section">
+                    <div class="wood-cross">
+                        <div class="rabbet-cut"></div>
+                    </div>
+                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                        <!-- Depth arrow -->
+                        <line x1="175" y1="140" x2="175" y2="110" stroke="#667eea" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="175" y1="140" x2="175" y2="145" stroke="#667eea" stroke-width="2"/>
+                        <!-- Width arrow -->
+                        <line x1="135" y1="150" x2="175" y2="150" stroke="#667eea" stroke-width="2"/>
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#667eea"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                    <div style="position: absolute; right: 10px; top: 100px; font-size: 12px; color: #667eea;">⅜" depth</div>
+                    <div style="position: absolute; bottom: 25px; left: 120px; font-size: 12px; color: #667eea;">⅜" width</div>
+                </div>
+                
+                <div class="rabbet-explanation">
+                    <h3>Cross-Section View</h3>
+                    <p style="margin-top: 10px;">The rabbet creates a "shelf" on the back edge of the frame where all your materials sit:</p>
+                    <ul style="margin: 15px 0 15px 20px;">
+                        <li>Glass rests against the front edge</li>
+                        <li>Mat board goes next</li>
+                        <li>Artwork sits on the mat</li>
+                        <li>Backing board fills the rest</li>
+                        <li>Glazier points hold everything in</li>
+                    </ul>
+                    <p><strong>Standard size:</strong> ⅜" × ⅜" works for most frames</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 5: Corner Assembly -->
+        <div class="section">
+            <h2>🔨 Assembling Corners</h2>
+            
+            <div class="corner-assembly">
+                <div class="corner-diagram">
+                    <div class="corner-piece-h"></div>
+                    <div class="corner-piece-v"></div>
+                    <div class="glue-icon">🧴</div>
+                    <p style="position: absolute; bottom: 0; width: 100%; text-align: center;"><strong>Apply glue to both faces</strong></p>
+                </div>
+                
+                <div class="step-arrow">➡️</div>
+                
+                <div class="corner-complete">
+                    <div class="corner-joined-h"></div>
+                    <div class="corner-joined-v"></div>
+                    <div class="corner-joint"></div>
+                    <div style="position: absolute; top: 50px; left: 55px;">🗜️</div>
+                    <p style="position: absolute; bottom: 0; width: 100%; text-align: center;"><strong>Clamp for 24 hours</strong></p>
+                </div>
+            </div>
+            
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>Dry Fit First</h4>
+                    <p>Put all four pieces together WITHOUT glue to make sure everything fits and corners are tight.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>Apply Glue</h4>
+                    <p>Spread wood glue on BOTH faces of each miter joint. A thin, even coat is better than gobs.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>Clamp & Align</h4>
+                    <p>Use corner clamps or a band clamp. Wipe excess glue immediately with a damp cloth.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h4>Wait 24 Hours</h4>
+                    <p>Let the glue cure completely before removing clamps. Patience = strong joints!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 6: Layer Assembly -->
+        <div class="section">
+            <h2>📚 Assembly Order (Front to Back)</h2>
+            <p>Stack materials in this order from the front of the frame to the back:</p>
+            
+            <div class="layer-stack">
+                <div class="layer">
+                    <div class="layer-num">1</div>
+                    <div class="layer-visual glass">GLASS</div>
+                    <div class="layer-desc"><strong>Glass or Acrylic</strong> — Clean both sides thoroughly. No fingerprints!</div>
+                </div>
+                <div class="layer">
+                    <div class="layer-num">2</div>
+                    <div class="layer-visual mat">MAT BOARD</div>
+                    <div class="layer-desc"><strong>Mat Board</strong> — Must be acid-free. Window cut 2-3" smaller than frame.</div>
+                </div>
+                <div class="layer">
+                    <div class="layer-num">3</div>
+                    <div class="layer-visual artwork">ARTWORK</div>
+                    <div class="layer-desc"><strong>Artwork</strong> — Mounted with photo corners or acid-free hinge tape.</div>
+                </div>
+                <div class="layer">
+                    <div class="layer-num">4</div>
+                    <div class="layer-visual backing">BACKING BOARD</div>
+                    <div class="layer-desc"><strong>Backing</strong> — Acid-free foam board or corrugated. Cut to fit snugly.</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 15px; border-left: 5px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">🔒 Step 5: SEAL THE PACKAGE (Recommended!)</h3>
+                <p style="margin-bottom: 15px;">For maximum protection, seal the entire stack with <strong>acid-free framing tape</strong> before putting it in the frame:</p>
+                
+                <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center; justify-content: center; margin: 20px 0;">
+                    <!-- Sealed Package Diagram -->
+                    <div style="position: relative; width: 220px; height: 160px;">
+                        <!-- Stack visualization -->
+                        <div style="position: absolute; width: 180px; height: 120px; left: 20px; top: 20px; background: linear-gradient(180deg, #87CEEB 5%, #f5f1e6 5%, #f5f1e6 25%, #ff9a8b 25%, #ff9a8b 45%, #808080 45%); border-radius: 3px; border: 3px solid #4caf50;"></div>
+                        <!-- Tape wrapping around edges -->
+                        <div style="position: absolute; width: 186px; height: 8px; left: 17px; top: 17px; background: #4caf50; border-radius: 3px 3px 0 0;"></div>
+                        <div style="position: absolute; width: 186px; height: 8px; left: 17px; bottom: 17px; background: #4caf50; border-radius: 0 0 3px 3px;"></div>
+                        <div style="position: absolute; width: 8px; height: 126px; left: 17px; top: 17px; background: #4caf50; border-radius: 3px 0 0 3px;"></div>
+                        <div style="position: absolute; width: 8px; height: 126px; right: 17px; top: 17px; background: #4caf50; border-radius: 0 3px 3px 0;"></div>
+                        <!-- Label -->
+                        <div style="position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background: #4caf50; color: white; padding: 3px 10px; border-radius: 10px; font-size: 11px; white-space: nowrap;">Framing Tape</div>
+                    </div>
+                    
+                    <div style="max-width: 350px;">
+                        <p><strong>How to seal:</strong></p>
+                        <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+                            <li>Stack glass + mat + art + backing</li>
+                            <li>Align all edges perfectly</li>
+                            <li>Wrap acid-free framing tape around ALL 4 edges</li>
+                            <li>Tape covers edge of glass AND backing</li>
+                            <li>Press firmly for airtight seal</li>
+                            <li>Drop sealed package into frame</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                    <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px;">
+                        <strong>✅ What Framing Tape Protects:</strong>
+                        <ul style="margin: 8px 0 0 15px; font-size: 14px;">
+                            <li>Dust & insects</li>
+                            <li>Humidity changes</li>
+                            <li>Air pollutants</li>
+                            <li>Normal indoor conditions</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 10px;">
+                        <strong>🛒 Recommended Tapes:</strong>
+                        <ul style="margin: 8px 0 0 15px; font-size: 14px;">
+                            <li>Lineco Frame Sealing Tape</li>
+                            <li>Filmoplast P90</li>
+                            <li>3M ATG (acid-free)</li>
+                            <li>Aluminum tape (moisture barrier)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Water Protection Warning -->
+            <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #fff3cd, #ffe69c); border-radius: 15px; border-left: 5px solid #ffc107;">
+                <h3 style="color: #856404; margin-bottom: 15px;">⚠️ Standard Materials are NOT Waterproof!</h3>
+                <p style="margin-bottom: 15px;"><strong>Both framing tape AND standard backing absorb water.</strong> For true waterproofing, you need waterproof materials for BOTH.</p>
+                
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <!-- What absorbs water -->
+                    <div style="flex: 1; min-width: 280px; background: #ffebee; padding: 15px; border-radius: 10px; border: 2px solid #ef5350;">
+                        <strong style="color: #c62828;">❌ NOT Waterproof (Absorbs Water):</strong>
+                        <ul style="margin: 10px 0 0 15px; font-size: 14px; color: #c62828;">
+                            <li>Acid-free foam board</li>
+                            <li>Corrugated cardboard</li>
+                            <li>Mat board</li>
+                            <li>Standard framing tape</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Waterproof options -->
+                    <div style="flex: 1; min-width: 280px; background: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #66bb6a;">
+                        <strong style="color: #2e7d32;">✅ Natural Waterproof Options:</strong>
+                        <ul style="margin: 10px 0 0 15px; font-size: 14px; color: #2e7d32;">
+                            <li><strong>Birch plywood</strong> - sealed with tung oil</li>
+                            <li><strong>Hardboard/Masonite</strong> - sealed with shellac</li>
+                            <li><strong>Cork board</strong> - sealed with linseed oil</li>
+                        </ul>
+                        <p style="font-size: 12px; margin-top: 8px; color: #555;">All natural materials need proper sealing!</p>
+                    </div>
+                </div>
+                
+                <!-- Complete waterproof recipe -->
+                <div style="margin-top: 20px; background: white; padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">🌊 Complete Waterproof Recipe:</h4>
+                    <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
+                        <!-- Visual diagram -->
+                        <div style="position: relative; width: 180px; height: 130px; flex-shrink: 0;">
+                            <div style="position: absolute; width: 150px; height: 100px; left: 15px; top: 15px; background: linear-gradient(180deg, #87CEEB 8%, #f5f1e6 8%, #f5f1e6 30%, #ff9a8b 30%, #ff9a8b 50%, #2196f3 50%); border-radius: 3px;"></div>
+                            <!-- Silicone edges -->
+                            <div style="position: absolute; width: 160px; height: 10px; left: 10px; top: 10px; background: linear-gradient(90deg, #e0e0e0, #bdbdbd); border-radius: 5px 5px 0 0;"></div>
+                            <div style="position: absolute; width: 160px; height: 10px; left: 10px; bottom: 10px; background: linear-gradient(90deg, #e0e0e0, #bdbdbd); border-radius: 0 0 5px 5px;"></div>
+                            <div style="position: absolute; width: 10px; height: 110px; left: 10px; top: 10px; background: linear-gradient(180deg, #e0e0e0, #bdbdbd); border-radius: 5px 0 0 5px;"></div>
+                            <div style="position: absolute; width: 10px; height: 110px; right: 10px; top: 10px; background: linear-gradient(180deg, #e0e0e0, #bdbdbd); border-radius: 0 5px 5px 0;"></div>
+                            <!-- Labels -->
+                            <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #0277bd;">Glass</div>
+                            <div style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #333;">Artwork</div>
+                            <div style="position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: white;">Plastic</div>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 250px;">
+                            <ol style="margin: 0 0 0 20px; line-height: 2;">
+                                <li>Use <strong>waterproof backing</strong> (Coroplast or Sintra)</li>
+                                <li>Stack: Glass → Mat → Art → Plastic backing</li>
+                                <li>Seal edges with <strong>silicone caulk</strong> or <strong>butyl tape</strong></li>
+                                <li>Let cure 24 hours</li>
+                            </ol>
+                            <p style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-size: 13px;">
+                                <strong>Both are required!</strong> Waterproof backing + waterproof edge seal = truly waterproof frame
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Eco-Friendly Options -->
+                <div style="margin-top: 20px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 20px; border-radius: 10px; border: 2px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-bottom: 15px;">🌿 Natural & Traditional Backing:</h4>
+                    
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <!-- Natural wood backing -->
+                        <div style="flex: 1; min-width: 250px; background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #2e7d32;">🌲 Natural Wood Options:</strong>
+                            <ul style="margin: 10px 0 0 15px; font-size: 14px; line-height: 1.8;">
+                                <li><strong>Birch plywood</strong> (⅛") - Beautiful grain</li>
+                                <li><strong>Hardboard/Masonite</strong> - Compressed wood fibers</li>
+                                <li><strong>Baltic birch</strong> - Premium, no voids</li>
+                                <li><strong>Cork board</strong> - Renewable tree bark</li>
+                            </ul>
+                            <p style="font-size: 12px; margin-top: 8px; color: #666;"><em>All available at hardware/lumber stores</em></p>
+                        </div>
+                        
+                        <!-- Natural sealants -->
+                        <div style="flex: 1; min-width: 250px; background: white; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #2e7d32;">🛢️ Natural Sealants:</strong>
+                            <ul style="margin: 10px 0 0 15px; font-size: 14px; line-height: 1.8;">
+                                <li><strong>Tung oil</strong> - 3-4 coats, waterproof</li>
+                                <li><strong>Shellac</strong> - Fast drying, excellent</li>
+                                <li><strong>Linseed oil</strong> - Traditional, amber tone</li>
+                                <li><strong>Beeswax</strong> - Melt & brush on</li>
+                            </ul>
+                            <p style="font-size: 12px; margin-top: 8px; color: #666;"><em>All food-safe, non-toxic options</em></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Heritage framing method -->
+                    <div style="margin-top: 15px; background: linear-gradient(135deg, #fff9e6, #ffe8b3); padding: 15px; border-radius: 10px; border-left: 4px solid #d4a574;">
+                        <h4 style="color: #8B4513; margin-bottom: 10px;">📜 "Heritage Framing" - 100% Natural Method:</h4>
+                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <!-- Visual heritage stack -->
+                            <div style="position: relative; width: 160px; height: 110px; flex-shrink: 0;">
+                                <div style="position: absolute; width: 130px; height: 80px; left: 15px; top: 15px; background: linear-gradient(180deg, #a8d5ba 10%, #f5f1e6 10%, #f5f1e6 35%, #ff9a8b 35%, #ff9a8b 55%, #8d6e63 55%); border-radius: 3px; border: 2px solid #6d4c41;"></div>
+                                <!-- Wood grain texture effect -->
+                                <div style="position: absolute; width: 130px; height: 25px; left: 15px; bottom: 15px; background: repeating-linear-gradient(90deg, #6d4c41, #8d6e63 2px, transparent 2px, transparent 4px); opacity: 0.3; border-radius: 0 0 3px 3px;"></div>
+                                <!-- Tung oil sheen -->
+                                <div style="position: absolute; width: 140px; height: 8px; left: 10px; top: 12px; background: linear-gradient(90deg, rgba(255,215,0,0.4), rgba(218,165,32,0.4)); border-radius: 4px 4px 0 0;"></div>
+                                <div style="position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #8B4513;">Tung oil sealed</div>
+                            </div>
+                            
+                            <div style="flex: 1; min-width: 200px; font-size: 13px;">
+                                <strong>100% Natural Materials:</strong><br>
+                                • Glass (sand)<br>
+                                • Linen/cotton mat (plant fiber)<br>
+                                • <strong>Birch plywood backing</strong><br>
+                                • <strong>Tung oil waterproofing</strong><br>
+                                • Beeswax edge seal<br>
+                                • Wood frame<br><br>
+                                <span style="background: #4caf50; color: white; padding: 3px 8px; border-radius: 5px; font-size: 11px;">♻️ Completely renewable & biodegradable</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- How-to -->
+                    <div style="margin-top: 15px; background: white; padding: 15px; border-radius: 10px;">
+                        <strong style="color: #2e7d32;">🔨 How to Seal Wood Backing:</strong>
+                        <ol style="margin: 10px 0 0 20px; line-height: 2; font-size: 14px;">
+                            <li>Cut ⅛" birch plywood to size</li>
+                            <li>Sand smooth with 220 grit</li>
+                            <li>Apply tung oil: brush on, wipe excess after 15 min</li>
+                            <li>Repeat 3-4 coats (24 hours between coats)</li>
+                            <li>Let cure 48 hours → waterproof!</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 7: Glazier Points -->
+        <div class="section">
+            <h2>📌 Securing with Glazier Points</h2>
+            <p>Glazier points are small metal tabs pushed into the frame to hold everything in place:</p>
+            
+            <div style="display: flex; justify-content: center; align-items: center; gap: 50px; flex-wrap: wrap;">
+                <div class="glazier-diagram">
+                    <div class="frame-back-view">
+                        <div class="backing-board"></div>
+                        <div class="glazier-point top-1"></div>
+                        <div class="glazier-point top-2"></div>
+                        <div class="glazier-point bottom-1"></div>
+                        <div class="glazier-point bottom-2"></div>
+                        <div class="glazier-point left-1"></div>
+                        <div class="glazier-point left-2"></div>
+                        <div class="glazier-point right-1"></div>
+                        <div class="glazier-point right-2"></div>
+                    </div>
+                </div>
+                
+                <div style="max-width: 350px;">
+                    <h3>Back of Frame View</h3>
+                    <p style="margin: 15px 0;">Place glazier points every 3-4 inches around the frame.</p>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>Use a flat screwdriver or glazier point driver</li>
+                        <li>Push points into the wood at an angle</li>
+                        <li>Points should press firmly on backing</li>
+                        <li>Don't push too hard—you can crack glass!</li>
+                    </ul>
+                    <div class="tip-card success" style="margin-top: 20px;">
+                        <p><strong>Alternative:</strong> Turn buttons are easier and allow the frame to be opened later.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 8: Hanging Hardware -->
+        <div class="section">
+            <h2>🔩 Hanging Hardware</h2>
+            
+            <div class="hardware-options">
+                <div class="hardware-option">
+                    <div class="hardware-visual">
+                        <div class="sawtooth"></div>
+                    </div>
+                    <h4>Sawtooth Hanger</h4>
+                    <p style="font-size: 13px; color: #666;">Best for small frames under 8"×10"</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Mount centered on top of frame back</p>
+                </div>
+                
+                <div class="hardware-option">
+                    <div class="hardware-visual">
+                        <div class="wire-example">
+                            <div class="d-ring"></div>
+                            <div class="d-ring"></div>
+                        </div>
+                    </div>
+                    <h4>D-Rings + Wire</h4>
+                    <p style="font-size: 13px; color: #666;">Best for medium to large frames</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Mount ⅓ down from top on each side</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 9: Safety -->
+        <div class="section">
+            <h2>⚠️ Safety Reminders</h2>
+            
+            <div class="tips-grid">
+                <div class="tip-card danger">
+                    <div class="tip-icon">👓</div>
+                    <h4>Eye Protection</h4>
+                    <p>ALWAYS wear safety glasses when using power tools or cutting glass.</p>
+                </div>
+                <div class="tip-card danger">
+                    <div class="tip-icon">🧤</div>
+                    <h4>Gloves for Glass</h4>
+                    <p>Wear gloves when handling glass. Edges can be razor sharp.</p>
+                </div>
+                <div class="tip-card danger">
+                    <div class="tip-icon">🌬️</div>
+                    <h4>Ventilation</h4>
+                    <p>Work in a well-ventilated area when using stains, finishes, and paints.</p>
+                </div>
+                <div class="tip-card danger">
+                    <div class="tip-icon">🔥</div>
+                    <h4>Oily Rags</h4>
+                    <p>Oil-soaked rags can self-combust! Lay flat to dry or store in water.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 10: Fundraiser Tips -->
+        <div class="section">
+            <h2>💰 Fundraiser Success Tips</h2>
+            
+            <div class="steps-container">
+                <div class="step-card" style="border-left-color: #28a745;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #28a745, #20c997);">$</div>
+                    <h4>Standardize Sizes</h4>
+                    <p>Pick 2-3 sizes only (5×7, 8×10, 11×14). Bulk buying materials saves money!</p>
+                </div>
+                <div class="step-card" style="border-left-color: #28a745;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #28a745, #20c997);">⚡</div>
+                    <h4>Assembly Line</h4>
+                    <p>Cut ALL wood first, then glue ALL corners, then finish ALL frames. Much faster!</p>
+                </div>
+                <div class="step-card" style="border-left-color: #28a745;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #28a745, #20c997);">♻️</div>
+                    <h4>Reclaimed Wood</h4>
+                    <p>Pallet wood or old furniture creates a rustic look AND saves money.</p>
+                </div>
+                <div class="step-card" style="border-left-color: #28a745;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #28a745, #20c997);">🏷️</div>
+                    <h4>Pricing Formula</h4>
+                    <p>Materials + Labor (at $12/hr) + 75% markup = Your price. Example: $8 + $3 + $8 = $19 → sell for $20</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Reference -->
+        <div class="section">
+            <h2>📋 Quick Reference Checklist</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px;">
+                    <h4 style="margin-bottom: 15px;">✅ Before Selling</h4>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li>Corners tight, no gaps</li>
+                        <li>Finish smooth and even</li>
+                        <li>Glass clean, no smudges</li>
+                        <li>Back sealed with paper</li>
+                        <li>Hanging hardware secure</li>
+                        <li>No visible glue residue</li>
+                    </ul>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px;">
+                    <h4 style="margin-bottom: 15px;">🛒 Shopping List Per Frame</h4>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li>~4 ft of wood molding</li>
+                        <li>1 piece of glass or acrylic</li>
+                        <li>1 acid-free mat board</li>
+                        <li>1 acid-free backing board</li>
+                        <li>8-10 glazier points</li>
+                        <li>1 hanging hardware set</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; color: white; margin-top: 30px; padding: 20px;">
+            <p style="font-size: 1.2em;">Good luck with your fundraiser! 🎨🖼️✨</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Print this guide (Ctrl+P) for reference in your workshop</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -231,6 +231,15 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "list_minecraft_worlds",
+    description: "Lists all Minecraft Bedrock worlds with their details and validates their structure",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+  },
+  {
     name: "create_localization",
     description: "Creates or updates localization files for the addon",
     inputSchema: {

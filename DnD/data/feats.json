@@ -1,0 +1,870 @@
+{
+  "Alert": {
+    "description": "Always on the lookout for danger, you gain significant bonuses to initiative and awareness.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "General",
+    "prerequisites": [],
+    "benefits": [
+      "+5 bonus to initiative",
+      "Can't be surprised while conscious",
+      "Hidden creatures don't gain advantage on attacks against you"
+    ],
+    "impact": { "type": "initiative_boost", "details": "+5 initiative, surprise immunity" },
+    "rating": 4
+  },
+  "Actor": {
+    "description": "Skilled at mimicry and dramatics, you gain advantages when impersonating others.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "General",
+    "prerequisites": [],
+    "benefits": [
+      "+1 Charisma",
+      "Advantage on Deception/Performance for impersonation",
+      "Mimic speech and creature sounds"
+    ],
+    "impact": { "type": "social_utility", "details": "+1 Cha, impersonation" },
+    "rating": 3
+  },
+  "Athlete": {
+    "description": "You have undergone extensive physical training.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "General",
+    "prerequisites": [],
+    "benefits": [
+      "+1 Strength or Dexterity",
+      "Stand from prone costs 5 ft",
+      "Climbing doesn't cost extra movement",
+      "Running jump with 5 ft movement"
+    ],
+    "impact": { "type": "movement_utility", "details": "+1 Str/Dex, climbing, jumping" },
+    "rating": 2
+  },
+  "Charger": {
+    "description": "When you Dash, you can follow up with a powerful attack.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": [
+      "After Dash, bonus action melee attack or shove",
+      "+5 damage or 10 ft push if moved 10+ ft in straight line"
+    ],
+    "impact": { "type": "combat_charge", "details": "Bonus action attack after Dash" },
+    "rating": 2
+  },
+  "Crossbow Expert": {
+    "description": "Extensive practice with crossbows grants several benefits.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Ranged)",
+    "prerequisites": [],
+    "benefits": [
+      "Ignore loading property of crossbows",
+      "No disadvantage on ranged attacks within 5 ft",
+      "Bonus action hand crossbow attack after Attack action"
+    ],
+    "impact": { "type": "attack_frequency", "bonus_action_attack": "hand_crossbow" },
+    "rating": 5
+  },
+  "Defensive Duelist": {
+    "description": "Add proficiency bonus to AC as a reaction with a finesse weapon.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Defense)",
+    "prerequisites": ["Dexterity 13+"],
+    "benefits": [
+      "Reaction: +proficiency bonus to AC against one melee attack while wielding finesse weapon"
+    ],
+    "impact": { "type": "defense_reaction", "details": "+prof to AC as reaction" },
+    "rating": 3
+  },
+  "Dual Wielder": {
+    "description": "Master fighting with two weapons.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": [
+      "+1 AC while dual wielding",
+      "Two-weapon fighting with non-light weapons",
+      "Draw/stow two weapons at once"
+    ],
+    "impact": { "type": "dual_wield_enhancement", "details": "+1 AC, heavier weapons" },
+    "rating": 2
+  },
+  "Dungeon Delver": {
+    "description": "Alert to hidden traps and secret doors in dungeons.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Exploration",
+    "prerequisites": [],
+    "benefits": [
+      "Advantage on Perception/Investigation for secret doors",
+      "Advantage on trap saves, resistance to trap damage",
+      "Fast pace doesn't penalize passive Perception"
+    ],
+    "impact": { "type": "exploration_utility", "details": "Trap/secret door specialist" },
+    "rating": 1
+  },
+  "Durable": {
+    "description": "Hardy and resilient, with improved Hit Die healing.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "General",
+    "prerequisites": [],
+    "benefits": [
+      "+1 Constitution",
+      "Minimum HP from Hit Dice = 2x Con modifier"
+    ],
+    "impact": { "type": "healing_improvement", "details": "+1 Con, better Hit Die healing" },
+    "rating": 2
+  },
+  "Elemental Adept": {
+    "description": "Spells ignore resistance and improve minimum damage for a chosen element.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Spellcasting",
+    "prerequisites": ["Ability to cast at least one spell"],
+    "benefits": [
+      "Spells ignore resistance to chosen type (acid/cold/fire/lightning/thunder)",
+      "Treat 1s as 2s on damage dice for chosen type",
+      "Repeatable for different types"
+    ],
+    "impact": { "type": "spell_enhancement", "details": "Ignore resistance, improve min damage" },
+    "rating": 3
+  },
+  "Grappler": {
+    "description": "Hold your own in close-quarters grappling.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": ["Strength 13+"],
+    "benefits": [
+      "Advantage on attacks against creatures you grapple",
+      "Can pin grappled creature (both restrained)"
+    ],
+    "impact": { "type": "grapple_enhancement", "details": "Advantage while grappling, pin" },
+    "rating": 1
+  },
+  "Great Weapon Master": {
+    "description": "Devastating strikes with heavy weapons.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Melee)",
+    "prerequisites": [],
+    "benefits": [
+      "Bonus action melee attack on crit or killing blow",
+      "-5 to hit for +10 damage with heavy weapons"
+    ],
+    "impact": { "type": "damage_boost", "condition": "optional_-5/+10" },
+    "rating": 5
+  },
+  "Healer": {
+    "description": "An able physician who can mend wounds quickly.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": [
+      "Stabilize with healer's kit also restores 1 HP",
+      "Spend kit use: restore 1d6+4+max Hit Dice HP (1/rest per creature)"
+    ],
+    "impact": { "type": "healing", "details": "Non-magical healing from kit" },
+    "rating": 3
+  },
+  "Heavily Armored": {
+    "description": "Trained to master heavy armor.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Armor Training",
+    "prerequisites": ["Medium armor proficiency"],
+    "benefits": ["+1 Strength", "Heavy armor proficiency"],
+    "impact": { "type": "armor_proficiency", "details": "+1 Str, heavy armor" },
+    "rating": 2
+  },
+  "Heavy Armor Master": {
+    "description": "Use armor to deflect lethal strikes.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Defense",
+    "prerequisites": ["Heavy armor proficiency"],
+    "benefits": ["+1 Strength", "Nonmagical B/P/S damage reduced by 3 in heavy armor"],
+    "impact": { "type": "damage_reduction", "details": "-3 nonmagical B/P/S" },
+    "rating": 3
+  },
+  "Inspiring Leader": {
+    "description": "Inspire companions to grant temporary hit points.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility/Social",
+    "prerequisites": ["Charisma 13+"],
+    "benefits": ["10 min speech: up to 6 creatures gain temp HP = level + Cha mod (1/rest)"],
+    "impact": { "type": "temp_hp_party", "details": "Party temp HP = level + Cha" },
+    "rating": 3
+  },
+  "Keen Mind": {
+    "description": "Track time, direction, and detail with uncanny precision.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Intelligence", "Always know north and time", "Perfect 30-day recall"],
+    "impact": { "type": "utility", "details": "+1 Int, perfect recall" },
+    "rating": 2
+  },
+  "Lightly Armored": {
+    "description": "Trained to master light armor.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Armor Training",
+    "prerequisites": [],
+    "benefits": ["+1 Strength or Dexterity", "Light armor proficiency"],
+    "impact": { "type": "armor_proficiency", "details": "+1 Str/Dex, light armor" },
+    "rating": 1
+  },
+  "Linguist": {
+    "description": "Studied languages and codes.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Intelligence", "Learn 3 languages", "Create written ciphers"],
+    "impact": { "type": "utility", "details": "+1 Int, languages, ciphers" },
+    "rating": 1
+  },
+  "Lucky": {
+    "description": "You have inexplicable luck that kicks in at just the right moment.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "General",
+    "prerequisites": [],
+    "benefits": [
+      "3 luck points: reroll any attack, save, or ability check",
+      "Can force reroll on attacks against you",
+      "Regain all on long rest"
+    ],
+    "impact": { "type": "versatile_reroll", "uses_per_long_rest": 3 },
+    "rating": 5
+  },
+  "Mage Slayer": {
+    "description": "Techniques for melee combat against spellcasters.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": [
+      "Reaction melee attack when creature within 5 ft casts spell",
+      "Disadvantage on concentration saves from your damage",
+      "Advantage on saves vs spells from creatures within 5 ft"
+    ],
+    "impact": { "type": "anti_caster", "details": "Punish nearby spellcasting" },
+    "rating": 3
+  },
+  "Magic Initiate": {
+    "description": "Learn two cantrips and one 1st-level spell from a chosen class.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Spellcasting",
+    "prerequisites": [],
+    "benefits": [
+      "2 cantrips from chosen class",
+      "1 first-level spell, castable 1/long rest"
+    ],
+    "impact": { "type": "spell_versatility", "cantrips": 2, "spells": 1 },
+    "rating": 3
+  },
+  "Martial Adept": {
+    "description": "Learn two Battle Master maneuvers.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["2 Battle Master maneuvers", "1 d6 superiority die per short rest"],
+    "impact": { "type": "combat_maneuvers", "details": "2 maneuvers, 1 d6 die" },
+    "rating": 2
+  },
+  "Medium Armor Master": {
+    "description": "Practiced moving in medium armor.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Armor Training",
+    "prerequisites": ["Medium armor proficiency"],
+    "benefits": ["No Stealth disadvantage in medium armor", "+3 Dex to AC (instead of +2) if Dex 16+"],
+    "impact": { "type": "armor_optimization", "details": "Stealth-friendly, +1 AC" },
+    "rating": 2
+  },
+  "Mobile": {
+    "description": "Exceptionally speedy and agile.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Movement",
+    "prerequisites": [],
+    "benefits": ["+10 ft speed", "Dash ignores difficult terrain", "No OA from creatures you attack"],
+    "impact": { "type": "movement_enhancement", "speed_bonus": 10 },
+    "rating": 4
+  },
+  "Moderately Armored": {
+    "description": "Trained to master medium armor and shields.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Armor Training",
+    "prerequisites": ["Light armor proficiency"],
+    "benefits": ["+1 Strength or Dexterity", "Medium armor and shield proficiency"],
+    "impact": { "type": "armor_proficiency", "details": "+1 Str/Dex, medium armor + shields" },
+    "rating": 2
+  },
+  "Mounted Combatant": {
+    "description": "A dangerous foe while mounted.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": [
+      "Advantage on melee vs unmounted smaller creatures",
+      "Redirect attacks from mount to you",
+      "Mount evasion on Dex saves"
+    ],
+    "impact": { "type": "mounted_combat", "details": "Advantage, mount protection" },
+    "rating": 2
+  },
+  "Observant": {
+    "description": "Quick to notice details of your environment.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Intelligence or Wisdom", "Lip reading", "+5 passive Perception and Investigation"],
+    "impact": { "type": "perception_boost", "details": "+5 passive Perception/Investigation" },
+    "rating": 3
+  },
+  "Polearm Master": {
+    "description": "Keep enemies at bay with reach weapons.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Melee)",
+    "prerequisites": [],
+    "benefits": [
+      "Bonus action d4 butt-end attack with polearm",
+      "Opportunity attack when creatures enter your reach"
+    ],
+    "impact": { "type": "attack_frequency", "bonus_action_attack": "polearm_butt" },
+    "rating": 5
+  },
+  "Resilient": {
+    "description": "Gain saving throw proficiency in a chosen ability.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Defense",
+    "prerequisites": [],
+    "benefits": ["+1 to chosen ability", "Saving throw proficiency in chosen ability"],
+    "impact": { "type": "saving_throw_proficiency", "details": "+1 ASI + save prof" },
+    "rating": 4
+  },
+  "Ritual Caster": {
+    "description": "Cast spells as rituals from a ritual book.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Spellcasting",
+    "prerequisites": ["Intelligence or Wisdom 13+"],
+    "benefits": [
+      "Ritual book with 2 first-level ritual spells",
+      "Copy found ritual spells into book",
+      "Cast rituals without preparation"
+    ],
+    "impact": { "type": "spell_versatility", "details": "Access to ritual spells" },
+    "rating": 3
+  },
+  "Savage Attacker": {
+    "description": "Reroll melee weapon damage once per turn.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["Once per turn, reroll melee weapon damage dice, use either total"],
+    "impact": { "type": "damage_reroll", "details": "Marginal average increase" },
+    "rating": 2
+  },
+  "Sentinel": {
+    "description": "Master of controlling the battlefield through opportunity attacks.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Control)",
+    "prerequisites": [],
+    "benefits": [
+      "OA reduces target speed to 0",
+      "Disengage doesn't prevent your OAs",
+      "Reaction attack when creature attacks someone else within 5 ft"
+    ],
+    "impact": { "type": "battlefield_control", "details": "Stop movement, punish attacks" },
+    "rating": 5
+  },
+  "Sharpshooter": {
+    "description": "Master of ranged weapons, making impossible shots.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Ranged)",
+    "prerequisites": [],
+    "benefits": [
+      "No disadvantage at long range",
+      "Ignore half and three-quarters cover",
+      "-5 to hit for +10 damage"
+    ],
+    "impact": { "type": "damage_boost", "condition": "optional_-5/+10" },
+    "rating": 5
+  },
+  "Shield Master": {
+    "description": "Use shields for offense and defense.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat (Defense)",
+    "prerequisites": [],
+    "benefits": [
+      "Bonus action shove after Attack action",
+      "Add shield AC to Dex saves (self-targeting only)",
+      "Evasion-like reaction on Dex saves"
+    ],
+    "impact": { "type": "shield_combat", "details": "Shove + Dex save protection" },
+    "rating": 4
+  },
+  "Skilled": {
+    "description": "Gain three skill or tool proficiencies.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["3 skill or tool proficiencies"],
+    "impact": { "type": "skill_proficiency", "details": "3 proficiencies" },
+    "rating": 2
+  },
+  "Skulker": {
+    "description": "Expert at slinking through shadows.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Stealth",
+    "prerequisites": ["Dexterity 13+"],
+    "benefits": ["Hide in light obscurement", "Missed ranged attack stays hidden", "No Perception penalty in dim light"],
+    "impact": { "type": "stealth_enhancement", "details": "Better hiding and sniping" },
+    "rating": 2
+  },
+  "Spell Sniper": {
+    "description": "Enhance attacks with certain kinds of spells.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Spellcasting",
+    "prerequisites": ["Ability to cast at least one spell"],
+    "benefits": [
+      "Double range on attack roll spells",
+      "Ignore half/three-quarters cover",
+      "Learn one attack roll cantrip"
+    ],
+    "impact": { "type": "spell_enhancement", "range_multiplier": 2 },
+    "rating": 3
+  },
+  "Tavern Brawler": {
+    "description": "Accustomed to rough-and-tumble fighting.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Str or Con", "Improvised weapon proficiency", "d4 unarmed strikes", "Bonus action grapple on hit"],
+    "impact": { "type": "brawling", "details": "+1 ASI, d4 unarmed, grapple" },
+    "rating": 2
+  },
+  "Tough": {
+    "description": "Your hit point maximum increases significantly.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Defense",
+    "prerequisites": [],
+    "benefits": ["HP max increases by 2x your level (retroactive + ongoing)"],
+    "impact": { "type": "hp_increase", "details": "+2 HP per level" },
+    "rating": 4
+  },
+  "War Caster": {
+    "description": "Practiced casting spells in the midst of combat.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Spellcasting",
+    "prerequisites": ["Ability to cast at least one spell"],
+    "benefits": [
+      "Advantage on concentration saves",
+      "Somatic components with weapons/shield",
+      "Cast spell as opportunity attack"
+    ],
+    "impact": { "type": "concentration_reliability", "details": "Conc advantage + spell OA" },
+    "rating": 5
+  },
+  "Weapon Master": {
+    "description": "Gain proficiency with four weapons.",
+    "source": "PHB 2014",
+    "year": 2014,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Strength or Dexterity", "4 weapon proficiencies"],
+    "impact": { "type": "weapon_proficiency", "details": "+1 Str/Dex, 4 weapons" },
+    "rating": 1
+  },
+  "Bountiful Luck": {
+    "description": "Share your extraordinary luck with allies.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Halfling)",
+    "prerequisites": ["Halfling"],
+    "benefits": ["Reaction: ally within 30 ft rerolls a natural 1"],
+    "impact": { "type": "party_support", "details": "Extend Lucky to allies" },
+    "rating": 3
+  },
+  "Dragon Fear": {
+    "description": "Channel draconic ancestry to frighten enemies.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Dragonborn)",
+    "prerequisites": ["Dragonborn"],
+    "benefits": ["+1 Str/Con/Cha", "Use Breath Weapon to frighten: 30 ft, Wis save, 1 min"],
+    "impact": { "type": "crowd_control", "details": "AoE frighten" },
+    "rating": 3
+  },
+  "Dragon Hide": {
+    "description": "Grow retractable claws and hardened scales.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Dragonborn)",
+    "prerequisites": ["Dragonborn"],
+    "benefits": ["+1 Str/Con/Cha", "1d4 slashing claws", "Natural armor: 13 + Dex"],
+    "impact": { "type": "natural_armor", "details": "Claws + 13+Dex AC" },
+    "rating": 2
+  },
+  "Drow High Magic": {
+    "description": "Learn more magic typical of dark elves.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Drow)",
+    "prerequisites": ["Elf (drow)"],
+    "benefits": ["Detect Magic at will", "Levitate + Dispel Magic 1/long rest each"],
+    "impact": { "type": "spell_access", "details": "At-will Detect Magic + free spells" },
+    "rating": 3
+  },
+  "Dwarven Fortitude": {
+    "description": "Dwarven blood grants combat healing.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Dwarf)",
+    "prerequisites": ["Dwarf"],
+    "benefits": ["+1 Constitution", "Spend Hit Die when you take Dodge action"],
+    "impact": { "type": "combat_healing", "details": "+1 Con, heal while Dodging" },
+    "rating": 3
+  },
+  "Elven Accuracy": {
+    "description": "Legendary elven accuracy — triple advantage.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Elf/Half-Elf)",
+    "prerequisites": ["Elf or Half-Elf"],
+    "benefits": ["+1 Dex/Int/Wis/Cha", "Reroll one advantage die on Dex/Int/Wis/Cha attacks"],
+    "impact": { "type": "super_advantage", "details": "3d20 with advantage, ~14% crit" },
+    "rating": 4
+  },
+  "Fade Away": {
+    "description": "Gnomish illusion magic grants reactive invisibility.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Gnome)",
+    "prerequisites": ["Gnome"],
+    "benefits": ["+1 Dex or Int", "Reaction: invisible until end of next turn after taking damage (1/short rest)"],
+    "impact": { "type": "defensive_invisibility", "details": "Reaction invisibility" },
+    "rating": 3
+  },
+  "Fey Teleportation": {
+    "description": "High elven lore unlocks fey teleportation.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (High Elf)",
+    "prerequisites": ["Elf (high)"],
+    "benefits": ["+1 Int or Cha", "Learn Sylvan", "Misty Step 1/short rest"],
+    "impact": { "type": "teleportation", "details": "Misty Step 1/short rest" },
+    "rating": 3
+  },
+  "Flames of Phlegethos": {
+    "description": "Call on hellfire to enhance fire spells.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Tiefling)",
+    "prerequisites": ["Tiefling"],
+    "benefits": ["+1 Int or Cha", "Reroll 1s on fire spell damage", "1d4 fire retaliatory aura after casting"],
+    "impact": { "type": "fire_enhancement", "details": "Improved fire spells + retaliatory flames" },
+    "rating": 3
+  },
+  "Infernal Constitution": {
+    "description": "Fiendish blood grants elemental resilience.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Tiefling)",
+    "prerequisites": ["Tiefling"],
+    "benefits": ["+1 Constitution", "Cold and poison resistance", "Advantage vs poisoned"],
+    "impact": { "type": "resistances", "details": "+1 Con, cold/poison resist" },
+    "rating": 3
+  },
+  "Orcish Fury": {
+    "description": "Tireless fury in battle.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Half-Orc)",
+    "prerequisites": ["Half-Orc"],
+    "benefits": ["+1 Str or Con", "Extra damage die 1/short rest", "Reaction attack after Relentless Endurance"],
+    "impact": { "type": "damage_burst", "details": "Bonus damage + reaction on near-death" },
+    "rating": 3
+  },
+  "Prodigy": {
+    "description": "A knack for learning — gain expertise.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Half-Elf/Half-Orc/Human)",
+    "prerequisites": ["Half-Elf, Half-Orc, or Human"],
+    "benefits": ["1 skill + 1 tool + 1 language", "Expertise in one skill"],
+    "impact": { "type": "skill_expertise", "details": "Expertise for non-Bard/Rogue" },
+    "rating": 3
+  },
+  "Second Chance": {
+    "description": "Fortune favors you against strikes.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Halfling)",
+    "prerequisites": ["Halfling"],
+    "benefits": ["+1 Dex/Con/Cha", "Reaction: force attacker reroll (1/combat)"],
+    "impact": { "type": "defensive_reaction", "details": "Force attack reroll" },
+    "rating": 3
+  },
+  "Squat Nimbleness": {
+    "description": "Uncommonly nimble for your size.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Dwarf/Small)",
+    "prerequisites": ["Dwarf or Small size"],
+    "benefits": ["+1 Str or Dex", "+5 ft speed", "Acrobatics/Athletics proficiency or expertise", "Advantage to escape grapple"],
+    "impact": { "type": "movement_grapple", "details": "+5 speed, anti-grapple" },
+    "rating": 2
+  },
+  "Wood Elf Magic": {
+    "description": "Magic of the primeval woods.",
+    "source": "XGtE 2017",
+    "year": 2017,
+    "category": "Racial (Wood Elf)",
+    "prerequisites": ["Elf (wood)"],
+    "benefits": ["1 druid cantrip", "Longstrider 1/long rest", "Pass Without Trace 1/long rest"],
+    "impact": { "type": "spell_access", "details": "Cantrip + Longstrider + Pass Without Trace" },
+    "rating": 3
+  },
+  "Artificer Initiate": {
+    "description": "Learn some of an artificer's inventiveness.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting",
+    "prerequisites": [],
+    "benefits": ["1 artificer cantrip + 1 first-level spell", "Cast 1/long rest free or with slots", "Artisan tool proficiency as focus"],
+    "impact": { "type": "spell_versatility", "details": "Artificer spells + tool" },
+    "rating": 3
+  },
+  "Chef": {
+    "description": "Culinary mastery grants healing benefits.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Con or Wis", "Cook's utensils proficiency", "+1d8 HP on short rest Hit Die use", "Treats: bonus action temp HP = prof bonus"],
+    "impact": { "type": "healing_utility", "details": "Enhanced rest healing + temp HP treats" },
+    "rating": 3
+  },
+  "Crusher": {
+    "description": "Devastating bludgeoning impacts.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Str or Con", "Move target 5 ft on bludgeoning hit (1/turn, no save)", "Crit: advantage on all attacks vs target until your next turn"],
+    "impact": { "type": "battlefield_control", "details": "Forced movement + crit advantage" },
+    "rating": 3
+  },
+  "Eldritch Adept": {
+    "description": "Learn one Eldritch Invocation from the warlock class.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting",
+    "prerequisites": ["Spellcasting or Pact Magic"],
+    "benefits": ["1 Eldritch Invocation (no prerequisite ones for non-Warlocks)", "Swap on level up"],
+    "impact": { "type": "warlock_feature", "details": "One Eldritch Invocation" },
+    "rating": 3
+  },
+  "Fey Touched": {
+    "description": "Feywild magic has changed you.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting",
+    "prerequisites": [],
+    "benefits": ["+1 Int/Wis/Cha", "Learn Misty Step + 1 divination/enchantment 1st-level spell", "Cast each 1/long rest free or with slots"],
+    "impact": { "type": "spell_access", "details": "+1 ASI, Misty Step + bonus spell" },
+    "rating": 4
+  },
+  "Fighting Initiate": {
+    "description": "Learn one Fighting Style from the fighter class.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat",
+    "prerequisites": ["Martial weapon proficiency"],
+    "benefits": ["1 Fighting Style from fighter class", "Swap on ASI levels"],
+    "impact": { "type": "fighting_style", "details": "One Fighting Style" },
+    "rating": 2
+  },
+  "Gunner": {
+    "description": "Quick hand and keen eye with firearms.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat (Ranged)",
+    "prerequisites": [],
+    "benefits": ["+1 Dexterity", "Firearms proficiency", "Ignore loading", "No close-range disadvantage"],
+    "impact": { "type": "firearms_mastery", "details": "+1 Dex, firearms mastery" },
+    "rating": 3
+  },
+  "Metamagic Adept": {
+    "description": "Learn two Metamagic options from the sorcerer class.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting",
+    "prerequisites": ["Spellcasting or Pact Magic"],
+    "benefits": ["2 Metamagic options", "2 sorcery points (Metamagic only, 1/long rest)"],
+    "impact": { "type": "metamagic_access", "details": "2 Metamagic + 2 sorcery points" },
+    "rating": 3
+  },
+  "Piercer": {
+    "description": "Precise piercing weapon strikes.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Str or Dex", "Reroll 1 piercing damage die per turn", "Extra damage die on crit"],
+    "impact": { "type": "damage_enhancement", "details": "Reroll damage + extra crit die" },
+    "rating": 3
+  },
+  "Poisoner": {
+    "description": "Prepare and deliver deadly poisons.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat/Utility",
+    "prerequisites": [],
+    "benefits": ["Ignore poison resistance", "Apply poison as bonus action", "Poisoner's kit proficiency", "Craft: 2d8 poison + poisoned condition"],
+    "impact": { "type": "poison_mastery", "details": "Bypass resistance, craft poison" },
+    "rating": 3
+  },
+  "Shadow Touched": {
+    "description": "Shadowfell magic has changed you.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting",
+    "prerequisites": [],
+    "benefits": ["+1 Int/Wis/Cha", "Learn Invisibility + 1 illusion/necromancy 1st-level spell", "Cast each 1/long rest free or with slots"],
+    "impact": { "type": "spell_access", "details": "+1 ASI, Invisibility + bonus spell" },
+    "rating": 4
+  },
+  "Skill Expert": {
+    "description": "Hone your proficiency with a particular skill.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 to any ability score", "1 skill proficiency", "Expertise in 1 skill"],
+    "impact": { "type": "skill_expertise", "details": "Flexible ASI + proficiency + expertise" },
+    "rating": 3
+  },
+  "Slasher": {
+    "description": "Wounding slashing weapon strikes.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Str or Dex", "Reduce target speed 10 ft on slashing hit (1/turn)", "Crit: target has disadvantage on all attacks until your next turn"],
+    "impact": { "type": "debuff", "details": "Speed reduction + crit attack disadvantage" },
+    "rating": 3
+  },
+  "Telekinetic": {
+    "description": "Move things with your mind.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Spellcasting/Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Int/Wis/Cha", "Invisible Mage Hand (no components)", "Bonus action: 5 ft shove (Str save, 30 ft range)"],
+    "impact": { "type": "telekinesis", "details": "+1 ASI, free bonus action shove every turn" },
+    "rating": 4
+  },
+  "Telepathic": {
+    "description": "Mentally connect with others.",
+    "source": "TCoE 2020",
+    "year": 2020,
+    "category": "Utility",
+    "prerequisites": [],
+    "benefits": ["+1 Int/Wis/Cha", "60 ft telepathy (one-way, shared language)", "Detect Thoughts 1/long rest free"],
+    "impact": { "type": "telepathy", "details": "+1 ASI, telepathy, free Detect Thoughts" },
+    "rating": 3
+  },
+  "Gift of the Chromatic Dragon": {
+    "description": "Manifest chromatic dragon power.",
+    "source": "FToD 2021",
+    "year": 2021,
+    "category": "Combat/Defense",
+    "prerequisites": [],
+    "benefits": ["Bonus action: 1d4 elemental weapon infusion (1 min, 1/long rest)", "Reaction: elemental resistance (prof/long rest)"],
+    "impact": { "type": "elemental_combat", "details": "Weapon infusion + reactive resistance" },
+    "rating": 3
+  },
+  "Gift of the Gem Dragon": {
+    "description": "Manifest gem dragon power.",
+    "source": "FToD 2021",
+    "year": 2021,
+    "category": "Combat",
+    "prerequisites": [],
+    "benefits": ["+1 Int/Wis/Cha", "Reaction: 2d8 force + 10 ft push when damaged (prof/long rest)"],
+    "impact": { "type": "reactive_damage", "details": "2d8 force reprisal" },
+    "rating": 3
+  },
+  "Gift of the Metallic Dragon": {
+    "description": "Manifest metallic dragon power.",
+    "source": "FToD 2021",
+    "year": 2021,
+    "category": "Healing/Defense",
+    "prerequisites": [],
+    "benefits": ["Free Cure Wounds 1/long rest", "Reaction: +prof bonus AC to target within 5 ft (prof/long rest)"],
+    "impact": { "type": "healing_defense", "details": "Free Cure Wounds + scaling AC reaction" },
+    "rating": 4
+  },
+  "Svirfneblin Magic": {
+    "description": "Inherit deep gnome spellcasting.",
+    "source": "EEPC 2015",
+    "year": 2015,
+    "category": "Racial (Deep Gnome)",
+    "prerequisites": ["Gnome (deep/svirfneblin)"],
+    "benefits": ["Nondetection at will (self only)", "Blindness/Deafness, Blur, Disguise Self 1/long rest each"],
+    "impact": { "type": "spell_access", "details": "At-will Nondetection + defensive spells" },
+    "rating": 2
+  },
+  "Aberrant Dragonmark": {
+    "description": "Manifest an aberrant dragonmark with sorcerer magic.",
+    "source": "ERftLW 2019",
+    "year": 2019,
+    "category": "Spellcasting (Setting)",
+    "prerequisites": ["No existing dragonmark"],
+    "benefits": ["+1 Constitution", "1 sorcerer cantrip + 1st-level spell (1/long rest)", "Random effect table on overuse"],
+    "impact": { "type": "aberrant_magic", "details": "+1 Con, sorcerer spells with wild risk" },
+    "rating": 3
+  },
+  "Revenant Blade": {
+    "description": "Master of the double-bladed scimitar.",
+    "source": "ERftLW 2019",
+    "year": 2019,
+    "category": "Combat",
+    "prerequisites": ["Elf"],
+    "benefits": ["+1 Str or Dex", "Double-bladed scimitar gains finesse", "+1 AC with double-bladed scimitar"],
+    "impact": { "type": "weapon_mastery", "details": "Finesse double blade + AC" },
+    "rating": 2
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:caterpillar",
+      "materials": {
+        "default": "silverfish"
+      },
+      "textures": {
+        "default": "textures/entity/monarch_caterpillar"
+      },
+      "geometry": {
+        "default": "geometry.silverfish"
+      },
+      "render_controllers": ["controller.render.default"],
+      "animations": {
+        "walk": "animation.silverfish.walk"
+      },
+      "scripts": {
+        "animate": ["walk"]
+      },
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 11
+      }
+    }
+  }
+}

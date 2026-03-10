@@ -1,0 +1,132 @@
+﻿[
+    {
+        "ClickNumber":  1,
+        "Time":  "18:35:30",
+        "X":  747,
+        "Y":  833,
+        "ScreenChangePercent":  48.09,
+        "ScreenRegion":  "Bottom-Center",
+        "Before":  "click_1_before.png",
+        "After":  "click_1_after.png"
+    },
+    {
+        "ClickNumber":  2,
+        "Time":  "18:35:42",
+        "X":  743,
+        "Y":  516,
+        "ScreenChangePercent":  99.08,
+        "ScreenRegion":  "Middle-Center",
+        "Before":  "click_2_before.png",
+        "After":  "click_2_after.png"
+    },
+    {
+        "ClickNumber":  3,
+        "Time":  "18:36:01",
+        "X":  372,
+        "Y":  527,
+        "ScreenChangePercent":  70.76,
+        "ScreenRegion":  "Middle-Left",
+        "Before":  "click_3_before.png",
+        "After":  "click_3_after.png"
+    },
+    {
+        "ClickNumber":  4,
+        "Time":  "18:36:18",
+        "X":  550,
+        "Y":  525,
+        "ScreenChangePercent":  33.09,
+        "ScreenRegion":  "Middle-Left",
+        "Before":  "click_4_before.png",
+        "After":  "click_4_after.png"
+    },
+    {
+        "ClickNumber":  5,
+        "Time":  "18:36:31",
+        "X":  1637,
+        "Y":  347,
+        "ScreenChangePercent":  12.92,
+        "ScreenRegion":  "Top-Right",
+        "Before":  "click_5_before.png",
+        "After":  "click_5_after.png"
+    },
+    {
+        "ClickNumber":  6,
+        "Time":  "18:36:44",
+        "X":  1652,
+        "Y":  217,
+        "ScreenChangePercent":  95.37,
+        "ScreenRegion":  "Top-Right",
+        "Before":  "click_6_before.png",
+        "After":  "click_6_after.png"
+    },
+    {
+        "ClickNumber":  7,
+        "Time":  "18:36:51",
+        "X":  943,
+        "Y":  602,
+        "ScreenChangePercent":  95.87,
+        "ScreenRegion":  "Middle-Center",
+        "Before":  "click_7_before.png",
+        "After":  "click_7_after.png"
+    },
+    {
+        "ClickNumber":  8,
+        "Time":  "18:37:03",
+        "X":  19,
+        "Y":  16,
+        "ScreenChangePercent":  88.03,
+        "ScreenRegion":  "Top-Left",
+        "Before":  "click_8_before.png",
+        "After":  "click_8_after.png"
+    },
+    {
+        "ClickNumber":  9,
+        "Time":  "18:37:14",
+        "X":  198,
+        "Y":  543,
+        "ScreenChangePercent":  48.06,
+        "ScreenRegion":  "Middle-Left",
+        "Before":  "click_9_before.png",
+        "After":  "click_9_after.png"
+    },
+    {
+        "ClickNumber":  10,
+        "Time":  "18:37:22",
+        "X":  1145,
+        "Y":  857,
+        "ScreenChangePercent":  18.54,
+        "ScreenRegion":  "Bottom-Center",
+        "Before":  "click_10_before.png",
+        "After":  "click_10_after.png"
+    },
+    {
+        "ClickNumber":  11,
+        "Time":  "18:37:26",
+        "X":  1146,
+        "Y":  847,
+        "ScreenChangePercent":  39.17,
+        "ScreenRegion":  "Bottom-Center",
+        "Before":  "click_11_before.png",
+        "After":  "click_11_after.png"
+    },
+    {
+        "ClickNumber":  12,
+        "Time":  "18:37:32",
+        "X":  896,
+        "Y":  825,
+        "ScreenChangePercent":  33.05,
+        "ScreenRegion":  "Bottom-Center",
+        "Before":  "click_12_before.png",
+        "After":  "click_12_after.png"
+    },
+    {
+        "ClickNumber":  13,
+        "Time":  "18:37:36",
+        "X":  863,
+        "Y":  555,
+        "ScreenChangePercent":  79.12,
+        "ScreenRegion":  "Middle-Center",
+        "Before":  "click_13_before.png",
+        "After":  "click_13_after.png"
+    }
+]

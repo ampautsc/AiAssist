@@ -1,0 +1,14 @@
+{
+  "_comment": "item_texture.json defines textures for items",
+  "_location": "resource-packs/pack_name/textures/item_texture.json",
+  
+  "resource_pack_name": "pack_name",
+  "texture_data": {
+    "my_item": {
+      "textures": "textures/items/my_item"
+    },
+    "my_seeds": {
+      "textures": "textures/items/my_seeds"
+    }
+  }
+}

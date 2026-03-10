@@ -1,0 +1,38 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:item": {
+    "description": {
+      "identifier": "monarch:popup_tent",
+      "menu_category": {
+        "category": "items",
+        "group": "itemGroup.name.camping"
+      }
+    },
+    "components": {
+      "minecraft:icon": {
+        "textures": {
+          "default": "popup_tent"
+        }
+      },
+      "minecraft:display_name": {
+        "value": "item.monarch:popup_tent.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:entity_placer": {
+        "entity": "monarch:popup_tent",
+        "use_on": [
+          "minecraft:grass_block",
+          "minecraft:dirt",
+          "minecraft:sand",
+          "minecraft:gravel",
+          "minecraft:stone",
+          "minecraft:snow",
+          "minecraft:podzol",
+          "minecraft:mycelium",
+          "minecraft:coarse_dirt",
+          "minecraft:moss_block"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:butterfly",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {},
+    "components": {
+      "minecraft:type_family": {
+        "family": ["monarch_butterfly", "pollinator", "mob"]
+      },
+      "minecraft:health": {
+        "value": 4,
+        "max": 4
+      },
+      "minecraft:flying_speed": {
+        "value": 0.15
+      },
+      "minecraft:navigation.fly": {
+        "can_path_over_water": true,
+        "can_path_from_air": true
+      },
+      "minecraft:movement.fly": {},
+      "minecraft:physics": {
+        "has_gravity": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:collision_box": {
+        "width": 0.3,
+        "height": 0.3
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0,
+        "breathes_air": true,
+        "breathes_water": false
+      },
+      "minecraft:despawn": {
+        "despawn_from_distance": {}
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 7,
+        "look_distance": 6.0
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 8
+      },
+      "minecraft:behavior.random_fly": {
+        "priority": 2,
+        "xz_dist": 15,
+        "y_dist": 5,
+        "y_offset": 2,
+        "speed_multiplier": 1.0,
+        "can_land_on_trees": true
+      },
+      "minecraft:behavior.tempt": {
+        "priority": 4,
+        "speed_multiplier": 1.2,
+        "items": ["monarch:milkweed"]
+      },
+      "minecraft:behavior.lay_egg": {
+        "priority": 2,
+        "speed_multiplier": 1.0,
+        "search_range": 10,
+        "search_height": 3,
+        "goal_radius": 1.5,
+        "target_blocks": ["monarch:milkweed"],
+        "egg_type": "monarch:egg",
+        "on_lay": {
+          "event": "minecraft:laid_egg",
+          "target": "self"
+        }
+      },
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "cause": "fall",
+          "deals_damage": false
+        }
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {},
+      "minecraft:laid_egg": {}
+    }
+  }
+}
