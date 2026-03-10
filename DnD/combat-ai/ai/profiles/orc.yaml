@@ -1,0 +1,16 @@
+# Orc AI Profile
+# INT 7 → Low tier
+# Aggressive warriors that respect strength and fight fiercely.
+
+creature_type: orc
+personality: "aggressive, competitive, respects strength"
+preferred_tactics:
+  - aggressive_advance
+  - target_strongest_first
+  - charge_into_melee
+special_behaviors:
+  aggressive: true          # bonus action to move toward enemy
+flee_hp_percent: 10         # orcs rarely flee
+preferred_targets:
+  - strongest
+avoids: []

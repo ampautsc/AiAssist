@@ -1,0 +1,31 @@
+# Lich AI Profile
+# INT 20 → Genius tier (LLM-driven)
+# Ancient undead mastermind. The ultimate spellcaster opponent.
+
+creature_type: lich
+intelligence_tier_override: genius
+personality: "calculating, arrogant, preserves spell slots for key moments, enjoys psychological warfare"
+preferred_tactics:
+  - prioritize_concentration_casters
+  - use_legendary_actions_defensively
+  - save_power_word_kill_for_low_hp_target
+  - counterspell_healing_and_revives
+  - maintain_distance_from_melee
+  - use_minions_as_shields
+  - control_battlefield_with_wall_spells
+  - paralyze_key_threats
+special_behaviors:
+  legendary_resistance: 3
+  legendary_actions: 3
+  lair_actions: true
+  turn_resistance: true     # advantage on saves vs turn undead
+  rejuvenation: true        # reforms at phylactery
+flee_hp_percent: 0          # liches don't flee, they have contingency plans
+preferred_targets:
+  - casters
+  - concentrating
+  - healers
+  - low_hp_for_power_word_kill
+avoids:
+  - melee_engagement
+  - wasting_legendary_resistance_on_low_impact_effects

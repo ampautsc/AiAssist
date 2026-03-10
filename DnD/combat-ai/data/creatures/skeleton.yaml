@@ -1,0 +1,46 @@
+# Skeleton
+# Medium undead, challenge rating 1/4
+# SRD-compatible stat block
+
+name: Skeleton
+creature_type: undead
+size: medium
+armor_class: 13
+hit_points_max: 13
+speed: 6              # 30ft = 6 hexes
+
+abilities:
+  strength: 10
+  dexterity: 14
+  constitution: 15
+  intelligence: 6
+  wisdom: 8
+  charisma: 5
+
+attacks:
+  - name: Shortsword
+    attack_bonus: 4
+    damage_dice: "1d6+2"
+    damage_type: piercing
+    reach: 1
+  - name: Shortbow
+    attack_bonus: 4
+    damage_dice: "1d6+2"
+    damage_type: piercing
+    reach: 1
+    range_short: 16     # 80ft
+    range_long: 64      # 320ft
+
+senses:
+  darkvision: 12
+  passive_perception: 9
+
+damage_immunities:
+  - poison
+condition_immunities:
+  - poisoned
+
+special_abilities: []
+
+challenge_rating: 0.25
+proficiency_bonus: 2

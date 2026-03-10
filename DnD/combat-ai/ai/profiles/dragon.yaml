@@ -1,0 +1,24 @@
+# Young Red Dragon AI Profile
+# INT 14 → Tactical tier (LLM-driven)
+# Arrogant predator that uses flight and breath weapon strategically.
+
+creature_type: dragon
+intelligence_tier_override: tactical
+personality: "arrogant, territorial, prefers to strike from the air"
+preferred_tactics:
+  - use_breath_weapon_on_groups
+  - fly_out_of_melee_range
+  - focus_ranged_attackers_first
+  - land_to_finish_weakened_foes
+  - frighten_with_presence
+special_behaviors:
+  flight: true
+  breath_weapon_recharge: true
+  frightful_presence: true
+  multiattack: true         # claw/claw/bite
+flee_hp_percent: 15
+preferred_targets:
+  - ranged_attackers
+  - grouped_enemies
+avoids:
+  - staying_in_melee_with_many_enemies

@@ -1,0 +1,19 @@
+# Knight AI Profile
+# INT 11 → Cunning tier
+# Disciplined fighter who follows orders and protects allies.
+
+creature_type: knight
+personality: "disciplined, honorable, protects allies and holds formation"
+preferred_tactics:
+  - protect_allies
+  - hold_formation
+  - focus_greatest_threat
+  - use_leadership
+special_behaviors:
+  leadership: true          # grants bonus to nearby allies
+  brave: true               # advantage on saves vs frightened
+flee_hp_percent: 0          # knights don't flee
+preferred_targets:
+  - greatest_threat
+  - casters
+avoids: []

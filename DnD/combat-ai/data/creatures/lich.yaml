@@ -1,0 +1,94 @@
+# Lich
+# Medium undead, challenge rating 21
+# SRD-compatible stat block
+
+name: Lich
+creature_type: undead
+size: medium
+armor_class: 17
+hit_points_max: 135
+speed: 6              # 30ft = 6 hexes
+
+abilities:
+  strength: 11
+  dexterity: 16
+  constitution: 16
+  intelligence: 20
+  wisdom: 14
+  charisma: 16
+
+attacks:
+  - name: Paralyzing Touch
+    attack_bonus: 12
+    damage_dice: "3d6"
+    damage_type: cold
+    reach: 1
+    properties:
+      - paralyze_on_hit
+
+spells_known:
+  - mage_hand
+  - prestidigitation
+  - ray_of_frost
+  - detect_magic
+  - magic_missile
+  - shield
+  - thunderwave
+  - detect_thoughts
+  - invisibility
+  - acid_arrow
+  - animate_dead
+  - counterspell
+  - dispel_magic
+  - fireball
+  - blight
+  - dimension_door
+  - cloudkill
+  - scrying
+  - disintegrate
+  - globe_of_invulnerability
+  - finger_of_death
+  - plane_shift
+  - dominate_monster
+  - power_word_stun
+  - power_word_kill
+
+spell_slots_max:
+  slots:
+    0: 99
+    1: 4
+    2: 3
+    3: 3
+    4: 3
+    5: 3
+    6: 1
+    7: 1
+    8: 1
+    9: 1
+
+senses:
+  truesight: 24
+  passive_perception: 19
+
+damage_resistances:
+  - cold
+  - lightning
+  - necrotic
+
+damage_immunities:
+  - poison
+
+condition_immunities:
+  - charmed
+  - frightened
+  - paralyzed
+  - poisoned
+
+special_abilities:
+  - legendary_resistance_3
+  - rejuvenation
+  - spellcasting
+  - turn_resistance
+
+challenge_rating: 21.0
+proficiency_bonus: 7

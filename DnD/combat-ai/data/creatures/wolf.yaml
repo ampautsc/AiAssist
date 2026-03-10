@@ -1,0 +1,37 @@
+# Wolf
+# Medium beast, challenge rating 1/4
+# SRD-compatible stat block
+
+name: Wolf
+creature_type: beast
+size: medium
+armor_class: 13
+hit_points_max: 11
+speed: 8              # 40ft = 8 hexes
+
+abilities:
+  strength: 12
+  dexterity: 15
+  constitution: 12
+  intelligence: 3
+  wisdom: 12
+  charisma: 6
+
+attacks:
+  - name: Bite
+    attack_bonus: 4
+    damage_dice: "2d4+2"
+    damage_type: piercing
+    reach: 1
+    properties:
+      - knock_prone_on_hit
+
+senses:
+  passive_perception: 13
+
+special_abilities:
+  - keen_hearing_smell
+  - pack_tactics
+
+challenge_rating: 0.25
+proficiency_bonus: 2

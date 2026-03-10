@@ -1,0 +1,17 @@
+# Bandit AI Profile
+# INT 10 → Cunning tier
+# Self-interested fighters who flee when things go south.
+
+creature_type: bandit
+personality: "self-interested, pragmatic, not loyal to the cause"
+preferred_tactics:
+  - focus_weakest
+  - use_numbers_advantage
+  - flee_when_losing
+special_behaviors: {}
+flee_hp_percent: 30
+preferred_targets:
+  - wounded
+  - unarmored
+avoids:
+  - heavily_armored_targets

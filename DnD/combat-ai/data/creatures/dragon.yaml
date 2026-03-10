@@ -1,0 +1,50 @@
+# Young Red Dragon
+# Large dragon, challenge rating 10
+# SRD-compatible stat block
+
+name: Young Red Dragon
+creature_type: dragon
+size: large
+armor_class: 18
+hit_points_max: 178
+speed: 8              # 40ft = 8 hexes (also fly 80ft)
+
+abilities:
+  strength: 23
+  dexterity: 10
+  constitution: 21
+  intelligence: 14
+  wisdom: 11
+  charisma: 19
+
+attacks:
+  - name: Bite
+    attack_bonus: 10
+    damage_dice: "2d10+6"
+    damage_type: piercing
+    reach: 2
+    properties:
+      - multiattack
+  - name: Claw
+    attack_bonus: 10
+    damage_dice: "2d6+6"
+    damage_type: slashing
+    reach: 1
+    properties:
+      - multiattack
+
+senses:
+  darkvision: 24
+  blindsight: 6
+  passive_perception: 18
+
+damage_immunities:
+  - fire
+
+special_abilities:
+  - multiattack
+  - fire_breath
+  - flight
+
+challenge_rating: 10.0
+proficiency_bonus: 4

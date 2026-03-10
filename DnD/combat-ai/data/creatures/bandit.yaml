@@ -1,0 +1,40 @@
+# Bandit
+# Medium humanoid, challenge rating 1/8
+# SRD-compatible stat block
+
+name: Bandit
+creature_type: humanoid
+size: medium
+armor_class: 12
+hit_points_max: 11
+speed: 6              # 30ft = 6 hexes
+
+abilities:
+  strength: 11
+  dexterity: 12
+  constitution: 12
+  intelligence: 10
+  wisdom: 10
+  charisma: 10
+
+attacks:
+  - name: Scimitar
+    attack_bonus: 3
+    damage_dice: "1d6+1"
+    damage_type: slashing
+    reach: 1
+  - name: Light Crossbow
+    attack_bonus: 3
+    damage_dice: "1d8+1"
+    damage_type: piercing
+    reach: 1
+    range_short: 16
+    range_long: 64
+
+senses:
+  passive_perception: 10
+
+special_abilities: []
+
+challenge_rating: 0.125
+proficiency_bonus: 2
