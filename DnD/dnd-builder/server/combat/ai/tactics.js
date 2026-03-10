@@ -60,7 +60,7 @@ function getAllies(creature, combatants) {
  * Select the highest-priority target for an aggressive creature.
  * Priority: lowest HP → nearest → random
  */
-function selectAggresiveTarget(creature, enemies) {
+function selectAggressiveTarget(creature, enemies) {
   if (enemies.length === 0) return null
 
   // First, find enemies in melee range (1 hex)
@@ -114,7 +114,7 @@ const TACTIC_PROFILES = {
       return { action: 'flee', targetId: null, newPosition: retreatPos, reason: `${creature.name} is badly wounded and retreating!` }
     }
 
-    const target = selectAggresiveTarget(creature, enemies)
+    const target = selectAggressiveTarget(creature, enemies)
     const dist   = hexDistance(creature.position, target.position)
 
     if (dist <= 1) {
@@ -178,7 +178,7 @@ const TACTIC_PROFILES = {
     }
 
     if (enemies.length > 0) {
-      const target = selectAggresiveTarget(creature, enemies)
+      const target = selectAggressiveTarget(creature, enemies)
       return { action: 'attack', targetId: target.id, newPosition: null, reason: `${creature.name} attacks nervously.` }
     }
 

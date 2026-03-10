@@ -139,8 +139,7 @@ function resolveAttack(attacker, target, action) {
       damage += dmgResult.total
       damageType = dmgDef.type ?? damageType
     }
-    mechanics.applyDamage(target, damage, damageType)
-    // Mutate target HP
+    // Apply damage and mutate target HP
     const result = mechanics.applyDamage(target, damage, damageType)
     target.hp.current    = result.newHp
     target.hp.temporary  = result.newTemp

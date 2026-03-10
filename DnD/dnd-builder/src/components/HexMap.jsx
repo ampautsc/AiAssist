@@ -154,12 +154,14 @@ export default function HexMap({
     onHexClick?.(q, r)
   }, [onHexClick])
 
-  // Build a lookup map from token coordinates for fast rendering
+  // Build a lookup map from token coordinates for fast rendering.
+  // Multiple tokens sharing the same hex are collected into an array.
   const tokenMap = useMemo(() => {
     const map = {}
     for (const t of tokens) {
       const key = `${t.q ?? t.x ?? 0},${t.r ?? t.y ?? 0}`
-      map[key] = t
+      if (!map[key]) map[key] = []
+      map[key].push(t)
     }
     return map
   }, [tokens])
@@ -232,16 +234,24 @@ export default function HexMap({
         {/* Token layer — rendered on top */}
         <g id="tokens">
           {hexCells.map(({ q, r, cx, cy }) => {
-            const token = tokenMap[`${q},${r}`]
-            if (!token) return null
-            return (
-              <HexToken
-                key={`tok-${token.id}`}
-                cx={cx} cy={cy} size={hexSize}
-                color={token.color ?? '#4fc3f7'}
-                label={token.label ?? '?'}
-              />
-            )
+            const tokensAtHex = tokenMap[`${q},${r}`]
+            if (!tokensAtHex) return null
+            // Offset multiple tokens within the same hex so they don't overlap
+            return tokensAtHex.map((token, idx) => {
+              const total = tokensAtHex.length
+              const angle = (2 * Math.PI * idx) / total
+              const offsetDist = total > 1 ? hexSize * 0.28 : 0
+              return (
+                <HexToken
+                  key={`tok-${token.id}`}
+                  cx={cx + offsetDist * Math.cos(angle)}
+                  cy={cy + offsetDist * Math.sin(angle)}
+                  size={total > 1 ? hexSize * 0.55 : hexSize}
+                  color={token.color ?? '#4fc3f7'}
+                  label={token.label ?? '?'}
+                />
+              )
+            })
           })}
         </g>
 
