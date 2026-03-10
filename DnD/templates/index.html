@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}My Characters - D&D 5e Character Creator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-people"></i> My Characters</h1>
+            <a href="/create" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Create New Character
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if characters %}
+<div class="row">
+    {% for char in characters %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ char.name }}</h5>
+                <p class="card-text">
+                    <strong>Race:</strong> {{ char.race }}<br>
+                    <strong>Class:</strong> {{ char.class }}<br>
+                    <strong>Level:</strong> {{ char.level }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="/character/{{ char.filename }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-eye"></i> View
+                </a>
+                <a href="/level-up/{{ char.filename }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-arrow-up-circle"></i> Level Up
+                </a>
+                <button class="btn btn-sm btn-danger" onclick="deleteCharacter('{{ char.filename }}')">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4><i class="bi bi-info-circle"></i> No Characters Yet</h4>
+            <p>Get started by creating your first character!</p>
+            <a href="/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Character
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteCharacter(filename) {
+    if (confirm('Are you sure you want to delete this character?')) {
+        fetch(`/api/character/${filename}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Level Up - {{ character.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-arrow-up-circle"></i> Level Up: {{ character.name }}</h1>
+        <p class="lead">Advancing from Level {{ character.level }} to Level {{ character.level + 1 }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h3>Level {{ character.level + 1 }} Advancement</h3>
+            </div>
+            <div class="card-body">
+                <h5>Hit Points</h5>
+                <p>Choose how to increase your hit points:</p>
+                
+                <div class="btn-group mb-4" role="group">
+                    <button type="button" class="btn btn-outline-primary" onclick="rollHP()">
+                        <i class="bi bi-dice-6"></i> Roll {{ character.hit_dice|default('1d8') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="takeAverage()">
+                        Take Average
+                    </button>
+                </div>
+
+                <div id="hpResult" class="alert alert-info" style="display: none;">
+                    <!-- HP result will be shown here -->
+                </div>
+
+                <hr>
+
+                <h5>New Features</h5>
+                <div id="newFeatures">
+                    <p class="text-muted">Loading class features for level {{ character.level + 1 }}...</p>
+                </div>
+
+                <hr>
+
+                {% if (character.level + 1) % 4 == 0 %}
+                <h5>Ability Score Improvement</h5>
+                <p>You can increase one ability score by 2, or two ability scores by 1 each. Alternatively, you can take a feat.</p>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-radio" type="radio" name="asiChoice" id="asiIncrease" value="asi" checked>
+                        <label class="form-check-label" for="asiIncrease">
+                            Increase Ability Scores
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-radio" type="radio" name="asiChoice" id="asiFeat" value="feat">
+                        <label class="form-check-label" for="asiFeat">
+                            Take a Feat
+                        </label>
+                    </div>
+                </div>
+
+                <div id="asiSelection">
+                    <!-- ASI selection will be shown here -->
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <button class="btn btn-success btn-lg" onclick="completeLevelUp()">
+                        <i class="bi bi-check-circle"></i> Complete Level Up
+                    </button>
+                    <a href="/character/{{ filename }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const character = {{ character|tojson }};
+const filename = "{{ filename }}";
+
+function rollHP() {
+    // Simple dice roller for HP
+    const hitDice = character.hit_dice || '1d8';
+    const dieSize = parseInt(hitDice.split('d')[1]);
+    const roll = Math.floor(Math.random() * dieSize) + 1;
+    const conMod = Math.floor((character.abilities.constitution - 10) / 2);
+    const total = roll + conMod;
+    
+    document.getElementById('hpResult').innerHTML = `
+        <strong>Roll Result:</strong> ${roll} + ${conMod} (CON) = <strong>${total} HP</strong>
+    `;
+    document.getElementById('hpResult').style.display = 'block';
+}
+
+function takeAverage() {
+    const hitDice = character.hit_dice || '1d8';
+    const dieSize = parseInt(hitDice.split('d')[1]);
+    const average = Math.floor(dieSize / 2) + 1;
+    const conMod = Math.floor((character.abilities.constitution - 10) / 2);
+    const total = average + conMod;
+    
+    document.getElementById('hpResult').innerHTML = `
+        <strong>Average:</strong> ${average} + ${conMod} (CON) = <strong>${total} HP</strong>
+    `;
+    document.getElementById('hpResult').style.display = 'block';
+}
+
+function completeLevelUp() {
+    alert('Level up system coming soon! This will save your new level and features.');
+    // TODO: Implement actual level up save
+}
+</script>
+{% endblock %}

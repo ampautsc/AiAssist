@@ -1,0 +1,32 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.monarch.popup_tent.door": {
+      "initial_state": "closed",
+      "states": {
+        "closed": {
+          "transitions": [
+            { "opening": "q.variant == 1" }
+          ]
+        },
+        "opening": {
+          "animations": ["door_open"],
+          "transitions": [
+            { "open": "q.all_animations_finished" }
+          ]
+        },
+        "open": {
+          "transitions": [
+            { "closing": "q.variant == 0" }
+          ]
+        },
+        "closing": {
+          "animations": ["door_close"],
+          "transitions": [
+            { "closed": "q.all_animations_finished" }
+          ]
+        }
+      }
+    }
+  }
+}

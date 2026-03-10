@@ -1,0 +1,12 @@
+{
+  "resource_pack_name": "monarch_garden",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "milkweed_seeds": {
+      "textures": "textures/items/milkweed_seeds"
+    },
+    "popup_tent": {
+      "textures": "textures/items/popup_tent"
+    }
+  }
+}

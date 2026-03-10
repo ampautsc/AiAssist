@@ -1,0 +1,31 @@
+{
+  "_comment": "Basic custom block",
+  
+  "format_version": "1.21.40",
+  "minecraft:block": {
+    "description": {
+      "identifier": "namespace:block_name",
+      "menu_category": {
+        "category": "construction"
+      }
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:light_dampening": 15,
+      "minecraft:light_emission": 0,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 1.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 6
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "block_texture_name",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:loot": "loot_tables/blocks/block_name.json"
+    }
+  }
+}

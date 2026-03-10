@@ -1,0 +1,24 @@
+# Archmage AI Profile  
+# INT 20 → Genius tier (LLM-driven)
+# Brilliant spellcaster who uses spells strategically and conserves resources.
+
+creature_type: archmage
+intelligence_tier_override: genius
+personality: "calculating, patient, conserves spell slots for maximum impact"
+preferred_tactics:
+  - prioritize_concentration_casters
+  - use_counterspell_against_high_level_spells
+  - maintain_shield_spell_ready
+  - control_battlefield_first
+  - save_high_level_slots
+  - use_cantrips_when_efficient
+special_behaviors:
+  magic_resistance: true    # advantage on saves vs spells
+  spellcasting_focus: true
+flee_hp_percent: 20
+preferred_targets:
+  - casters
+  - concentrating
+avoids:
+  - melee_when_possible
+  - wasting_high_level_slots_on_weak_targets

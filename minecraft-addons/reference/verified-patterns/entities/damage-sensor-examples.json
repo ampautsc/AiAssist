@@ -1,0 +1,121 @@
+{
+  "_comment": "Official damage_sensor examples from Microsoft docs",
+  "_source": "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/entityreference/examples/entitycomponents/minecraftcomponent_damage_sensor",
+  
+  "_important": "triggers can be OBJECT or ARRAY - both valid!",
+  
+  "examples": {
+    
+    "bat_style_object": {
+      "_comment": "Simple object format - no fall damage",
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "cause": "fall",
+          "deals_damage": false
+        }
+      }
+    },
+    
+    "bee_style_array": {
+      "_comment": "Array format - multiple trigger conditions",
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": "no"
+          },
+          {
+            "on_damage": {
+              "filters": {
+                "test": "is_block",
+                "subject": "block",
+                "value": "minecraft:sweet_berry_bush"
+              }
+            },
+            "deals_damage": "no"
+          }
+        ]
+      }
+    },
+    
+    "creeper_style_event": {
+      "_comment": "Trigger event when damaged by lightning",
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "on_damage": {
+            "filters": {
+              "test": "is_family",
+              "subject": "other",
+              "value": "lightning"
+            },
+            "event": "minecraft:become_charged"
+          },
+          "deals_damage": false
+        }
+      }
+    },
+    
+    "allay_style_owner_filter": {
+      "_comment": "Don't take damage from owner player",
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "on_damage": {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_owner",
+                    "subject": "other"
+                  }
+                ]
+              }
+            },
+            "deals_damage": "no"
+          }
+        ]
+      }
+    },
+    
+    "armadillo_style_with_modifiers": {
+      "_comment": "Reduce damage when rolled up",
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "on_damage": {
+              "filters": {
+                "any_of": [
+                  { "test": "is_family", "subject": "other", "value": "mob" },
+                  { "test": "is_family", "subject": "other", "value": "player" }
+                ]
+              },
+              "event": "minecraft:threat_detected"
+            },
+            "damage_multiplier": 0.5,
+            "damage_modifier": -1
+          }
+        ]
+      }
+    },
+    
+    "invincible_utility": {
+      "_comment": "Take no damage at all - for utility entities",
+      "minecraft:damage_sensor": {
+        "triggers": {
+          "deals_damage": false
+        }
+      }
+    }
+  },
+  
+  "deals_damage_values": {
+    "boolean": "true or false",
+    "string_yes": "\"yes\" - damage applied",
+    "string_no": "\"no\" - damage NOT applied",
+    "string_side_effects": "\"no_but_side_effects_apply\" - no damage but weapon durability lost, enchants trigger"
+  }
+}

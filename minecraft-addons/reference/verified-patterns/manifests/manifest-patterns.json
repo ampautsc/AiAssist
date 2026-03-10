@@ -1,0 +1,65 @@
+{
+  "_comment": "Manifest patterns for BP and RP",
+  
+  "_behavior_pack_manifest": {
+    "format_version": 2,
+    "header": {
+      "name": "My Behavior Pack",
+      "description": "Description here",
+      "uuid": "GENERATE-NEW-UUID-1",
+      "version": [1, 0, 0],
+      "min_engine_version": [1, 21, 0]
+    },
+    "modules": [
+      {
+        "type": "data",
+        "uuid": "GENERATE-NEW-UUID-2",
+        "version": [1, 0, 0]
+      },
+      {
+        "type": "script",
+        "language": "javascript",
+        "uuid": "GENERATE-NEW-UUID-3",
+        "version": [1, 0, 0],
+        "entry": "scripts/main.js"
+      }
+    ],
+    "dependencies": [
+      {
+        "_comment": "Resource pack dependency",
+        "uuid": "RP-HEADER-UUID",
+        "version": [1, 0, 0]
+      },
+      {
+        "_comment": "Minecraft server API",
+        "module_name": "@minecraft/server",
+        "version": "2.0.0"
+      }
+    ]
+  },
+  
+  "_resource_pack_manifest": {
+    "format_version": 2,
+    "header": {
+      "name": "My Resource Pack",
+      "description": "Description here",
+      "uuid": "GENERATE-NEW-UUID-4",
+      "version": [1, 0, 0],
+      "min_engine_version": [1, 21, 0]
+    },
+    "modules": [
+      {
+        "type": "resources",
+        "uuid": "GENERATE-NEW-UUID-5",
+        "version": [1, 0, 0]
+      }
+    ],
+    "dependencies": [
+      {
+        "_comment": "Behavior pack dependency - use BP header UUID",
+        "uuid": "BP-HEADER-UUID",
+        "version": [1, 0, 0]
+      }
+    ]
+  }
+}

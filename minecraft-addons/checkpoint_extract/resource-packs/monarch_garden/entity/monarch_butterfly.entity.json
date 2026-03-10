@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:butterfly",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/monarch_butterfly"
+      },
+      "geometry": {
+        "default": "geometry.monarch_butterfly"
+      },
+      "render_controllers": ["controller.render.default"],
+      "animations": {
+        "fly": "animation.monarch_butterfly.fly",
+        "idle": "animation.monarch_butterfly.idle",
+        "flight_controller": "controller.animation.monarch_butterfly.flight"
+      },
+      "scripts": {
+        "animate": ["flight_controller"]
+      },
+      "spawn_egg": {
+        "base_color": "#E86A17",
+        "overlay_color": "#000000"
+      }
+    }
+  }
+}

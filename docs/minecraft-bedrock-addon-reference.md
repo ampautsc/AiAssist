@@ -194,23 +194,50 @@ The manifest file is required for both Resource and Behavior packs.
 
 ### Block Definition (Behavior Pack)
 
+**IMPORTANT:** Use `properties` not `states` for block variants. Values must be arrays.
+
 ```json
 {
-  "format_version": "1.20.0",
+  "format_version": "1.21.50",
   "minecraft:block": {
     "description": {
-      "identifier": "namespace:block_name"
+      "identifier": "namespace:block_name",
+      "properties": {
+        "namespace:property_name": [0, 1, 2]
+      }
     },
     "components": {
       "minecraft:destroy_time": 2.0,
       "minecraft:explosion_resistance": 10.0,
       "minecraft:friction": 0.6,
-      "minecraft:map_color": "#FFFFFF",
-      "minecraft:geometry": "geometry.block_name"
+      "minecraft:map_color": "#FFFFFF"
+    },
+    "permutations": [
+      {
+        "condition": "query.block_state('namespace:property_name') == 0",
+        "components": {
+          "minecraft:light_emission": 0
+        }
+      },
+      {
+        "condition": "query.block_state('namespace:property_name') == 1",
+        "components": {
+          "minecraft:light_emission": 5
+        }
+      }
+    ],
+    "events": {
+      "namespace:change_state": {
+        "set_block_state": {
+          "namespace:property_name": "1"
+        }
+      }
     }
   }
 }
 ```
+
+**Common Error:** Using `"states": { "name": { "values": { "min": 0, "max": 2 } } }` causes "Unexpected version" error. Must use `"properties": { "name": [0, 1, 2] }` instead.
 
 ### Recipe Definition (Behavior Pack)
 

@@ -1,0 +1,833 @@
+MAXED-OUT LORE BARD BUILDS BY SPECIES - LEVEL 8
+================================================================================
+All builds MUST have: solid AC AND concentration protection. No exceptions.
+Source: https://rpgbot.net/dnd5/characters/classes/bard/races/
+
+================================================================================
+NON-SPELL RACIAL ABILITIES (the key differentiator)
+================================================================================
+These are actions/reactions that are NOT spells. They don't cost spell slots,
+can't be Counterspelled, work inside Silence, and don't break concentration.
+
++---------------------+-----------------------------------------------------------+-------------+
+| Species    
+         | Non-Spell Ability                                         | Action Cost |
++---------------------+-----------------------------------------------------------+-------------+
+| Eladrin             | Fey Step: BA 30ft teleport. PB/long rest. NOT a spell =   | Bonus Act   |
+|                     |   can still cast leveled spell same turn.                  |             |
+|                     |   DC = 8 + Prof + CHA = DC 14 at Lv8 (CHA 17).           |             |
+|                     |   AUTUMN: 2 creatures w/in 10ft CHARMED 1 min (WIS save). |             |
+|                     |     Best Bard season. Breaks on damage but Bard runs      |             |
+|                     |     non-damage spells. Teleport THEN charm = safe.        |             |
+|                     |   WINTER: 1 creature w/in 5ft BEFORE teleport frightened  |             |
+|                     |     until end of your next turn (WIS save). Reliable CC.  |             |
+|                     |   SPRING: teleport a willing ally 30ft instead of you.    |             |
+|                     |   SUMMER: Prof bonus fire dmg to creatures w/in 5ft.      |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Shadar-Kai          | Blessing of Raven Queen: 30ft teleport + resistance to    | Bonus Act   |
+|                     |   ALL damage until start of next turn. PB/long rest.      |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Firbolg             | Hidden Step: BA, invisible until start of next turn (or   | Bonus Act   |
+|                     |   attack/dmg roll/force save). PB/long rest. NOT A SPELL: |             |
+|                     |   can't be Counterspelled, works in Silence/Antimagic.    |             |
+|                     |   While invisible: untargetable by sight spells, attacks  |             |
+|                     |   have disadvantage. COMBAT LOOP: Cast spell (action)     |             |
+|                     |   THEN Hidden Step (BA) = invisible for ALL enemy turns.  |             |
+|                     |   Concentration safe because nothing can target you.      |             |
+|                     |   Prevention > mitigation. 3 uses at Lv8 = most combats. |             |
+|                     | Speech of Beast and Leaf: talk to beasts/plants.          | Passive     |
+|                     | Firbolg Magic: Detect Magic + Disguise Self 1/day each.   | Innate (sp) |
++---------------------+-----------------------------------------------------------+-------------+
+| Chromatic Dragonborn| Breath Weapon: 30ft LINE, DEX save, scales with level.    | Action      |
+|                     |   Safer geometry than 15ft cone for squishy casters.      |             |
+|                     | Chromatic Warding (Lv5): FULL IMMUNITY to one damage      | Action      |
+|                     |   type for 1 minute. Not concentration.                   |             |
+|                     | DRAGON FEAR FEAT (any Dragonborn): replace breath use     | Action      |
+|                     |   with 30ft AoE frighten. WIS save (8+Prof+CHA = DC 15   |             |
+|                     |   at CHA 18). 1 min, repeat save each turn. NO CONC.     |             |
+|                     |   Half feat (+1 CHA). Non-spell mass CC that stacks with  |             |
+|                     |   concentration spells. Run HP + Dragon Fear together.    |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Metallic Dragonborn | Breath Weapon: 15ft cone damage, DEX save.                | Action      |
+|                     | Metallic Breath (Lv5): 15ft cone CONTROL effect:          | Action      |
+|                     |   Enervating = incapacitated (CON save)                   |             |
+|                     |   Repulsion = push 20ft + prone (STR save)                |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Gem Dragonborn      | Breath Weapon: 15ft cone, DEX save.                       | Action      |
+|                     | Gem Flight: hover 1 min. PB/long rest.                    | Bonus Act   |
+|                     | Telepathy: 30ft innate. No feat needed.                   | Passive     |
++---------------------+-----------------------------------------------------------+-------------+
+| Goblin              | Nimble Escape: Disengage or Hide as bonus action.         | Bonus Act   |
+|                     |   EVERY TURN. No resource cost. Unlimited.                |             |
+|                     | Fury of the Small: +Prof bonus damage once/short rest.    | Free        |
++---------------------+-----------------------------------------------------------+-------------+
+| Goliath             | Stone's Endurance: reduce damage by 1d12+CON as reaction. | Reaction    |
+|                     |   PB/long rest. Stacks with high AC.                      |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Harengon            | Hare Trigger: add Prof bonus to initiative rolls.         | Passive     |
+|                     | Rabbit Hop: BA jump PBd12 ft, no opportunity attacks.     | Bonus Act   |
+|                     |   PB/long rest. Free escape from melee.                   |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Aasimar             | Celestial Revelation (Lv3): 1min transformation.          | Action      |
+|                     |   Radiant Soul = flight + extra radiant damage.           |             |
+|                     | Healing Hands: PB HP healed, touch. 1/long rest.          | Action      |
++---------------------+-----------------------------------------------------------+-------------+
+| Changeling          | Shapechanger: change physical appearance at will.         | Action      |
+|                     |   Not a spell. Can't be Dispelled. Not Disguise Self.     |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Kobold (MMoM)       | Draconic Cry: BA, enemies in 10ft grant advantage on      | Bonus Act   |
+|                     |   attacks against them until start of your next turn.      |             |
+|                     |   PB/long rest.                                           |             |
++---------------------+-----------------------------------------------------------+-------------+
+| Kenku (MMoM)        | Kenku Recall: advantage on any skill check. PB/long rest. | Free        |
+|                     | Mimicry: perfectly replicate any sound you've heard.      | Free        |
++---------------------+-----------------------------------------------------------+-------------+
+| Satyr               | (No non-spell ability)                                    | --          |
+| Yuan-Ti             | (Innate Suggestion = IS a spell)                          | --          |
+| Fairy               | (Innate spells only)                                      | --          |
+| Halfling            | Lucky: reroll nat 1s. Passive.                            | Passive     |
+| Custom Lineage      | (No racial abilities, extra feat instead)                 | --          |
+| Tortle              | Shell Defense: +4 AC, prone, can't move. End as BA.       | Action      |
+| Mountain Dwarf      | (No non-spell ability, just armor prof)                   | --          |
+| Tiefling            | (Innate spells only)                                      | --          |
+| Half-Elf            | (No non-spell ability, just 2 extra skills)               | --          |
+| Owlin               | (No non-spell ability, just flight + stealth skill)       | --          |
+| Warforged           | (No non-spell ability, just AC + resistances)             | --          |
+| Autognome           | Built for Success: add d4 to failed roll. PB/long rest.   | Reaction    |
++---------------------+-----------------------------------------------------------+-------------+
+
+
+================================================================================
+FULL CAPABILITY MATRIX - ALL VIABLE SPECIES
+================================================================================
+
++---------------------+-----+----------+----------+-----------+----------+---------+--------+-----------+
+| Species             | AC  | Adv CON  | Prof CON | Flight    | Telepathy| Armor   | Magic  | Non-Spell |
+|                     |     | Save     | Save     |           |          | Prof    | Resist | Ability   |
++---------------------+-----+----------+----------+-----------+----------+---------+--------+-----------+
+| Eladrin             | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | FEY STEP  |
+| Shadar-Kai          | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | TELEPORT+ |
+| Firbolg             | 14  | No       | No       | No        | No       | Light   | No     | HIDDEN ST |
+| Chromatic Dragonborn| 19  | YES WC   | No       | No        | No       | Med+Shd | No     | BREATH 30 |
+| Metallic Dragonborn | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | CC BREATH |
+| Satyr               | 19  | YES WC   | No       | No        | No       | Med+Shd | YES    | --        |
+| Yuan-Ti             | 19  | YES WC   | No       | No        | No       | Med+Shd | YES    | --        |
+| Goblin              | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | NIMBLE    |
+| Goliath             | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | STONE END |
+| Harengon            | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | INIT+HOP  |
+| Aasimar             | 19  | YES WC   | No       | YES 1min  | No       | Med+Shd | No     | HEAL+FLY  |
+| Changeling          | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | SHAPESHIFT|
+| Kobold (MMoM)       | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | DRAC CRY  |
+| Gem Dragonborn      | 19  | YES WC   | No       | YES 1min  | YES innt | Med+Shd | No     | BREATH+FLY|
+| Kenku (MMoM)        | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | SKILL ADV |
+| Autognome           | 18  | No       | YES Res  | No        | No       | Natural | No     | FIX ROLLS |
+| Custom Lineage      | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | EXTRA FEAT|
+| Half-Elf            | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | 2 SKILLS  |
+| Halfling (Lightfoot)| 19  | YES WC   | No       | No        | No       | Med+Shd | No     | REROLL 1s |
+| Tiefling (Glasya)   | 19  | YES WC   | No       | No        | No       | Med+Shd | No     | INNATE SP |
+| Fairy               | 14  | No       | YES Res  | YES perm  | No       | Light   | No     | --        |
+| Tortle              | 19  | YES WC   | YES Res  | No        | No       | Shell   | No     | SHELL DEF |
+| Mountain Dwarf      | 17  | YES WC   | No       | No        | No       | Med+Lgt | No     | --        |
+| Owlin               | 14  | No       | YES Res  | YES perm  | No       | Light   | No     | --        |
+| Warforged           | 18  | No       | YES Res  | No        | No       | Integr  | No     | --        |
++---------------------+-----+----------+----------+-----------+----------+---------+--------+-----------+
+
+LEGEND
+  AC 19 = Moderately Armored (Half-Plate + Shield) or equivalent
+  WC    = War Caster (Adv on CON saves + somatic with shield)
+  Res   = Resilient CON (+1 CON, Prof on all CON saves)
+  Tortle AC 19 = Natural 17 + Bracers of Defense. Gets BOTH WC and Res.
+
+
+================================================================================
+FEAT PATHS (Level 4 / Level 8)
+================================================================================
+Species that take Mod Armored + War Caster end at CHA 17 (DC 15).
+Species with free armor or flight can invest in CHA instead.
+
++---------------------+-------------------+-------------------+-------------------+----------+--------+
+| Species             | Feat 1 (Lv1 if CL)| Feat 2 (Lv4)     | Feat 3 (Lv8)     | Final CHA| Spl DC |
++---------------------+-------------------+-------------------+-------------------+----------+--------+
+| Eladrin             | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Shadar-Kai          | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Firbolg             | --                | Fey Touched +1CHA | Telekinetic +1CHA | 20       | DC 17  |
+| Chromatic Dragonborn| --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Metallic Dragonborn | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Satyr               | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Yuan-Ti             | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Goblin              | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Goliath             | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Harengon            | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Aasimar             | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Changeling          | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Kobold (MMoM)       | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Gem Dragonborn      | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Kenku (MMoM)        | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Autognome           | --                | Resilient CON     | CHA +2            | 20       | DC 17  |
+| Custom Lineage      | Moderately Armored| War Caster        | Fey Touched +1CHA | 18       | DC 16  |
+| Half-Elf            | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Halfling (Lightfoot)| --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Tiefling (Glasya)   | --                | Moderately Armored| War Caster        | 17       | DC 15  |
+| Fairy               | --                | Resilient CON     | CHA +2            | 20       | DC 17  |
+| Tortle              | --                | Resilient CON     | War Caster        | 17       | DC 15  |
+| Mountain Dwarf      | --                | War Caster        | CHA +2            | 20       | DC 17  |
+| Owlin               | --                | Resilient CON     | CHA +2            | 20       | DC 17  |
+| Warforged           | --                | Resilient CON     | CHA +2            | 20       | DC 17  |
++---------------------+-------------------+-------------------+-------------------+----------+--------+
+
+
+================================================================================
+TIER LIST - RANKED BY NON-SPELL ABILITY + DEFENSES
+================================================================================
+
+TIER 1 - Has a powerful non-spell ability AND strong defenses
++---------------------+-----+--------+------------------------------------------------------+
+| Species             | AC  | Spl DC | Why Tier 1                                           |
++---------------------+-----+--------+------------------------------------------------------+
+| Eladrin             | 19  | DC 15  | Fey Step = BA 30ft teleport + rider. NOT a spell so  |
+|                     |     |        | you ALSO cast a leveled spell same turn. PB/long rest|
+|                     |     |        | AUTUMN: charm 2 creatures 1 min after teleporting.   |
+|                     |     |        | WINTER: frighten 1 creature before teleporting.      |
+|                     |     |        | Fey Step DC 14 (1 below spell DC). Best BA in game.  |
++---------------------+-----+--------+------------------------------------------------------+
+| Tortle              | 19  | DC 15  | ONLY build with BOTH Adv CON and Prof CON. 99%       |
+|                     |     |        | concentration hold rate. Shell Defense for emergencies|
+|                     |     |        | Bracers of Defense = AC 19 with no armor/shield.     |
++---------------------+-----+--------+------------------------------------------------------+
+| Satyr               | 19  | DC 15  | Magic Resistance + Fey typing. Advantage on ALL      |
+|                     |     |        | spell saves. Immune to Hold Person etc. 35ft speed.  |
++---------------------+-----+--------+------------------------------------------------------+
+| Yuan-Ti             | 19  | DC 15  | Magic Resistance + Poison Immunity. Innate Suggestion|
+|                     |     |        | (CHA-based, free cast). Extremely hard to kill.      |
++---------------------+-----+--------+------------------------------------------------------+
+| Custom Lineage      | 19  | DC 16  | 3 feats by Lv8 = armor + conc + Fey Touched (Misty  |
+|                     |     |        | Step + Silvery Barbs). Highest CHA of armored builds.|
++---------------------+-----+--------+------------------------------------------------------+
+| Firbolg             | 14  | DC 17  | CHA 20 EVASION BUILD. Fey Touched (Misty Step +      |
+|                     |     |        | Silvery Barbs 1/day free) + Telekinetic (BA 5ft      |
+|                     |     |        | shove DC 17 + invisible Mage Hand 60ft). Hidden Step |
+|                     |     |        | 3x/day: cast spell THEN BA invisible. Enemies CAN'T  |
+|                     |     |        | TARGET YOU = concentration safe without War Caster.   |
+|                     |     |        | Prevention > mitigation. Misty Step = emergency       |
+|                     |     |        | teleport. Disguise Self innate + Speech of Beast =    |
+|                     |     |        | best social Bard. DC 17 = tied highest in list.      |
+|                     |     |        | RISK: AC 14 + no CON help when not invisible.        |
+|                     |     |        | AoE spells still hit while invisible. 3 uses/day.    |
++---------------------+-----+--------+------------------------------------------------------+
+
+TIER 2 - Has a strong non-spell ability but trades something
++---------------------+-----+--------+------------------------------------------------------+
+| Species             | AC  | Spl DC | Why Tier 2                                           |
++---------------------+-----+--------+------------------------------------------------------+
+| Shadar-Kai          | 19  | DC 15  | Teleport + resist ALL damage for a full turn. Great  |
+|                     |     |        | panic button. Slightly worse than Eladrin because no |
+|                     |     |        | CC rider effect.                                     |
++---------------------+-----+--------+------------------------------------------------------+
+| Chromatic Dragonborn| 19  | DC 15  | 30ft LINE breath = safe AoE geometry. Chromatic      |
+|                     |     |        | Warding = full damage type IMMUNITY for 1 min. Both  |
+|                     |     |        | non-spell, non-concentration.                        |
++---------------------+-----+--------+------------------------------------------------------+
+| Metallic Dragonborn | 19  | DC 15  | Repulsion Breath = 15ft cone push 20ft + prone.      |
+|                     |     |        | Non-spell AoE crowd control. Huge for Bard who       |
+|                     |     |        | normally lacks non-conc CC options.                   |
++---------------------+-----+--------+------------------------------------------------------+
+| Goblin              | 19  | DC 15  | Nimble Escape = Disengage/Hide as BA EVERY TURN.     |
+|                     |     |        | No resource cost. Unlimited uses. Best sustained     |
+|                     |     |        | escape tool in the game. Fury of Small = burst dmg.  |
++---------------------+-----+--------+------------------------------------------------------+
+| Gem Dragonborn      | 19  | DC 15  | Innate telepathy (free) + temp flight + breath wpn.  |
+|                     |     |        | Most packed species kit. Flight only 1min/day though.|
++---------------------+-----+--------+------------------------------------------------------+
+| Fairy               | 14  | DC 17  | PERMANENT flight + CHA 20. Avoids melee entirely.    |
+|                     |     |        | AC 14 = dead if anything reaches you. No non-spell   |
+|                     |     |        | ability but flight compensates massively.            |
++---------------------+-----+--------+------------------------------------------------------+
+| Mountain Dwarf      | 17  | DC 17  | Free medium armor = no feat tax. CHA 20. Highest     |
+|                     |     |        | spell DC of armored builds. No non-spell ability.    |
++---------------------+-----+--------+------------------------------------------------------+
+
+TIER 3 - Functional, one unique trick, but outclassed above
++---------------------+-----+--------+------------------------------------------------------+
+| Species             | AC  | Spl DC | Why Tier 3                                           |
++---------------------+-----+--------+------------------------------------------------------+
+| Goliath             | 19  | DC 15  | Stone's Endurance = reaction dmg reduction. Good but |
+|                     |     |        | limited uses (PB/long rest). No other racial synergy.|
++---------------------+-----+--------+------------------------------------------------------+
+| Harengon            | 19  | DC 15  | Prof to initiative = go first, land Hypnotic Pattern |
+|                     |     |        | before enemies act. Rabbit Hop = free melee escape.  |
++---------------------+-----+--------+------------------------------------------------------+
+| Aasimar             | 19  | DC 15  | Radiant Soul = 1min flight + radiant damage. Healing |
+|                     |     |        | Hands = free heal. Flight costs full action to start.|
++---------------------+-----+--------+------------------------------------------------------+
+| Changeling          | 19  | DC 15  | At-will shapechange. Cannot be Dispelled. Amazing    |
+|                     |     |        | for grifting but zero combat non-spell abilities.    |
++---------------------+-----+--------+------------------------------------------------------+
+| Kobold (MMoM)       | 19  | DC 15  | Draconic Cry = BA grant advantage on attacks vs all  |
+|                     |     |        | nearby enemies. Great party support but melee range. |
++---------------------+-----+--------+------------------------------------------------------+
+| Autognome           | 18  | DC 17  | Natural armor (no Mod Armored needed). Built for     |
+|                     |     |        | Success = d4 to failed rolls. CHA 20. Quiet but good|
++---------------------+-----+--------+------------------------------------------------------+
+| Kenku (MMoM)        | 19  | DC 15  | Kenku Recall = advantage on skill checks PB/long     |
+|                     |     |        | rest. Mimicry synergizes with Bard social identity.  |
++---------------------+-----+--------+------------------------------------------------------+
+| Owlin               | 14  | DC 17  | Permanent flight (like Fairy) + Darkvision + Stealth.|
+|                     |     |        | Slightly worse than Fairy - no innate spells.        |
++---------------------+-----+--------+------------------------------------------------------+
+| Warforged           | 18  | DC 17  | Integrated Protection = AC 16+Prof (18 at Lv8).     |
+|                     |     |        | Poison resist, disease immune. Solid but passive.    |
++---------------------+-----+--------+------------------------------------------------------+
+| Half-Elf            | 19  | DC 15  | +2 CHA, two +1s, two extra skills. No non-spell     |
+|                     |     |        | ability. Outclassed by Custom Lineage for feats.     |
++---------------------+-----+--------+------------------------------------------------------+
+| Halfling (Lightfoot)| 19  | DC 15  | Reroll nat 1s, hide behind allies. No impactful      |
+|                     |     |        | non-spell action. Slow 25ft.                         |
++---------------------+-----+--------+------------------------------------------------------+
+| Tiefling (Glasya)   | 19  | DC 15  | Innate Invis + Disguise Self saves spell slots.      |
+|                     |     |        | All innate spells = still spells. No unique action.  |
++---------------------+-----+--------+------------------------------------------------------+
+
+
+================================================================================
+FINAL 7 - HEAD TO HEAD (Combat + Social)
+================================================================================
+A Lore Bard must be fun at the table AND effective in combat. Pure optimization
+without RP appeal is pointless. Pure RP without combat legs gets you killed.
+
+SOCIAL TOOLKIT (what the species gives you for FREE, before spells):
++---------------------+------------------------------------------------------------------+
+| Species             | Social Tools (racial, non-spell-slot)                            |
++---------------------+------------------------------------------------------------------+
+| Firbolg             | Speech of Beast and Leaf: talk to ANY beast or plant. They       |
+|                     |   understand you, you get advantage on CHA checks to influence   |
+|                     |   them. Infinite creative uses (scout via birds, interrogate     |
+|                     |   trees, befriend guard dogs). Disguise Self innate 1/day.       |
+|                     |   Detect Magic innate 1/day. Hidden Step works out of combat     |
+|                     |   for infiltration. Gentle giant who talks to squirrels = peak   |
+|                     |   Bard energy.                                                   |
++---------------------+------------------------------------------------------------------+
+| Gem Dragonborn      | 30ft Telepathy innate. Communicate silently with anyone who      |
+|                     |   shares a language. Coordinate with party in front of NPCs.     |
+|                     |   Whisper to a prisoner without guards hearing. Feed lines to    |
+|                     |   party face. "I know what you're thinking" bluff. Telepathy     |
+|                     |   is the #1 social Bard tool after Expertise.                    |
++---------------------+------------------------------------------------------------------+
+| Eladrin             | Season-shifting personality: your appearance and demeanor        |
+|                     |   change with your chosen season. Autumn = warm/generous,        |
+|                     |   Winter = cold/calculating, Spring = playful, Summer = bold.    |
+|                     |   Autumn Fey Step charms 2 people as a non-spell — works in     |
+|                     |   social encounters where spells would be noticed. Fey nature   |
+|                     |   = inherently dramatic and otherworldly presence.               |
++---------------------+------------------------------------------------------------------+
+| Satyr               | Fey creature. Immune to humanoid-targeting effects. Natural      |
+|                     |   trickster/revelry archetype fits Bard perfectly. 35ft speed    |
+|                     |   = run from consequences. But NO racial social mechanics.       |
+|                     |   You're charming because you're a Bard, not because you're a   |
+|                     |   Satyr. Pure RP flavor, no mechanical social edge.              |
++---------------------+------------------------------------------------------------------+
+| Yuan-Ti             | Innate Suggestion 1/day (CHA-based, free, no slot). One of      |
+|                     |   the best social spells in the game FOR FREE. "You should       |
+|                     |   let us pass." "You didn't see anything." Huge. BUT: you are   |
+|                     |   a snake person. Feared and hated in most settings. Hard to    |
+|                     |   walk into a tavern. Social situations require overcoming       |
+|                     |   your appearance before you can even start persuading.          |
++---------------------+------------------------------------------------------------------+
+| Custom Lineage      | You can be ANYTHING. Human-passing, exotic, mysterious —         |
+|                     |   total RP freedom. Fey Touched gives Misty Step + Silvery      |
+|                     |   Barbs 1/day free. But no racial social features. You're a     |
+|                     |   blank slate. Great for a specific character concept, but       |
+|                     |   you bring nothing the class doesn't already give you.          |
++---------------------+------------------------------------------------------------------+
+| Tortle              | Shell is distinctive. Wise-old-traveler archetype. But zero     |
+|                     |   social mechanics. No telepathy, no disguise, no charm, no     |
+|                     |   beast speech. Tortle is a combat fortress that happens to      |
+|                     |   be a Bard. Socially you're just... a turtle with Expertise.   |
++---------------------+------------------------------------------------------------------+
+
+COMBAT IDENTITY (what your typical round looks like):
++---------------------+------------------------------------------------------------------+
+| Species             | Turns 1-3 in a typical combat                                   |
++---------------------+------------------------------------------------------------------+
+| Firbolg             | T1: Hypnotic Pattern (action) → Hidden Step (BA invisible).     |
+| AC 14, DC 17        |   You disappear. Enemies can't target you or your HP.           |
+| Fey Touched         | T2: Enemies that saved? Dissonant Whispers/Heat Metal (action)  |
+| Telekinetic         |   → Hidden Step (BA invisible). Still untouchable.              |
+|                     | T3: Out of Hidden Steps. Telekinetic shove (BA, DC 17) to push  |
+|                     |   melee away. Or Misty Step (Fey Touched free) to flee.         |
+|                     | WEAKNESS: AoE hits you while invisible. AC 14 if caught.        |
+|                     | STRENGTH: Most combats are 3-4 rounds. You're invisible for all.|
++---------------------+------------------------------------------------------------------+
+| Gem Dragonborn      | T1: Hypnotic Pattern (action). Solid DC 15 opening.             |
+| AC 19, DC 15        | T2: If mopping up: Breath Weapon (action, non-spell AoE).       |
+| Mod Armored + WC    |   Or maintain concentration + Cutting Words / Silvery Barbs.    |
+|                     | T3: Gem Flight (BA) if need height advantage. Telepathy lets    |
+|                     |   you coordinate without breaking stealth or position.          |
+|                     | WEAKNESS: DC 15 (2 below Firbolg). No escape tool.              |
+|                     | STRENGTH: AC 19 + Adv CON = tanky. Flight + telepathy + breath.|
++---------------------+------------------------------------------------------------------+
+| Eladrin             | T1: Hypnotic Pattern (action) → Autumn Fey Step (BA): teleport  |
+| AC 19, DC 15        |   30ft + charm 2 creatures within 10ft of landing for 1 min.    |
+| Mod Armored + WC    |   Non-spell charm stacks with concentration spell. Two CC       |
+|                     |   effects in one turn, one of which isn't concentration.        |
+|                     | T2: Maintain HP + Cutting Words. Fey Step again if needed.      |
+|                     | T3: 3rd Fey Step available. Winter = frighten for escape.       |
+|                     | WEAKNESS: DC 14 on Fey Step (separate from DC 15 spell DC).    |
+|                     | STRENGTH: BA teleport + CC rider. Two control effects/turn.     |
++---------------------+------------------------------------------------------------------+
+| Satyr               | T1: Hypnotic Pattern (action). Standard opener.                 |
+| AC 19, DC 15        | T2: Maintain concentration. Cutting Words / Silvery Barbs.      |
+| Mod Armored + WC    | T3: Same. You're a reaction bot with Magic Resistance.          |
+|                     |   Enemy casters bounce off you. Hold Person? Adv to save.      |
+|                     |   Dominate Person? Adv to save. Feeblemind? Adv to save.       |
+|                     | WEAKNESS: No non-spell BA or action. Turns feel samey.          |
+|                     | STRENGTH: Nearly impossible to shut down magically. You just    |
+|                     |   keep going. The "unkillable" Bard.                            |
++---------------------+------------------------------------------------------------------+
+| Yuan-Ti             | T1: Hypnotic Pattern (action). Standard opener.                 |
+| AC 19, DC 15        | T2-3: Maintain + reactions. Same as Satyr but also immune to    |
+| Mod Armored + WC    |   poison (very common damage type). Innate Suggestion available |
+|                     |   if you want to talk down a humanoid mid-combat.               |
+|                     | WEAKNESS: Same as Satyr — no exciting BA or non-spell action.   |
+|                     | STRENGTH: Magic Resist + Poison Immune = most durable Bard.    |
+|                     |   Suggestion in combat = "Drop your weapon and surrender."      |
++---------------------+------------------------------------------------------------------+
+| Custom Lineage      | T1: Hypnotic Pattern (action). DC 16 (highest of armored).     |
+| AC 19, DC 16        | T2: Maintain + Silvery Barbs (free 1/day via Fey Touched).     |
+| ModArm+WC+FeyTouch  | T3: Misty Step (free via Fey Touched) if repositioning needed. |
+|                     | WEAKNESS: No racial feature at all. You ARE your spell list.    |
+|                     | STRENGTH: DC 16 + free Misty Step + free Silvery Barbs.        |
+|                     |   Highest "floor" — never bad, but never exciting either.       |
++---------------------+------------------------------------------------------------------+
+| Tortle              | T1: Hypnotic Pattern (action). DC 15.                           |
+| AC 19, DC 15        | T2-3: Maintain concentration at 99% hold rate (Adv + Prof CON).|
+| Bracers, Res+WC     |   Nothing breaks your spell. You just sit there winning.        |
+|                     |   Shell Defense available if swarmed (+4 AC = AC 23 prone).    |
+|                     | WEAKNESS: Boring turns. No BA, no non-spell trick. Slow 30ft.  |
+|                     | STRENGTH: The spell STAYS UP. Period. That's the whole pitch.   |
++---------------------+------------------------------------------------------------------+
+
+THE VERDICT:
++---------------------+----------+----------+---------+-------------------------------+
+| Species             | Combat   | Social   | Fun?    | One-Line Identity             |
++---------------------+----------+----------+---------+-------------------------------+
+| Firbolg             | A-       | A+       | YES     | Invisible fey giant who talks |
+|                     |          |          |         | to squirrels and disappears.  |
++---------------------+----------+----------+---------+-------------------------------+
+| Eladrin             | A+       | A        | YES     | Teleporting fey lord who      |
+|                     |          |          |         | charms rooms by arriving.     |
++---------------------+----------+----------+---------+-------------------------------+
+| Gem Dragonborn      | A        | A        | YES     | Telepathic dragon with a      |
+|                     |          |          |         | breath weapon and wings.      |
++---------------------+----------+----------+---------+-------------------------------+
+| Yuan-Ti             | A        | B+       | MAYBE   | Snake with free Suggestion.   |
+|                     |          |          |         | RP-limited by appearance.     |
++---------------------+----------+----------+---------+-------------------------------+
+| Satyr               | A        | B        | MAYBE   | Unkillable party goat.        |
+|                     |          |          |         | Tanky but turns are quiet.    |
++---------------------+----------+----------+---------+-------------------------------+
+| Custom Lineage      | A        | B-       | MEH     | The best blank character      |
+|                     |          |          |         | sheet. Optimal, not exciting. |
++---------------------+----------+----------+---------+-------------------------------+
+| Tortle              | A+ def   | C+       | MEH     | Unbreakable concentration.    |
+|                     |          |          |         | Zero personality mechanics.   |
++---------------------+----------+----------+---------+-------------------------------+
+
+TOP 3 FOR "COMBAT CAPABLE AND FUN TO PLAY IN SOCIAL SITUATIONS":
+
+  1. FIRBOLG — Best social kit in the game (beast speech, disguise,
+     detect magic, hidden step infiltration). CHA 20 / DC 17 evasion
+     build is unique and exciting to pilot. High-risk/high-reward
+     combat with invisible concentration protection. Every turn has
+     a meaningful decision. Telekinetic shove adds tactical depth.
+
+  2. ELADRIN — Best combat action economy (BA teleport + charm/frighten
+     + leveled spell same turn). Season-shifting gives strong RP hook.
+     Autumn charm is a social tool too. Fey nature = built-in
+     mystique. AC 19 is safe. Slightly less social depth than Firbolg
+     but more combat depth.
+
+  3. GEM DRAGONBORN — Telepathy is the Bard's dream social tool.
+     Silent party coordination, interrogation, intimidation, bluffing.
+     Flight + breath weapon + shield + armor = packed kit. Jack of
+     all trades species. Not the BEST at anything but good at
+     everything.
+
+
+================================================================================
+THREE BUILDS PER SPECIES - FINAL 7
+================================================================================
+All start: Point Buy CHA 15+2=17, DEX 14+1=15, CON 14, WIS 12, INT 8, STR 8
+(Tasha's flexible +2 CHA, +1 DEX. Exceptions noted.)
+Two feats (Lv4, Lv8). Custom Lineage gets three (Lv1, Lv4, Lv8).
+Two uncommon magic items each.
+
+CHA MATH REMINDER: Starting CHA 17 (odd).
+  CHA 20 requires: ASI +2 and one half-feat +1 = 17→19→20 or 17→18→20
+  CHA 18 requires: one half-feat +1 = 17→18
+  Two half-feats from 17 = 19 (odd, WASTED — avoid this)
+
+KEY UNCOMMON ITEMS FOR BARDS:
+  Instrument of the Bards  - Adv vs charm, bonus spells (varies by type)
+  Cloak of Protection      - +1 AC, +1 ALL saves (helps CON saves too)
+  Stone of Good Luck       - +1 all ability checks AND saves
+  Pearl of Power           - Regain 1 spell slot (3rd or lower) per day
+  Winged Boots             - 4 hours of flight per day
+  Sentinel Shield          - Adv on initiative AND Perception checks
+  Amulet of Proof Ag Det   - Can't be scryed, targeted by divination
+  Bracers of Defense       - +2 AC (no armor, no shield required)
+  Hat of Disguise          - At-will Disguise Self
+  Ring of Mind Shielding   - Thoughts can't be read, lies can't be detected
+  Medallion of Thoughts    - Detect Thoughts 3/day (social powerhouse)
+
+--------------------------------------------------------------------------------
+FIRBOLG - "The Gentle Giant Who Disappears"
+--------------------------------------------------------------------------------
+
+  BUILD A: EVASION (Max CHA, Hidden Step = defense)
+  Feats: Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON protection: NONE
+  Items: Cloak of Protection (+1 AC=15, +1 saves), Instrument of the Bards
+  ---
+  How it works: Cast spell → Hidden Step invisible. 3 rounds of untargetable.
+  Fey Touched gives free Misty Step (emergency escape) + free 1st-level spell
+  (Silvery Barbs = force enemy reroll + give ally advantage, 1/day free).
+  DC 17 Hypnotic Pattern is brutal. After Hidden Steps run out, Cloak helps
+  a bit and you Misty Step away. AC 15 with Cloak is still paper-thin.
+  RISK: AoE still hits invisible creatures. If caught after 3 rounds, fragile.
+  REWARD: Highest DC, coolest combat loop, most fun to pilot.
+
+  BUILD B: BALANCED (Armor + CHA + Hidden Step)
+  Feats: Moderately Armored +1 DEX → Fey Touched +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: NONE (formal)
+  Items: Cloak of Protection (+1 AC=20, +1 saves), Instrument of the Bards
+  ---
+  How it works: AC 20 with Cloak. DC 16 spells. Free Misty Step for escape.
+  Hidden Step is concentration protection: invisible = can't be targeted = no
+  CON saves needed. When Hidden Steps run out, AC 20 takes over. Cloak gives
+  +1 to CON saves (total +3 CON save, not great but not zero).
+  Best of both worlds. Never the best at anything, always adequate at everything.
+  RISK: No Adv CON or Prof CON. After 3 Hidden Steps, DC 13 CON saves at +3.
+  REWARD: AC 20, DC 16, free teleport, 3 turns of invisibility. Very well-rounded.
+
+  BUILD C: FORTRESS (Armor + War Caster, ignore CHA)
+  Feats: Moderately Armored +1 DEX → War Caster
+  AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (War Caster)
+  Items: Instrument of the Bards, Stone of Good Luck (+1 checks AND saves)
+  ---
+  How it works: AC 19, Adv on CON saves, DC 15. Standard reliable tank.
+  Hidden Step on top = overkill defense but you NEVER lose concentration.
+  Stone of Good Luck gives +1 to every ability check (skill monkey boost)
+  and +1 to every save (stacks with War Caster Adv on CON). Speech of Beast
+  and Leaf + Stone of Good Luck = +1 on CHA checks to influence beasts.
+  RISK: DC 15 is 2 below Build A. Fewer enemies fail your saves.
+  REWARD: Most reliable. Nothing goes wrong. Boring but effective.
+
+--------------------------------------------------------------------------------
+ELADRIN - "The Fey Lord Who Charms Rooms by Arriving"
+--------------------------------------------------------------------------------
+
+  BUILD A: DOUBLE CC (Armor + War Caster, Fey Step does the rest)
+  Feats: Moderately Armored +1 DEX → War Caster
+  AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (WC)
+  Items: Instrument of the Bards, Cloak of Protection (+1 AC=20, +1 saves)
+  Fey Step DC: 14  (8 + 3 Prof + 3 CHA)
+  ---
+  How it works: T1 Hypnotic Pattern (DC 15) + Autumn Fey Step (charm 2, DC 14).
+  Two separate CC effects from one turn. The charm isn't concentration.
+  AC 20 with Cloak. Adv CON saves. You're a tank who teleports and charms.
+  RISK: Fey Step DC 14 is low — higher WIS enemies shrug it off.
+  REWARD: Two CC effects per turn. Safest build in the entire document.
+
+  BUILD B: HIGH DC (Max CHA, Fey Step CC gets better too)
+  Feats: Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Cloak of Protection (+1 AC=15, +1 saves), Instrument of the Bards
+  Fey Step DC: 16  (8 + 3 + 5 CHA)
+  ---
+  How it works: DC 17 spells + DC 16 Fey Step. Both CC effects hit harder.
+  Free Misty Step from Fey Touched + Fey Step teleport = extreme mobility.
+  After Fey Stepping away, you're 30ft from danger. AC 15 with Cloak.
+  No formal CON protection but you have two teleports to stay out of range.
+  RISK: AC 15 is tissue paper. If enemies close, you're dead.
+  REWARD: DC 17 spells + DC 16 Autumn charm = devastating double CC.
+
+  BUILD C: BALANCED (Armor + Fey Touched)
+  Feats: Moderately Armored +1 DEX → Fey Touched +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: NONE (formal)
+  Items: Sentinel Shield (Adv initiative + Adv Perception), Instrument
+  Fey Step DC: 15  (8 + 3 + 4 CHA)
+  ---
+  How it works: DC 16 spells, DC 15 Fey Step (matches spell DC of armored
+  builds). AC 19. Sentinel Shield = advantage on initiative = land Hypnotic
+  Pattern before anyone acts. Fey Step + free Misty Step = double teleport.
+  Three teleport options per day (3 Fey Steps + Misty Step). Extremely mobile.
+  RISK: No Adv CON. CON save is +2 base. Concentration can break.
+  REWARD: Best initiative of any build. DC 16. Triple teleport. AC 19.
+
+--------------------------------------------------------------------------------
+GEM DRAGONBORN - "The Telepathic Dragon"
+--------------------------------------------------------------------------------
+
+  BUILD A: STANDARD TANK (Armor + War Caster)
+  Feats: Moderately Armored +1 DEX → War Caster
+  AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (WC)
+  Items: Instrument of the Bards, Pearl of Power (extra 3rd-level slot/day)
+  ---
+  How it works: AC 19, Adv CON saves, DC 15. Pearl of Power = 2 Hypnotic
+  Patterns per day instead of 1 (or HP + Dispel Magic, etc.). Breath Weapon
+  for non-spell AoE. Gem Flight for emergency elevation. Telepathy for
+  coordination. Packed kit, safe build. Pearl lets you be less conservative
+  with spell slots.
+  RISK: DC 15 is lowest tier. Telepathy is 30ft (short range).
+  REWARD: Most versatile toolkit. Answer for every situation.
+
+  BUILD B: DRAGON FEAR (Armor + AoE frighten, no concentration)
+  Feats: Moderately Armored +1 DEX → Dragon Fear +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: NONE (formal)
+  Items: Instrument of the Bards, Cloak of Protection (+1 AC=20, +1 saves)
+  Dragon Fear DC: 16  (8 + 3 + 4 CHA)
+  ---
+  How it works: T1 cast Hypnotic Pattern (DC 16 conc). T2 Dragon Fear (DC 16,
+  NOT concentration, replaces one breath use). Now enemies are BOTH hypnotized
+  AND frightened from separate effects. Two mass CC effects at once, only one
+  uses concentration. Cloak = AC 20, +1 all saves (CON save +3 total).
+  Telepathy lets you warn party "I'm about to roar, close your eyes."
+  RISK: No Adv CON. Dragon Fear uses your breath weapon charge.
+  REWARD: Two simultaneous AoE CC effects. DC 16 on both. AC 20.
+
+  BUILD C: MAX CHA DRAGON (Highest DC + Dragon Fear)
+  Feats: Dragon Fear +1 CHA (18) → ASI CHA +2 (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Cloak of Protection (+1 AC=15, +1 saves), Instrument of the Bards
+  Dragon Fear DC: 17  (8 + 3 + 5 CHA)
+  ---
+  How it works: DC 17 Hypnotic Pattern + DC 17 Dragon Fear. Highest possible
+  DC on both mass CC effects. Gem Flight to get airborne after roaring.
+  Telepathy to coordinate. No armor means Cloak is essential (AC 15).
+  RISK: AC 15 is fragile. No CON protection at all.
+  REWARD: DC 17 double mass CC. Fly away after. Telepathy from the sky.
+
+--------------------------------------------------------------------------------
+SATYR - "The Unkillable Party Goat"
+--------------------------------------------------------------------------------
+
+  BUILD A: STANDARD TANK (Maximum resilience)
+  Feats: Moderately Armored +1 DEX → War Caster
+  AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (WC)
+  Items: Instrument of the Bards, Stone of Good Luck (+1 checks + saves)
+  ---
+  How it works: AC 19, Adv CON, Magic Resistance (adv ALL spell saves),
+  Fey type (immune to Hold Person, Charm Person, etc.). Stone of Good Luck
+  boosts every skill check (+1 to already-Expertise checks) and every save.
+  You are a wall. Spells bounce off. Concentration never breaks. Walk into
+  any situation and shrug.
+  RISK: DC 15. No exciting turns. You maintain and react.
+  REWARD: Hardest Bard to disable in the entire game.
+
+  BUILD B: BALANCED (Armor + CHA boost)
+  Feats: Moderately Armored +1 DEX → Fey Touched +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: NONE (formal)
+  Items: Instrument of the Bards, Cloak of Protection (+1 AC=20, +1 saves)
+  ---
+  How it works: AC 20 with Cloak. DC 16. Magic Resistance + Cloak's +1 saves
+  means you have adv + bonus on all spell saves. Free Misty Step for mobility.
+  Silvery Barbs 1/day free. No War Caster but Magic Resistance protects you
+  from the SPELLS that would break your concentration (disintegrate, etc.).
+  Physical hits still threaten concentration though.
+  RISK: Melee attacks still break concentration at normal rates.
+  REWARD: AC 20, DC 16, teleport, nearly immune to magic. Best "safe" option.
+
+  BUILD C: MAX CHA (Lean into DC, let Magic Resistance carry)
+  Feats: Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Cloak of Protection (+1 AC=15, +1 saves), Winged Boots (4hr flight)
+  ---
+  How it works: DC 17 + Magic Resistance + Fey type. Winged Boots give you
+  permanent flight (4 hours is effectively all-day). Fly 30ft up, cast DC 17
+  Hypnotic Pattern, enemies can't reach you. Magic Resist means even enemy
+  casters struggle. Free Misty Step if somehow cornered.
+  RISK: AC 15. If grounded or targeted by multiple archers, vulnerable.
+  REWARD: Flying unkillable goat with DC 17. Absurd.
+
+--------------------------------------------------------------------------------
+YUAN-TI - "The Snake Who Whispers Surrender"
+--------------------------------------------------------------------------------
+
+  BUILD A: STANDARD TANK (Maximum durability)
+  Feats: Moderately Armored +1 DEX → War Caster
+  AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (WC)
+  Items: Instrument of the Bards, Amulet of Proof Against Detection
+  ---
+  How it works: AC 19, Adv CON, Magic Resistance, Poison Immunity. Amulet
+  means you can't be scryed or detected by divination — the perfect spy.
+  Innate Suggestion 1/day. You are a walking fortress that nobody can find.
+  RISK: DC 15 is low. Snake appearance limits social access.
+  REWARD: Most durable + most hidden Bard possible.
+
+  BUILD B: SOCIAL PREDATOR (Armor + CHA for Suggestion DC)
+  Feats: Moderately Armored +1 DEX → Fey Touched +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: NONE (formal)
+  Items: Instrument of the Bards, Hat of Disguise (at-will Disguise Self)
+  ---
+  How it works: Hat of Disguise solves the snake-appearance problem entirely.
+  Look like anyone, walk into any tavern. DC 16 spells + innate Suggestion
+  (DC 16 CHA-based). Free Misty Step. You're a shapeshifting snake infiltrator
+  with Magic Resistance backup. Disguise Self from Hat + Suggestion = grifter.
+  RISK: No CON protection. Hat requires concentration? No — Disguise Self isn't
+  concentration. Hat is free. Physical damage still threatens concentration.
+  REWARD: Solves Yuan-Ti's biggest weakness (appearance) while keeping all strengths.
+
+  BUILD C: MAX CHA SNAKE (Suggestion DC 17 is terrifying)
+  Feats: Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Hat of Disguise, Instrument of the Bards
+  ---
+  How it works: DC 17 everything. Innate Suggestion at DC 17 for free.
+  "You should let us into the vault." DC 17 WIS save or they do it.
+  Hat of Disguise hides the snake. Magic Resistance if caught. Misty Step
+  to escape. You are the ultimate social predator.
+  RISK: AC 14 = dead in combat. Purely a social/ambush character.
+  REWARD: DC 17 free Suggestion is one of the most powerful social tools
+  in the game. Combined with Bard Expertise in Deception/Persuasion = GG.
+
+--------------------------------------------------------------------------------
+CUSTOM LINEAGE - "The Optimized Blank Slate" (3 feats!)
+--------------------------------------------------------------------------------
+
+  BUILD A: FULL PACKAGE (Armor + CON + CHA)
+  Feats: Moderately Armored +1 DEX → War Caster → Fey Touched +1 CHA (18)
+  AC: 19 (half plate + shield)  |  CHA: 18  |  DC: 16  |  CON: Adv (WC)
+  Items: Instrument of the Bards, Cloak of Protection (+1 AC=20, +1 saves)
+  ---
+  How it works: AC 20, Adv CON, DC 16, free Misty Step, free Silvery Barbs.
+  The only build that gets armor + War Caster + Fey Touched + high CHA.
+  Cloak pushes AC to 20 and gives +1 to all saves on top of War Caster Adv.
+  Nothing else in this document matches this stat line.
+  RISK: CHA 18 not 20. But DC 16 with AC 20 and Adv CON is the best package.
+  REWARD: Highest floor in the entire document. Nothing can go wrong.
+
+  BUILD B: MAX CHA ARMORED (CHA 20 in half plate)
+  Feats: Moderately Armored +1 DEX → Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 19 (half plate + shield)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Cloak of Protection (+1 AC=20, +1 saves), Instrument of the Bards
+  ---
+  How it works: AC 20 with Cloak, DC 17, free Misty Step + Silvery Barbs.
+  No War Caster but AC 20 means you get hit less, and Cloak gives +1 CON
+  saves (+3 total). Misty Step to escape melee if swarmed.
+  ONLY BUILD with CHA 20 + AC 19+ in the entire document.
+  RISK: No Adv CON. CON save +3 only.
+  REWARD: DC 17 in AC 20. Unique stat line. Best numbers in the doc.
+
+  BUILD C: TRIPLE HALF-FEAT (CHA 20 + 3 bonus features, no armor)
+  Feats: Fey Touched +1 CHA (18) → Telekinetic +1 CHA (19) → Telepathic +1 CHA (20)
+  AC: 14 (studded leather)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Cloak of Protection (+1 AC=15, +1 saves), Winged Boots (4hr flight)
+  ---
+  How it works: CHA 20 from three half-feats. Free Misty Step + Silvery Barbs
+  (Fey Touched). BA Telekinetic shove DC 17 + invisible Mage Hand 60ft.
+  Telepathy 60ft (double Gem Dragonborn range). Winged Boots = flight.
+  You're a flying, telepathic, telekinetic DC 17 caster with Misty Step.
+  RISK: AC 15 is fragile. No CON protection. No racial features at all.
+  REWARD: Most features from feats alone. But Custom Lineage brings NOTHING
+  racial. This is "create your own species from feats." If that excites you,
+  it's the most customizable build. If not, Firbolg does this better.
+
+--------------------------------------------------------------------------------
+TORTLE - "The Unbreakable Concentration Fortress"
+--------------------------------------------------------------------------------
+
+  BUILD A: DOUBLE CON (Both concentration protections)
+  Feats: Resilient CON +1 (CON 14→15) → War Caster
+  AC: 17 (natural)  |  CHA: 17  |  DC: 15  |  CON: Adv + Prof (BOTH!)
+  Items: Bracers of Defense (+2 AC=19), Instrument of the Bards
+  Tortle point buy: CHA 17, CON 14+1=15(Res), DEX can dump (8).
+  ---
+  How it works: ONLY build with BOTH Adv CON and Prof CON saves.
+  Concentration check: d20 with advantage + 5 (Prof 3 + CON 2). DC 10 check
+  = ~99% success. Bracers of Defense = AC 19 (no armor/shield needed, War
+  Caster somatic component not an issue). You cast a spell and it STAYS UP.
+  Shell Defense if swarmed = AC 21 (17+4) while prone.
+  RISK: DC 15 is low. No mobility, no escape tools. Boring turns.
+  REWARD: Mathematically best concentration holder in 5e. Period.
+
+  BUILD B: BALANCED (One CON protection + CHA)
+  Feats: Resilient CON +1 (CON 15) → Fey Touched +1 CHA (18)
+  AC: 17 (natural)  |  CHA: 18  |  DC: 16  |  CON: Prof (Resilient)
+  Items: Bracers of Defense (+2 AC=19), Instrument of the Bards
+  ---
+  How it works: AC 19, DC 16, Prof CON saves (+5 total = very good).
+  Free Misty Step for escape (Tortle is slow, this helps enormously).
+  Free Silvery Barbs 1/day. No Adv on CON but Prof alone is strong:
+  DC 10 CON save at +5 = 80% success (vs 55% without Prof).
+  RISK: No War Caster. Adv on CON is missed. 80% hold rate vs 99%.
+  REWARD: DC 16 is a real improvement over DC 15. Misty Step on a Tortle
+  is huge — they're slow and have zero innate mobility.
+
+  BUILD C: MAX CHA TURTLE (Highest DC + Prof CON)
+  Feats: Resilient CON +1 (CON 15) → ASI CHA +2 (CHA 19... odd!)
+  ---
+  WAIT: CHA 17 + 2 = 19 (odd). Wasted point. Better:
+  Feats: Fey Touched +1 CHA (18) → ASI CHA +2 (20)
+  AC: 17 (natural)  |  CHA: 20  |  DC: 17  |  CON: NONE
+  Items: Bracers of Defense (+2 AC=19), Instrument of the Bards
+  ---
+  How it works: AC 19, DC 17, free Misty Step, free Silvery Barbs.
+  No CON protection at all. CON save is +2 (base). Shell Defense = AC 21
+  if overwhelmed. You're betting on DC 17 landing so hard that enemies
+  can't hit you in the first place.
+  RISK: CON save +2 = 60% to hold on DC 10. Huge concentration risk.
+  REWARD: DC 17 Tortle with AC 19 and Misty Step. If the spell lands,
+  you might not need to hold it long.
+
+
+================================================================================
+ALL 21 BUILDS - MASTER COMPARISON
+================================================================================
+
+  Species          Build  AC  CHA  DC  CON Prot   Signature Trick
+  ---------------  -----  --  ---  --  ---------  --------------------------------
+  Firbolg          A      15  20   17  NONE       Invisible DC 17 caster
+  Firbolg          B      20  18   16  Cloak+Hid  AC 20 + 3 turns invisible
+  Firbolg          C      19  17   15  Adv(WC)    Unkillable invisible tank
+
+  Eladrin          A      20  17   15  Adv(WC)    Double CC (spell + charm)
+  Eladrin          B      15  20   17  NONE       DC 17 spell + DC 16 charm
+  Eladrin          C      19  18   16  NONE       Triple teleport + best init
+
+  Gem Dragonborn   A      19  17   15  Adv(WC)    Pearl of Power = 2x Hyp Pat
+  Gem Dragonborn   B      20  18   16  Cloak      DC 16 spell + DC 16 Dragon Fear
+  Gem Dragonborn   C      15  20   17  NONE       DC 17 double mass CC + flight
+
+  Satyr            A      19  17   15  Adv(WC)    Magic Resist + Adv CON = wall
+  Satyr            B      20  18   16  Cloak      AC 20 + Magic Resist + teleport
+  Satyr            C      15  20   17  NONE       Flying unkillable goat DC 17
+
+  Yuan-Ti          A      19  17   15  Adv(WC)    Unscryable fortress spy
+  Yuan-Ti          B      19  18   16  NONE       Shapeshifting social predator
+  Yuan-Ti          C      14  20   17  NONE       DC 17 free Suggestion = GG
+
+  Custom Lineage   A      20  18   16  Adv(WC)    AC 20 + Adv CON + Misty Step
+  Custom Lineage   B      20  20   17  Cloak      ONLY CHA 20 + AC 20 build
+  Custom Lineage   C      15  20   17  NONE       Flying telepathic telekinetic
+
+  Tortle           A      19  17   15  Adv+Prof   99% concentration hold. Period.
+  Tortle           B      19  18   16  Prof       80% conc + DC 16 + Misty Step
+  Tortle           C      19  20   17  NONE       DC 17 + AC 19 + Shell Defense
+
+  ---------------  -----  --  ---  --  ---------  --------------------------------
+
+PATTERNS:
+  "A" builds  = Safe. AC 19-20, DC 15, Adv CON or double CON protection.
+  "B" builds  = Balanced. AC 19-20, DC 16, partial or creative CON coverage.
+  "C" builds  = Glass cannon. AC 14-15, DC 17, no CON protection, highest impact.
+
+NOTABLE STANDOUTS:
+  Best tank:       Custom Lineage A — AC 20, Adv CON, DC 16, Misty Step. Done.
+  Best DC:         Custom Lineage B — DC 17 in AC 20. Nobody else can do this.
+  Most fun:        Firbolg A — Invisible DC 17 caster. Unique combat loop.
+  Most resilient:  Tortle A — 99% concentration. Mathematically unbeatable.
+  Best double CC:  Gem Dragonborn B — Hypnotic Pattern + Dragon Fear, both DC 16.
+  Best social:     Yuan-Ti C — DC 17 free Suggestion + Hat of Disguise.
+  Best flyer:      Satyr C — Flying goat with DC 17 + Magic Resistance.
+  Best init:       Eladrin C — Sentinel Shield + AC 19 + triple teleport.
+  Best all-around: Satyr B — AC 20, DC 16, Magic Resist, Misty Step, Fey type.

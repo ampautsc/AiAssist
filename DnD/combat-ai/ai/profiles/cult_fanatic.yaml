@@ -1,0 +1,19 @@
+# Cult Fanatic AI Profile
+# INT 11 → Cunning tier (borderline tactical)
+# Zealous caster who uses spells aggressively and fights to the death.
+
+creature_type: cult_fanatic
+personality: "zealous, fanatical, will die for the cause without hesitation"
+preferred_tactics:
+  - cast_offensive_spells_first
+  - hold_spirit_guardians_concentration
+  - protect_cult_leader
+  - focus_casters
+special_behaviors:
+  dark_devotion: true       # advantage on saves vs charmed/frightened
+flee_hp_percent: 0          # fanatics never flee
+preferred_targets:
+  - casters
+  - healers
+avoids:
+  - melee_if_concentration_active

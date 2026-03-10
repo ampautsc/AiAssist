@@ -1,0 +1,42 @@
+# Goblin
+# Small humanoid, challenge rating 1/4
+# SRD-compatible stat block
+
+name: Goblin
+creature_type: humanoid
+size: small
+armor_class: 15
+hit_points_max: 7
+speed: 6              # 30ft = 6 hexes
+
+abilities:
+  strength: 8
+  dexterity: 14
+  constitution: 10
+  intelligence: 10
+  wisdom: 8
+  charisma: 8
+
+attacks:
+  - name: Scimitar
+    attack_bonus: 4
+    damage_dice: "1d6+2"
+    damage_type: slashing
+    reach: 1
+  - name: Shortbow
+    attack_bonus: 4
+    damage_dice: "1d6+2"
+    damage_type: piercing
+    reach: 1
+    range_short: 16
+    range_long: 64
+
+senses:
+  darkvision: 12
+  passive_perception: 9
+
+special_abilities:
+  - nimble_escape
+
+challenge_rating: 0.25
+proficiency_bonus: 2

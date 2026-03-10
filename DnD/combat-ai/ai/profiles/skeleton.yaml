@@ -1,0 +1,15 @@
+# Skeleton AI Profile
+# INT 6 → Low tier
+# Skeletons follow simple commands but have no self-preservation.
+
+creature_type: skeleton
+intelligence_tier_override: low
+personality: "obedient, mechanical, follows last command given"
+preferred_tactics:
+  - attack_nearest
+  - use_ranged_if_available
+special_behaviors:
+  vulnerability_bludgeoning: true
+flee_hp_percent: 0          # undead don't flee
+preferred_targets: []
+avoids: []

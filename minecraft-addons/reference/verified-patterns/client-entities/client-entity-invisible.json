@@ -1,0 +1,18 @@
+{
+  "_comment": "Invisible client entity - references geometry.invisible (empty geometry)",
+  "_note": "The geometry identifier must match exactly what's in the geometry file",
+  
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "namespace:invisible_entity",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "geometry": {
+        "default": "geometry.invisible"
+      },
+      "render_controllers": ["controller.render.default"]
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.monarch.popup_tent",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 6,
+        "visible_bounds_height": 4,
+        "visible_bounds_offset": [0, 1.5, 0]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "floor",
+          "parent": "root",
+          "pivot": [0, 0, 0],
+          "cubes": [
+            {
+              "origin": [-24, 0, -24],
+              "size": [48, 1, 48],
+              "uv": [0, 48]
+            }
+          ]
+        },
+        {
+          "name": "back_wall",
+          "parent": "root",
+          "pivot": [0, 0, 24],
+          "cubes": [
+            {
+              "origin": [-24, 1, 23],
+              "size": [48, 38, 1],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "left_wall",
+          "parent": "root",
+          "pivot": [-24, 0, 0],
+          "cubes": [
+            {
+              "origin": [-24, 1, -24],
+              "size": [1, 38, 48],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "right_wall",
+          "parent": "root",
+          "pivot": [24, 0, 0],
+          "cubes": [
+            {
+              "origin": [23, 1, -24],
+              "size": [1, 38, 48],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "front_left",
+          "parent": "root",
+          "pivot": [0, 0, -24],
+          "cubes": [
+            {
+              "origin": [-24, 1, -24],
+              "size": [14, 38, 1],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "front_right",
+          "parent": "root",
+          "pivot": [0, 0, -24],
+          "cubes": [
+            {
+              "origin": [10, 1, -24],
+              "size": [14, 38, 1],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "front_top",
+          "parent": "root",
+          "pivot": [0, 0, -24],
+          "cubes": [
+            {
+              "origin": [-10, 33, -24],
+              "size": [20, 6, 1],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "roof",
+          "parent": "root",
+          "pivot": [0, 39, 0],
+          "cubes": [
+            {
+              "origin": [-25, 38, -25],
+              "size": [50, 1, 50],
+              "uv": [0, 48]
+            }
+          ]
+        },
+        {
+          "name": "door_flap",
+          "parent": "root",
+          "pivot": [0, 33, -24],
+          "cubes": [
+            {
+              "origin": [-10, 1, -25],
+              "size": [20, 32, 1],
+              "uv": [0, 0]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

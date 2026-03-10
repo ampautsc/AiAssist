@@ -1,0 +1,29 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:milkweed_seed_entity",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/milkweed_seed"
+      },
+      "geometry": {
+        "default": "geometry.milkweed_seed"
+      },
+      "render_controllers": ["controller.render.default"],
+      "animations": {
+        "float": "animation.milkweed_seed.float",
+        "float_controller": "controller.animation.milkweed_seed.float"
+      },
+      "scripts": {
+        "animate": ["float_controller"]
+      },
+      "spawn_egg": {
+        "base_color": "#F5E6D3",
+        "overlay_color": "#FFFFFF"
+      }
+    }
+  }
+}

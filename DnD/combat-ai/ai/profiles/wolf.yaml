@@ -1,0 +1,20 @@
+# Wolf AI Profile
+# INT 3 → Bestial tier
+# Pack hunters that flank and flee when wounded.
+
+creature_type: wolf
+intelligence_tier_override: bestial
+personality: "pack hunter, loyal, retreats when injured"
+preferred_tactics:
+  - flank_with_pack
+  - pack_tactics
+  - target_isolated_prey
+special_behaviors:
+  pack_tactics: true        # advantage when ally within 5ft of target
+  keen_hearing_smell: true   # advantage on Perception checks
+flee_hp_percent: 30
+preferred_targets:
+  - isolated
+  - wounded
+avoids:
+  - large_groups_alone

@@ -1,0 +1,26 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.monarch_butterfly.flight": {
+      "initial_state": "gliding",
+      "states": {
+        "gliding": {
+          "animations": ["idle"],
+          "transitions": [
+            {
+              "flapping": "query.modified_move_speed > 0.1"
+            }
+          ]
+        },
+        "flapping": {
+          "animations": ["fly"],
+          "transitions": [
+            {
+              "gliding": "query.modified_move_speed <= 0.1"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

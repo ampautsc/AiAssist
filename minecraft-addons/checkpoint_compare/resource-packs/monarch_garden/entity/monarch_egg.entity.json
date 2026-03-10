@@ -1,0 +1,22 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:egg",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/monarch_egg"
+      },
+      "geometry": {
+        "default": "geometry.chicken"
+      },
+      "render_controllers": ["controller.render.item_sprite"],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 13
+      }
+    }
+  }
+}

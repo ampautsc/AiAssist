@@ -1,0 +1,85 @@
+{
+  "format_version": "1.20.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:caterpillar",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {
+      "monarch:transform_to_chrysalis": {
+        "minecraft:transformation": {
+          "into": "monarch:chrysalis",
+          "delay": 0.5
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["caterpillar", "arthropod", "mob"]
+      },
+      "minecraft:health": {
+        "value": 2,
+        "max": 2
+      },
+      "minecraft:movement": {
+        "value": 0.05
+      },
+      "minecraft:navigation.walk": {
+        "can_path_over_water": false,
+        "avoid_water": true
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:jump.static": {},
+      "minecraft:collision_box": {
+        "width": 0.2,
+        "height": 0.2
+      },
+      "minecraft:physics": {},
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 7,
+        "look_distance": 4.0
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 8
+      },
+      "minecraft:behavior.random_stroll": {
+        "priority": 6,
+        "speed_multiplier": 0.8
+      },
+      "minecraft:behavior.tempt": {
+        "priority": 4,
+        "speed_multiplier": 1.0,
+        "items": ["monarch:milkweed"]
+      },
+      "minecraft:timer": {
+        "looping": false,
+        "time": 600,
+        "time_down_event": {
+          "event": "monarch:become_chrysalis"
+        }
+      },
+      "minecraft:ageable": {
+        "duration": 600,
+        "grow_up": {
+          "event": "monarch:become_chrysalis"
+        }
+      }
+    },
+    "events": {
+      "monarch:become_chrysalis": {
+        "add": {
+          "component_groups": ["monarch:transform_to_chrysalis"]
+        }
+      }
+    }
+  }
+}

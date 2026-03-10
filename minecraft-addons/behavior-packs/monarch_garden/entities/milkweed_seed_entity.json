@@ -1,0 +1,67 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:milkweed_seed_entity",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "is_experimental": false,
+      "runtime_identifier": "minecraft:snowball"
+    },
+    "component_groups": {
+      "monarch:despawn": {
+        "minecraft:instant_despawn": {}
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["seed", "inanimate"]
+      },
+      "minecraft:scale": {
+        "value": 0.3
+      },
+      "minecraft:collision_box": {
+        "width": 0.15,
+        "height": 0.15
+      },
+      "minecraft:projectile": {
+        "on_hit": {
+          "definition_event": {
+            "affect_projectile": true,
+            "event_trigger": {
+              "event": "monarch:seed_landed",
+              "target": "self"
+            }
+          }
+        },
+        "gravity": 0.03,
+        "power": 0.0,
+        "uncertainty_base": 0,
+        "uncertainty_multiplier": 0,
+        "should_bounce": false,
+        "multiple_targets": false,
+        "liquid_inertia": 0.6
+      },
+      "minecraft:physics": {
+        "has_gravity": true,
+        "has_collision": true
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {},
+      "monarch:seed_landed": {
+        "queue_command": {
+          "command": [
+            "say SEED HIT - PROJECTILE ON_HIT FIRED",
+            "scriptevent monarch:seed_landed"
+          ]
+        }
+      },
+      "monarch:despawn_seed": {
+        "add": {
+          "component_groups": ["monarch:despawn"]
+        }
+      }
+    }
+  }
+}

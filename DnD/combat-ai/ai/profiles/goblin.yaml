@@ -1,0 +1,19 @@
+# Goblin AI Profile
+# INT 10 → Low tier (but cunning in practice via profile)
+# Cowardly opportunists who prefer hit-and-run.
+
+creature_type: goblin
+personality: "cowardly, opportunistic, prefers ambush and hit-and-run"
+preferred_tactics:
+  - flank_when_possible
+  - target_wounded
+  - hit_and_run
+  - use_cover
+special_behaviors:
+  nimble_escape: true       # disengage or hide as bonus action
+flee_hp_percent: 20
+preferred_targets:
+  - wounded
+  - isolated
+avoids:
+  - direct_confrontation_when_outnumbered
