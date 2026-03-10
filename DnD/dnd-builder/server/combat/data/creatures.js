@@ -100,15 +100,15 @@ function getTemplateKeys() {
  */
 function createCreature(key, overrides = {}) {
   const t = getTemplate(key)
-  const a = t.abilities
+  const abilities = t.abilities
 
   // Compute modifiers from ability scores
-  const strMod = computeModifier(a.str)
-  const dexMod = computeModifier(a.dex)
-  const conMod = computeModifier(a.con)
-  const intMod = computeModifier(a.int)
-  const wisMod = computeModifier(a.wis)
-  const chaMod = computeModifier(a.cha)
+  const strMod = computeModifier(abilities.str)
+  const dexMod = computeModifier(abilities.dex)
+  const conMod = computeModifier(abilities.con)
+  const intMod = computeModifier(abilities.int)
+  const wisMod = computeModifier(abilities.wis)
+  const chaMod = computeModifier(abilities.cha)
 
   const id       = overrides.id       || t.id
   const name     = overrides.name     || t.name
@@ -120,7 +120,7 @@ function createCreature(key, overrides = {}) {
     type:     t.type,
     cr:       t.cr,
     // Abilities
-    str: a.str, dex: a.dex, con: a.con, int: a.int, wis: a.wis, cha: a.cha,
+    str: abilities.str, dex: abilities.dex, con: abilities.con, int: abilities.int, wis: abilities.wis, cha: abilities.cha,
     strMod, dexMod, conMod, intMod, wisMod, chaMod,
     profBonus: t.profBonus,
     // Combat stats

@@ -659,7 +659,7 @@ function makeTacticalAI(profileMap) {
     try {
       return makeDecision(profileKey, creature, allCombatants, round)
     } catch (err) {
-      console.error(`[Tactics] Error in profile '${profileKey}' for ${creature.name}:`, err.message)
+      console.error(`[Tactics] Error in profile '${profileKey}' for ${creature.name}:`, err)
       return makeDecision('generic_melee', creature, allCombatants, round)
     }
   }
