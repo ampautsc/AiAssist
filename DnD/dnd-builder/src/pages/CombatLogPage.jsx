@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api'
+import HexMap from '../components/HexMap'
 
 // ─── STYLING HELPERS ────────────────────────────────────────────────────────
 
@@ -40,6 +41,8 @@ export default function CombatLogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('');
+  const [showMap, setShowMap] = useState(true);
+  const [selectedMapRound, setSelectedMapRound] = useState(0);
 
   // Load data
   useEffect(() => {
@@ -151,7 +154,7 @@ export default function CombatLogPage() {
           {logData.sampleLogs?.map((log, i) => (
             <button
               key={i}
-              onClick={() => setSelectedRun(i)}
+              onClick={() => { setSelectedRun(i); setSelectedMapRound(0); }}
               style={{
                 padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', border: 'none', cursor: 'pointer',
                 background: i === selectedRun ? 'var(--accent-gold)' : 'rgba(255,255,255,0.08)',
@@ -196,6 +199,59 @@ export default function CombatLogPage() {
             }}
           />
         </div>
+
+        {/* Hex Map */}
+        {run?.positionSnapshots && run.positionSnapshots.length > 0 && (
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => setShowMap(m => !m)}
+                style={{
+                  padding: '0.3rem 0.7rem', borderRadius: '4px', fontSize: '0.8rem',
+                  background: showMap ? 'var(--accent-blue)' : 'rgba(255,255,255,0.08)',
+                  color: showMap ? '#fff' : '#aaa', border: 'none', cursor: 'pointer',
+                }}
+              >
+                🗺️ Hex Map {showMap ? '▾' : '▸'}
+              </button>
+              {showMap && (
+                <>
+                  <span style={{ color: '#888', fontSize: '0.8rem' }}>Round:</span>
+                  <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                    {run.positionSnapshots.map((snap, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedMapRound(i)}
+                        style={{
+                          padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem',
+                          border: 'none', cursor: 'pointer',
+                          background: i === selectedMapRound ? 'var(--accent-gold)' : 'rgba(255,255,255,0.08)',
+                          color: i === selectedMapRound ? '#000' : '#aaa',
+                        }}
+                      >
+                        {snap.round === 0 ? 'Start' : `R${snap.round}`}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            {showMap && run.positionSnapshots[selectedMapRound] && (
+              <div style={{
+                background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '1rem',
+                overflowX: 'auto',
+              }}>
+                <HexMap
+                  combatants={run.positionSnapshots[selectedMapRound].combatants}
+                  round={run.positionSnapshots[selectedMapRound].round}
+                  gridWidth={14}
+                  gridHeight={10}
+                  hexSize={28}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Log output */}
         <div style={{

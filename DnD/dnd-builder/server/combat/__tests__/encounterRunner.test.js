@@ -447,3 +447,157 @@ describe('buildAnalytics', () => {
     assert.equal(analytics[0].hitRate, 60);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// resolveDragonFear
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('resolveDragonFear', () => {
+  it('applies frightened condition on failed WIS save', () => {
+    const bard = makeBard(); // has dragonFear resource
+    const f1 = makeFanatic(1);
+    // f1 WIS save: 10.5 + 1 = 11.5 < 15 (DC) → FAIL → frightened
+    const log = [];
+    
+    runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
+    assert.ok(f1.conditions.includes('frightened'));
+    assert.equal(bard.dragonFear.uses, 0);
+    assert.ok(log.some(l => l.includes('FRIGHTENED')));
+  });
+
+  it('does not apply frightened when target succeeds WIS save', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.saves.wis = 20; // guaranteed success
+    const log = [];
+    
+    runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
+    assert.ok(!f1.conditions.includes('frightened'));
+    assert.ok(log.some(l => l.includes('SUCCESS')));
+  });
+
+  it('skips targets already frightened', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.conditions.push('frightened');
+    const log = [];
+    
+    runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
+    // Still 1 'frightened' condition, not doubled
+    assert.equal(f1.conditions.filter(c => c === 'frightened').length, 1);
+    assert.ok(log.some(l => l.includes('Already frightened')));
+  });
+
+  it('skips targets immune to frightened', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.immunities = { conditions: ['frightened'] };
+    const log = [];
+    
+    runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
+    assert.ok(!f1.conditions.includes('frightened'));
+    assert.ok(log.some(l => l.includes('Immune')));
+  });
+
+  it('does nothing when no Dragon Fear uses remain', () => {
+    const bard = makeBard();
+    bard.dragonFear.uses = 0;
+    const f1 = makeFanatic(1);
+    const log = [];
+    
+    runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
+    assert.ok(!f1.conditions.includes('frightened'));
+    assert.ok(log.some(l => l.includes('no uses remaining')));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// processEndOfTurnSaves — Dragon Fear frightened repeat save
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('processEndOfTurnSaves — Dragon Fear frightened', () => {
+  it('frightened creature makes WIS save at end of turn', () => {
+    const bard = makeBard(); // has dragonFear with dc: 15
+    const f1 = makeFanatic(1);
+    f1.conditions.push('frightened');
+    const log = [];
+    
+    // f1 WIS save: 10.5 + 1 = 11.5 < 15 → FAIL → stays frightened
+    runner.processEndOfTurnSaves(f1, [bard, f1], log);
+    assert.ok(f1.conditions.includes('frightened'));
+    assert.ok(log.some(l => l.includes('Dragon Fear')));
+  });
+
+  it('frightened creature breaks free on successful save', () => {
+    const bard = makeBard();
+    bard.dragonFear.dc = 5; // very low DC
+    const f1 = makeFanatic(1);
+    f1.conditions.push('frightened');
+    const log = [];
+    
+    // f1 WIS save: 10.5 + 1 = 11.5 >= 5 → SUCCESS
+    runner.processEndOfTurnSaves(f1, [bard, f1], log);
+    assert.ok(!f1.conditions.includes('frightened'));
+    assert.ok(log.some(l => l.includes('no longer frightened')));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// runEncounter — positionSnapshots tracking
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('runEncounter — positionSnapshots', () => {
+  it('includes positionSnapshots in result', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.currentHP = 1; // dies in round 1
+    
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: simpleAttackAI,
+      maxRounds: 5,
+      verbose: false,
+    });
+    
+    assert.ok(Array.isArray(result.positionSnapshots));
+    assert.ok(result.positionSnapshots.length >= 2); // start + at least 1 round end
+  });
+
+  it('initial snapshot has round 0 and all combatants', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.currentHP = 1;
+    
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: simpleAttackAI,
+      maxRounds: 5,
+      verbose: false,
+    });
+    
+    const startSnap = result.positionSnapshots[0];
+    assert.equal(startSnap.round, 0);
+    assert.equal(startSnap.phase, 'start');
+    assert.equal(startSnap.combatants.length, 2);
+  });
+
+  it('snapshots include HP, conditions, and position', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.currentHP = 1;
+    
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: simpleAttackAI,
+      maxRounds: 5,
+      verbose: false,
+    });
+    
+    const snap = result.positionSnapshots[0];
+    const bardSnap = snap.combatants.find(c => c.side === 'party');
+    assert.ok(typeof bardSnap.currentHP === 'number');
+    assert.ok(typeof bardSnap.maxHP === 'number');
+    assert.ok(Array.isArray(bardSnap.conditions));
+    assert.ok(typeof bardSnap.position === 'object');
+  });
+});

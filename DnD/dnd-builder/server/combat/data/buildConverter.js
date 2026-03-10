@@ -70,6 +70,7 @@ function buildToCreature(build, overrides = {}) {
   // ── Features ────────────────────────────────────────────────────────
   const hasWarCaster = feats.some(f => f.grantsAdvConSaves);
   const hasResilientCon = feats.some(f => f.grantsProfConSaves);
+  const hasDragonFear = feats.some(f => f.name === 'Dragon Fear' || f.grantsDragonFear);
   const magicResistance = (species.traitList || []).some(t =>
     t.name?.toLowerCase().includes('magic resistance')
   );
@@ -246,6 +247,20 @@ function buildToCreature(build, overrides = {}) {
       duration: 10,
       active: false,
       roundsRemaining: 0,
+    };
+  }
+
+  // ── Dragon Fear ───────────────────────────────────────────────────
+  // Dragon Fear feat: replace breath weapon with a terrifying roar (1/short or long rest).
+  // DC = 8 + profBonus + CHA mod. 30ft cone WIS save or frightened for 1 minute.
+  if (hasDragonFear && isDragonborn) {
+    creature.dragonFear = {
+      uses: 1,
+      max: 1,
+      dc: 8 + profBonus + mods.cha,
+      save: 'wis',
+      range: 30,
+      shape: '30ft cone',
     };
   }
 

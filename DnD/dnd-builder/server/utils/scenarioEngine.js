@@ -730,6 +730,7 @@ function runCombatEngineEvaluation(builds, options = {}) {
           bardHpPct: r.bardHpPct,
           log: r.log,
           analytics: r.analytics,
+          positionSnapshots: r.positionSnapshots || [],
         }));
 
       if (sampleLogs.length > 0) {
@@ -746,9 +747,10 @@ function runCombatEngineEvaluation(builds, options = {}) {
         }, null, 0)); // compact JSON (no indentation) to save space
       }
 
-      // Strip logs from runs before passing to result compilation (save memory)
+      // Strip logs and snapshots from runs before passing to result compilation (save memory)
       for (const run of simResult.runs) {
         delete run.log;
+        delete run.positionSnapshots;
       }
 
       // Map new engine results to legacy dashboard format

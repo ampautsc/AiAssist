@@ -261,6 +261,43 @@ function evalConcentrationSelfHeal(ctx) {
 }
 
 /**
+ * DRAGON FEAR — Use Dragon Fear feat for no-concentration AoE frighten.
+ * Best used on round 2 after Hypnotic Pattern is active (hits creatures that saved).
+ * DC = 8 + profBonus + CHA mod. 30ft cone, WIS save or frightened 1 min.
+ * Frightened: disadvantage on attacks/ability checks, can't move closer to source.
+ */
+function evalDragonFear(ctx) {
+  const { me, activeEnemies, round } = ctx;
+  if (!me.dragonFear || me.dragonFear.uses <= 0) return null;
+  
+  // Require at least 1 active (non-disabled) enemy in range
+  const inRange = activeEnemies.filter(e => mech.distanceBetween(me, e) <= me.dragonFear.range);
+  if (inRange.length === 0) return null;
+  
+  // Prefer round 2+ when HP may have already incapacitated some enemies.
+  // Skip round 1 if HP is available — HP is the better opener.
+  if (round === 1 && me.spellSlots && me.spellSlots[3] > 0 &&
+      me.spellsKnown && me.spellsKnown.includes('Hypnotic Pattern') &&
+      activeEnemies.length >= 2) {
+    return null; // Let Hypnotic Pattern opener win on round 1
+  }
+  
+  // Filter to enemies that aren't already frightened or incapacitated
+  const eligibleTargets = inRange.filter(e =>
+    !mech.hasCondition(e, 'frightened') &&
+    !mech.hasCondition(e, 'charmed_hp') &&
+    !mech.hasCondition(e, 'incapacitated')
+  );
+  if (eligibleTargets.length === 0) return null;
+  
+  return {
+    action: { type: 'dragon_fear', targets: eligibleTargets },
+    reasoning: `Dragon Fear on ${eligibleTargets.length} active enemies in ${me.dragonFear.range}ft (DC ${me.dragonFear.dc} WIS save or frightened). No-concentration CC!`,
+  };
+}
+
+
+/**
  * NO CONCENTRATION — re-establish with Hypnotic Pattern if 2+ enemies.
  */
 function evalRecastHypnoticPattern(ctx) {
@@ -691,6 +728,7 @@ PROFILES['lore_bard'] = [
   evalConcentrationFinishWithCrossbow,
   evalConcentrationBreathWeapon,
   evalConcentrationRangedViciousMockery,
+  evalDragonFear,
   evalRecastHypnoticPattern,
   evalCastHoldPerson,
   evalFallbackCantrip,

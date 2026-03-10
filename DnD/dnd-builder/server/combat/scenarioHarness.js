@@ -225,9 +225,10 @@ function simulateScenario(build, scenario, options = {}) {
       analytics: result.analytics,
     };
 
-    // Save full combat log for first N runs (for debugging/viewer)
+    // Save full combat log and position snapshots for first N runs (for debugging/viewer)
     if (i < logRuns) {
       runEntry.log = result.log;
+      runEntry.positionSnapshots = result.positionSnapshots || [];
     }
 
     runs.push(runEntry);

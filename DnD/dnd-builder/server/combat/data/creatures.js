@@ -65,6 +65,9 @@ const CREATURE_TEMPLATES = {
         shape: '15ft cone',
       },
       gemFlight: { uses: 3, max: 3, duration: 10, active: false, roundsRemaining: 0 },
+      // Dragon Fear feat: replaces breath weapon exhalation with a frightening roar
+      // WIS save DC = 8 + profBonus + CHA mod = 8 + 3 + 4 = 15
+      dragonFear: { uses: 1, max: 1, dc: 15, save: 'wis', range: 30, shape: '30ft cone' },
     },
     
     weapons: [

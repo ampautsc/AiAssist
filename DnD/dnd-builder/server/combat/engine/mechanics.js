@@ -86,6 +86,23 @@ function makeAttackRoll(attackBonus, targetAC, advantage = false, disadvantage =
   return { natural, attackBonus, total, targetAC, hits, isCrit, isMiss, type };
 }
 
+/**
+ * Check if a creature is frightened of any visible enemy.
+ * Frightened creatures have disadvantage on attack rolls and ability checks
+ * while the source of fear is visible, and cannot move closer to it.
+ * @param {object} creature — the attacking creature
+ * @param {object[]} allCombatants — all combatants in the encounter
+ * @returns {boolean}
+ */
+function hasFrightenedDisadvantage(creature, allCombatants) {
+  if (!hasCondition(creature, 'frightened')) return false;
+  // The source of fear is on the opposing side and alive
+  const fearSource = allCombatants.find(c =>
+    c.side !== creature.side && isAlive(c) && c.dragonFear
+  );
+  return !!fearSource;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // DAMAGE ROLLS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -244,4 +261,5 @@ module.exports = {
   getActiveEnemies, getAllAliveEnemies,
   breakConcentration,
   distanceBetween,
+  hasFrightenedDisadvantage,
 };

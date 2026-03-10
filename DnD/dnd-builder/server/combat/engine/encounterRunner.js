@@ -156,6 +156,26 @@ function processEndOfTurnSaves(combatant, allCombatants, log) {
     }
   }
   
+  // Dragon Fear: frightened repeat save at end of each turn
+  if (mech.hasCondition(combatant, 'frightened')) {
+    // Find the creature that frightened this combatant (the one with Dragon Fear)
+    const fearSources = allCombatants.filter(c =>
+      c.side !== combatant.side && mech.isAlive(c) && c.dragonFear
+    );
+    
+    if (fearSources.length > 0) {
+      const dc = fearSources[0].dragonFear.dc;
+      const save = mech.makeSavingThrow(combatant.saves.wis, dc);
+      
+      if (save.success) {
+        mech.removeCondition(combatant, 'frightened');
+        log.push(`  END OF TURN: WIS save vs Dragon Fear [d20:${save.result}+${save.saveBonus}=${save.total} vs DC ${dc}] SUCCESS! ${combatant.name} is no longer frightened!`);
+      } else {
+        log.push(`  END OF TURN: WIS save vs Dragon Fear [d20:${save.result}+${save.saveBonus}=${save.total} vs DC ${dc}] FAIL. Still frightened.`);
+      }
+    }
+  }
+  
   // Hypnotic Pattern: no repeat save (need to be shaken awake as an action)
 }
 
@@ -246,6 +266,10 @@ function resolveActionItem(combatant, action, allCombatants, log) {
       }
       break;
       
+    case 'dragon_fear':
+      resolveDragonFear(combatant, action, allCombatants, log);
+      break;
+      
     default:
       log.push(`  Unknown action type: ${action.type}`);
   }
@@ -269,6 +293,8 @@ function resolveWeaponAttack(attacker, action, allCombatants, log) {
   if (mech.hasCondition(target, 'invisible')) disadvantage = true;
   // Paralyzed target: advantage & auto-crit within 5ft
   if (mech.hasCondition(target, 'paralyzed')) advantage = true;
+  // Frightened: disadvantage on attack rolls while source of fear is visible
+  if (mech.hasFrightenedDisadvantage(attacker, allCombatants)) disadvantage = true;
   
   const atkResult = mech.makeAttackRoll(weapon.attackBonus, target.ac, advantage, disadvantage);
   attacker.attacksMade = (attacker.attacksMade || 0) + 1;
@@ -348,6 +374,47 @@ function resolveShakeAwake(combatant, action, log) {
   log.push(`  ACTION: Shakes ${target.name} awake! Charmed + Incapacitated removed.`);
 }
 
+function resolveDragonFear(attacker, action, allCombatants, log) {
+  const df = attacker.dragonFear;
+  if (!df || df.uses <= 0) {
+    log.push(`  ACTION: Dragon Fear — no uses remaining!`);
+    return;
+  }
+  
+  df.uses--;
+  const targets = action.targets || [];
+  const dc = df.dc;
+  
+  log.push(`  ACTION: Dragon Fear (${df.shape}, DC ${dc} WIS save or frightened 1 minute). ${df.uses}/${df.max} uses remaining.`);
+  
+  for (const target of targets) {
+    if (!mech.isAlive(target)) continue;
+    if (mech.hasCondition(target, 'frightened')) {
+      log.push(`    → ${target.name}: Already frightened. Skipping.`);
+      continue;
+    }
+    
+    // Immunity: creatures immune to frightened condition
+    const immunities = target.immunities?.conditions || [];
+    if (immunities.includes('frightened')) {
+      log.push(`    → ${target.name}: Immune to frightened! No effect.`);
+      continue;
+    }
+    
+    // Dark Devotion: advantage on saves vs frightened
+    const hasAdv = target.darkDevotion || false;
+    const save = mech.makeSavingThrow(target.saves.wis, dc, hasAdv);
+    
+    if (!save.success) {
+      mech.addCondition(target, 'frightened');
+      attacker.conditionsInflicted = (attacker.conditionsInflicted || 0) + 1;
+      log.push(`    → ${target.name}: WIS save FAIL [d20:${save.result}+${save.saveBonus}=${save.total} vs DC ${dc}]! FRIGHTENED! (Disadvantage on attacks/checks, can't move closer.)`);
+    } else {
+      log.push(`    → ${target.name}: WIS save SUCCESS [d20:${save.result}+${save.saveBonus}=${save.total} vs DC ${dc}]. Not frightened.`);
+    }
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // VICTORY CONDITIONS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -391,16 +458,36 @@ function checkVictory(allCombatants, round) {
  * @param {Function} config.getDecision — (combatant, allCombatants, round, log) => decision
  * @param {number} [config.maxRounds=20]
  * @param {boolean} [config.verbose=true]
- * @returns {{ winner: string, rounds: number, log: string[], analytics: Object }}
+ * @returns {{ winner: string, rounds: number, log: string[], analytics: Object, positionSnapshots: Object[] }}
  */
 function runEncounter(config) {
   const { combatants, getDecision, maxRounds = 20, verbose = true } = config;
   const allCombatants = [...combatants];
   const fullLog = [];
+  const positionSnapshots = [];   // Per-round position tracking for hex map replay
   
   function log(msg) {
     fullLog.push(msg);
     if (verbose) console.log(msg);
+  }
+  
+  /** Record a snapshot of all combatant positions + state for hex map display */
+  function recordSnapshot(round, phase) {
+    positionSnapshots.push({
+      round,
+      phase,
+      combatants: allCombatants.map(c => ({
+        id: c.id,
+        name: c.name,
+        side: c.side,
+        position: { ...(c.position || { x: 0, y: 0 }) },
+        currentHP: c.currentHP,
+        maxHP: c.maxHP,
+        alive: mech.isAlive(c),
+        flying: !!c.flying,
+        conditions: [...(c.conditions || [])],
+      })),
+    });
   }
   
   // Roll initiative
@@ -414,6 +501,9 @@ function runEncounter(config) {
     });
     log('');
   }
+  
+  // Snapshot starting positions
+  recordSnapshot(0, 'start');
   
   // Combat loop
   let result = { over: false };
@@ -469,6 +559,9 @@ function runEncounter(config) {
       // Check victory
       result = checkVictory(allCombatants, round);
     }
+    
+    // Snapshot end-of-round positions for hex map replay
+    recordSnapshot(round, 'end');
   }
   
   // Build analytics
@@ -481,6 +574,7 @@ function runEncounter(config) {
     log: fullLog,
     analytics,
     combatants: allCombatants,
+    positionSnapshots,
   };
 }
 
@@ -520,6 +614,7 @@ module.exports = {
   resolveWeaponAttack,
   resolveMultiattack,
   resolveBreathWeapon,
+  resolveDragonFear,
   resolveShakeAwake,
   checkVictory,
   buildAnalytics,
