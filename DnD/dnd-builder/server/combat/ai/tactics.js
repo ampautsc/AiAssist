@@ -1,27 +1,689 @@
 /**
- * AI DM Tactics Module
+ * AI Tactics Module — Priority-based tactical decision engine for D&D 5e combat.
  *
- * Determines what action a creature takes on its turn.
- * In full production this module calls the OpenAI API for complex encounters.
- * For development / offline use it applies rule-based heuristics.
- *
- * Exports:
- *   chooseTactic(creature, allCombatants, options) → TacticDecision
- *
- * TacticDecision:
- *   {
- *     action:      'attack' | 'move' | 'flee' | 'spell' | 'dodge' | 'help',
- *     targetId:    string | null,
- *     newPosition: { q, r } | null,
- *     reason:      string        // DM-facing explanation
- *   }
+ * Each creature profile is an ordered array of evaluator functions.
+ * makeDecision() runs them in sequence and returns the first non-null result,
+ * with bonus-action-only results merged into the main decision.
  */
 
 'use strict'
 
-// ── Geometry helpers ──────────────────────────────────────────────────────────
+const mech = require('../engine/mechanics')
 
-/** Axial (hex grid) distance between two positions. */
+// ─────────────────────────────────────────────────────────────────────────────
+// BATTLEFIELD ASSESSMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Build a context snapshot used by all evaluators.
+ * @param {object} creature
+ * @param {object[]} allCombatants
+ * @param {number} round
+ * @returns {object} ctx
+ */
+function assessBattlefield(creature, allCombatants, round) {
+  const alive = allCombatants.filter(c => mech.isAlive(c))
+  const enemies = alive.filter(c => c.side !== creature.side && c.id !== creature.id)
+  const allies  = alive.filter(c => c.side === creature.side  && c.id !== creature.id)
+
+  const activeEnemies = enemies.filter(e => !mech.isIncapacitated(e))
+  const enemiesInMelee = activeEnemies.filter(e => mech.distanceBetween(creature, e) <= 5)
+  const charmedAllies  = allies.filter(a => mech.hasCondition(a, 'charmed_hp'))
+
+  const hpPct      = creature.currentHP / creature.maxHP
+  const isFlying   = !!creature.flying
+  const isInvisible = (creature.conditions || []).includes('invisible')
+  const canFly     = !!(creature.gemFlight && creature.gemFlight.uses > 0 && !isFlying)
+
+  return {
+    me: creature,
+    round,
+    allCombatants,
+    enemies,
+    allies,
+    activeEnemies,
+    enemiesInMelee,
+    charmedAllies,
+    hpPct,
+    isFlying,
+    isInvisible,
+    canFly,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TARGETING HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function selectHighestThreat(enemies) {
+  if (!enemies || enemies.length === 0) return null
+  const casters = enemies.filter(e => e.spellsKnown && e.spellsKnown.length > 0)
+  if (casters.length > 0) return casters[0]
+  return enemies[0]
+}
+
+function selectWeakest(enemies) {
+  if (!enemies || enemies.length === 0) return null
+  return enemies.reduce((a, b) => a.currentHP <= b.currentHP ? a : b)
+}
+
+function selectClosestCharmedAlly(me, charmedAllies) {
+  if (!charmedAllies || charmedAllies.length === 0) return null
+  return charmedAllies.reduce((closest, ally) => {
+    return mech.distanceBetween(me, ally) < mech.distanceBetween(me, closest) ? ally : closest
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BARD / PARTY EVALUATORS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function evalSurvivalInvisibility(ctx) {
+  const { me, hpPct, isInvisible } = ctx
+  if (hpPct >= 0.25) return null
+  if (isInvisible) return null
+  if (!me.spellSlots || !(me.spellSlots[4] > 0)) return null
+  return {
+    action: { spell: 'Greater Invisibility', level: 4 },
+    reasoning: 'CRITICAL HP — casting Greater Invisibility for survival',
+    bonusAction: me.gemFlight && me.gemFlight.uses > 0 ? { type: 'gem_flight' } : null,
+  }
+}
+
+function evalOpeningAoEDisable(ctx) {
+  const { me, round, activeEnemies } = ctx
+  if (round !== 1) return null
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
+  return {
+    action: { spell: 'Hypnotic Pattern', level: 3, targets: activeEnemies },
+    reasoning: 'ROUND 1 opening — casting Hypnotic Pattern to disable enemies',
+    bonusAction: me.gemFlight && me.gemFlight.uses > 0 ? { type: 'gem_flight' } : null,
+  }
+}
+
+function evalConcentrationAllDisabled(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (activeEnemies.length > 0) return null
+  return {
+    action: { type: 'dodge' },
+    reasoning: 'All enemies are disabled — maintaining concentration and taking dodge',
+  }
+}
+
+function evalConcentrationMeleeViciousMockery(ctx) {
+  const { me, enemiesInMelee } = ctx
+  if (!me.concentrating) return null
+  if (enemiesInMelee.length === 0) return null
+  return {
+    action: { spell: 'Vicious Mockery', target: enemiesInMelee[0] },
+    reasoning: 'Concentrating — enemy in melee, casting Vicious Mockery to impose disadvantage',
+  }
+}
+
+function evalConcentrationFinishWithCrossbow(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (activeEnemies.length !== 1) return null
+  if (activeEnemies[0].currentHP > 10) return null
+  return {
+    action: { type: 'attack', weapon: me.weapon, target: activeEnemies[0] },
+    reasoning: 'Concentrating — one weak enemy remaining, finishing with crossbow',
+  }
+}
+
+function evalConcentrationBreathWeapon(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (!me.breathWeapon || !(me.breathWeapon.uses > 0)) return null
+  const range = me.breathWeapon.range || 15
+  const targets = activeEnemies.filter(e => mech.distanceBetween(me, e) <= range)
+  if (targets.length < 2) return null
+  return {
+    action: { type: 'breath_weapon', targets },
+    reasoning: 'Concentrating — multiple enemies in breath range, using breath weapon',
+  }
+}
+
+function evalConcentrationRangedViciousMockery(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Vicious Mockery', target: selectHighestThreat(activeEnemies) },
+    reasoning: 'Concentrating — casting Vicious Mockery at highest threat',
+  }
+}
+
+function evalConcentrationSelfHeal(ctx) {
+  const { me, hpPct } = ctx
+  if (!me.concentrating) return null
+  if (hpPct >= 0.5) return null
+  return {
+    action: null,
+    bonusAction: { type: 'cast_healing_word', spell: 'Healing Word' },
+    _bonusActionOnly: true,
+    reasoning: 'Concentrating but HP low — using bonus action Healing Word',
+  }
+}
+
+function evalRecastHypnoticPattern(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (activeEnemies.length < 2) return null
+  if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
+  return {
+    action: { spell: 'Hypnotic Pattern', level: 3, targets: activeEnemies },
+    reasoning: 'Recasting Hypnotic Pattern to disable multiple enemies',
+  }
+}
+
+function evalCastHoldPerson(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[2] > 0)) return null
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Hold Person', level: 2, target: selectHighestThreat(activeEnemies) },
+    reasoning: 'Casting Hold Person on highest threat',
+  }
+}
+
+function evalFallbackCantrip(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+  const target   = selectHighestThreat(activeEnemies)
+  const known    = me.spellsKnown || []
+  const cantrips = me.cantrips || []
+  const allKnown = [...known, ...cantrips]
+  if (allKnown.includes('Vicious Mockery')) {
+    return {
+      action: { spell: 'Vicious Mockery', target },
+      reasoning: 'Fallback — casting Vicious Mockery',
+    }
+  }
+  if (allKnown.includes('Sacred Flame')) {
+    return {
+      action: { spell: 'Sacred Flame', target },
+      reasoning: 'Fallback — casting Sacred Flame',
+    }
+  }
+  return null
+}
+
+function evalDodge(_ctx) {
+  return {
+    action: { type: 'dodge' },
+    reasoning: 'No better option — taking dodge action',
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENEMY (CULT FANATIC) EVALUATORS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function evalEnemyInvisibleFallback(ctx) {
+  const { me, activeEnemies, charmedAllies, allies } = ctx
+  const allInvisible = activeEnemies.length > 0 && activeEnemies.every(e => mech.hasCondition(e, 'invisible'))
+  if (!allInvisible) return null
+
+  if (me.spellSlots && me.spellSlots[1] > 0 && !me.concentrating) {
+    return {
+      action: { spell: 'Shield of Faith', level: 1, target: me },
+      reasoning: 'Enemies are invisible — casting Shield of Faith on self',
+    }
+  }
+  if (charmedAllies.length > 0) {
+    const target = selectClosestCharmedAlly(me, charmedAllies)
+    return {
+      action: { type: 'shake_awake', target },
+      reasoning: 'Enemies are invisible — shaking awake charmed ally',
+    }
+  }
+  return {
+    action: { type: 'dodge' },
+    reasoning: 'Enemies are invisible — taking dodge',
+  }
+}
+
+function evalFlyingTargetRanged(ctx) {
+  const { me, activeEnemies, allies } = ctx
+  const flyingTargets = activeEnemies.filter(e => e.flying)
+  if (flyingTargets.length === 0) return null
+  const target = flyingTargets[0]
+
+  const allyAlreadyHolding = allies.some(a => a.concentrating === 'Hold Person')
+  if (me.spellSlots && me.spellSlots[2] > 0 && !allyAlreadyHolding) {
+    return {
+      action: { spell: 'Hold Person', level: 2, target },
+      reasoning: 'Enemy is flying — casting Hold Person to ground them',
+    }
+  }
+  return {
+    action: { spell: 'Sacred Flame', target },
+    reasoning: 'Enemy is flying — using Sacred Flame at range',
+  }
+}
+
+function evalOpeningSpiritualWeapon(ctx) {
+  const { me, round, enemiesInMelee } = ctx
+  if (round !== 1) return null
+  if (me.spiritualWeapon && me.spiritualWeapon.active) return null
+  if (!me.spellSlots || !(me.spellSlots[2] > 0)) return null
+  if (enemiesInMelee.length === 0) return null
+  return {
+    action: { type: 'multiattack', target: enemiesInMelee[0] },
+    bonusAction: { spell: 'Spiritual Weapon', level: 2 },
+    reasoning: 'Round 1 — attacking and summoning Spiritual Weapon as bonus action',
+  }
+}
+
+function evalShakeAwakeAllies(ctx) {
+  const { me, charmedAllies } = ctx
+  if (charmedAllies.length === 0) return null
+  return {
+    action: { type: 'shake_awake', target: selectClosestCharmedAlly(me, charmedAllies) },
+    reasoning: 'Shaking awake charmed ally',
+  }
+}
+
+function evalMeleeAttack(ctx) {
+  const { me, enemiesInMelee } = ctx
+  if (enemiesInMelee.length === 0) return null
+  const target = enemiesInMelee[0]
+  if (me.multiattack > 0) {
+    return {
+      action: { type: 'multiattack', target },
+      reasoning: 'Enemy in melee — using multiattack',
+    }
+  }
+  return {
+    action: { type: 'attack', weapon: me.weapon, target },
+    reasoning: 'Enemy in melee — attacking',
+  }
+}
+
+function evalInflictWounds(ctx) {
+  const { me, enemiesInMelee } = ctx
+  if (enemiesInMelee.length === 0) return null
+  if (!me.spellSlots || !(me.spellSlots[1] > 0)) return null
+  return {
+    action: { spell: 'Inflict Wounds', level: 1, target: enemiesInMelee[0] },
+    reasoning: 'Enemy in melee — casting Inflict Wounds for high damage',
+  }
+}
+
+function evalRangedCantripWithApproach(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+
+  const target = selectHighestThreat(activeEnemies)
+  const nearestEnemy = activeEnemies.reduce((nearest, e) => {
+    return mech.distanceBetween(me, e) < mech.distanceBetween(me, nearest) ? e : nearest
+  })
+
+  const movement = { type: 'move_toward', target: nearestEnemy }
+  const cantrips = me.cantrips || []
+  const known    = me.spellsKnown || []
+
+  if (cantrips.includes('Sacred Flame') || known.includes('Sacred Flame')) {
+    return {
+      action: { spell: 'Sacred Flame', target },
+      movement,
+      reasoning: 'Approaching and casting Sacred Flame',
+    }
+  }
+  if (cantrips.length > 0 || known.length > 0) {
+    const cantrip = cantrips[0] || known[0]
+    return {
+      action: { spell: cantrip, target },
+      movement,
+      reasoning: `Approaching and casting ${cantrip}`,
+    }
+  }
+  if (me.weapon) {
+    return {
+      action: { type: 'attack', weapon: me.weapon, target },
+      movement,
+      reasoning: 'Approaching to attack',
+    }
+  }
+  return null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REACTION EVALUATORS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function evalCuttingWords(creature, event) {
+  if (event.type !== 'enemy_attack_roll') return null
+  const { roll, targetAC } = event
+  if (roll < targetAC) return null           // already misses
+  if ((roll - 8) >= targetAC) return null    // d8 max can't save it
+  if (!(creature.bardicInspirationUses > 0)) return null
+  if (creature.reactedThisRound) return null
+  return { type: 'cutting_words', dieUsed: 'd8' }
+}
+
+const DANGEROUS_SPELLS = [
+  'Hold Person', 'Inflict Wounds', 'Command',
+  'Hypnotic Pattern', 'Fireball', 'Power Word Stun', 'Finger of Death',
+]
+
+function evalCounterspell(creature, event) {
+  if (event.type !== 'enemy_casting_spell') return null
+  if (!DANGEROUS_SPELLS.includes(event.spell)) return null
+  if (!creature.spellSlots || !(creature.spellSlots[3] > 0)) return null
+  if (creature.reactedThisRound) return null
+  return { type: 'counterspell', slotLevel: 3 }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MONSTER-SPECIFIC EVALUATORS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function evalDragonBreathWeapon(ctx) {
+  const { me, round, activeEnemies } = ctx
+  if (!me.breathWeapon || !(me.breathWeapon.uses > 0)) return null
+  const range = me.breathWeapon.range || 30
+  const inRange = activeEnemies.filter(e => mech.distanceBetween(me, e) <= range)
+  if (inRange.length === 0) return null
+  if (round !== 1 && inRange.length < 2) return null
+  return {
+    action: { type: 'breath_weapon', targets: inRange },
+    reasoning: 'Using breath weapon on clustered enemies',
+  }
+}
+
+function evalDragonMultiattack(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+  const target = selectHighestThreat(activeEnemies)
+  const dist   = mech.distanceBetween(me, target)
+  const result = {
+    action: { type: 'multiattack', target },
+    reasoning: 'Dragon multiattack',
+  }
+  if (dist > 10) {
+    result.movement = { type: 'move_toward', target }
+  }
+  return result
+}
+
+function evalGiantRockThrow(ctx) {
+  const { me, activeEnemies } = ctx
+  const flyingTargets = activeEnemies.filter(e => e.flying)
+  if (flyingTargets.length === 0) return null
+  const target      = flyingTargets[0]
+  const rangedWeapon = me.weapons && me.weapons.find(w => w.type === 'ranged')
+  if (!rangedWeapon) return null
+  return {
+    action: { type: 'attack', weapon: rangedWeapon, target },
+    reasoning: 'Throwing rock at flying target',
+  }
+}
+
+function evalGiantMelee(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+  const target = selectWeakest(activeEnemies)
+  const dist   = mech.distanceBetween(me, target)
+  const REACH  = 10
+
+  const result = me.multiattack > 0
+    ? { action: { type: 'multiattack', target }, reasoning: 'Giant multiattack' }
+    : { action: { type: 'attack', weapon: me.weapon, target }, reasoning: 'Giant attack' }
+
+  if (dist > REACH) {
+    result.movement = { type: 'move_toward', target }
+  }
+  return result
+}
+
+function evalMageFireball(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Fireball', level: 3, targets: activeEnemies },
+    reasoning: 'Casting Fireball for AoE damage',
+  }
+}
+
+function evalMageFireBolt(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Fire Bolt', target: selectHighestThreat(activeEnemies) },
+    reasoning: 'Casting Fire Bolt cantrip',
+  }
+}
+
+function evalMageMistyStep(ctx) {
+  const { me, enemiesInMelee } = ctx
+  if (enemiesInMelee.length === 0) return null
+  if (!me.spellSlots || !(me.spellSlots[2] > 0)) return null
+  return {
+    action: null,
+    bonusAction: { spell: 'Misty Step', level: 2 },
+    _bonusActionOnly: true,
+    reasoning: 'Enemy in melee — using Misty Step bonus action to escape',
+  }
+}
+
+function evalArchmageConeOfCold(ctx) {
+  const { me, round, activeEnemies } = ctx
+  if (round > 2) return null
+  if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Cone of Cold', level: 5, targets: activeEnemies },
+    reasoning: 'Opening with Cone of Cold for massive damage',
+  }
+}
+
+function evalLichPowerWordStun(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.spellSlots || !(me.spellSlots[8] > 0)) return null
+  const target = activeEnemies.find(e => e.currentHP <= 150)
+  if (!target) return null
+  return {
+    action: { spell: 'Power Word Stun', level: 8, target },
+    reasoning: 'Using Power Word Stun on weakened target',
+  }
+}
+
+function evalLichFingerOfDeath(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.spellSlots || !(me.spellSlots[7] > 0)) return null
+  if (activeEnemies.length === 0) return null
+  return {
+    action: { spell: 'Finger of Death', level: 7, target: selectHighestThreat(activeEnemies) },
+    reasoning: 'Casting Finger of Death for devastating damage',
+  }
+}
+
+function evalLichCloudkill(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
+  if (activeEnemies.length < 2) return null
+  return {
+    action: { spell: 'Cloudkill', level: 5, targets: activeEnemies },
+    reasoning: 'Casting Cloudkill on multiple enemies',
+  }
+}
+
+function evalLegendaryResistance(creature, event) {
+  if (event.type !== 'failed_save') return null
+  if (!creature.legendaryResistance || !(creature.legendaryResistance.uses > 0)) return null
+  creature.legendaryResistance.uses--
+  return { type: 'legendary_resistance' }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILE REGISTRY
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PROFILES = {
+  lore_bard: [
+    evalSurvivalInvisibility,
+    evalOpeningAoEDisable,
+    evalConcentrationAllDisabled,
+    evalConcentrationMeleeViciousMockery,
+    evalConcentrationFinishWithCrossbow,
+    evalConcentrationBreathWeapon,
+    evalConcentrationRangedViciousMockery,
+    evalConcentrationSelfHeal,
+    evalRecastHypnoticPattern,
+    evalCastHoldPerson,
+    evalFallbackCantrip,
+    evalDodge,
+  ],
+  cult_fanatic: [
+    evalEnemyInvisibleFallback,
+    evalFlyingTargetRanged,
+    evalOpeningSpiritualWeapon,
+    evalShakeAwakeAllies,
+    evalMeleeAttack,
+    evalInflictWounds,
+    evalRangedCantripWithApproach,
+    evalDodge,
+  ],
+  generic_melee:    [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
+  generic_ranged:   [evalRangedCantripWithApproach, evalMeleeAttack, evalDodge],
+  dragon:           [evalDragonBreathWeapon, evalDragonMultiattack, evalDodge],
+  giant_bruiser:    [evalGiantRockThrow, evalGiantMelee, evalDodge],
+  mage_caster:      [evalMageMistyStep, evalMageFireball, evalMageFireBolt, evalDodge],
+  archmage_caster:  [evalMageMistyStep, evalArchmageConeOfCold, evalMageFireball, evalMageFireBolt, evalDodge],
+  lich_caster:      [evalLichPowerWordStun, evalLichFingerOfDeath, evalLichCloudkill, evalMageFireball, evalMageFireBolt, evalDodge],
+  undead_melee:     [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
+}
+
+const REACTION_PROFILES = {
+  lore_bard:       [evalCuttingWords, evalCounterspell],
+  cult_fanatic:    [],
+  generic_melee:   [],
+  generic_ranged:  [],
+  dragon:          [],
+  giant_bruiser:   [],
+  mage_caster:     [],
+  archmage_caster: [],
+  lich_caster:     [evalLegendaryResistance],
+  undead_melee:    [],
+}
+
+function getProfile(key) {
+  return PROFILES[key] || null
+}
+
+function getProfileNames() {
+  return Object.keys(PROFILES)
+}
+
+function registerProfile(key, evaluators) {
+  PROFILES[key] = evaluators
+  REACTION_PROFILES[key] = REACTION_PROFILES[key] || []
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION ENGINE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Run all evaluators in a profile, return the first main decision,
+ * merging any _bonusActionOnly result as a bonus action.
+ */
+function makeDecision(profileKey, creature, allCombatants, round) {
+  const profile = PROFILES[profileKey]
+  if (!profile) throw new Error(`Unknown AI profile: ${profileKey}`)
+
+  const ctx = assessBattlefield(creature, allCombatants, round)
+
+  let mainDecision    = null
+  let bonusOnlyResult = null
+
+  for (const evaluator of profile) {
+    const result = evaluator(ctx)
+    if (!result) continue
+
+    if (result._bonusActionOnly) {
+      if (!bonusOnlyResult) bonusOnlyResult = result
+      // Continue — don't treat this as the main decision
+      continue
+    }
+
+    if (!mainDecision) {
+      mainDecision = result
+      // Keep running to find any _bonusActionOnly results
+    }
+  }
+
+  if (mainDecision && bonusOnlyResult && !mainDecision.bonusAction) {
+    mainDecision.bonusAction = bonusOnlyResult.bonusAction
+  }
+
+  return mainDecision
+}
+
+/**
+ * Run reaction evaluators for a profile.
+ */
+function makeReaction(profileKey, creature, event) {
+  const profile = REACTION_PROFILES[profileKey]
+  if (!profile) return null
+
+  for (const evaluator of profile) {
+    const result = evaluator(creature, event)
+    if (result) return result
+  }
+  return null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI FACTORY FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Create a getDecision function for an encounter runner.
+ * @param {object|Function} profileMap - { [creatureId]: profileKey } or (creature) => profileKey
+ */
+function makeTacticalAI(profileMap) {
+  const resolve = typeof profileMap === 'function'
+    ? profileMap
+    : (creature) => profileMap[creature.id] || 'generic_melee'
+
+  return function getDecision(creature, allCombatants, round, _log) {
+    const profileKey = resolve(creature) || 'generic_melee'
+    try {
+      return makeDecision(profileKey, creature, allCombatants, round)
+    } catch (err) {
+      console.error(`[Tactics] Error in profile '${profileKey}' for ${creature.name}:`, err.message)
+      return makeDecision('generic_melee', creature, allCombatants, round)
+    }
+  }
+}
+
+/**
+ * Create a getReaction function for an encounter runner.
+ */
+function makeReactionAI(profileMap) {
+  const resolve = typeof profileMap === 'function'
+    ? profileMap
+    : (creature) => profileMap[creature.id] || 'generic_melee'
+
+  return function getReaction(creature, event) {
+    const profileKey = resolve(creature) || 'generic_melee'
+    return makeReaction(profileKey, creature, event)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGACY API (backward compatibility)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Axial (hex grid) distance between two positions. Legacy support. */
 function hexDistance(a, b) {
   return Math.max(
     Math.abs((a.q ?? 0) - (b.q ?? 0)),
@@ -30,212 +692,87 @@ function hexDistance(a, b) {
   )
 }
 
-/** Return a position one hex closer to the target. Simple greedy step. */
-function stepToward(from, to) {
-  const dq = Math.sign((to.q ?? 0) - (from.q ?? 0))
-  const dr = Math.sign((to.r ?? 0) - (from.r ?? 0))
-  return { q: (from.q ?? 0) + dq, r: (from.r ?? 0) + dr }
-}
+const CREATURE_PROFILES = {}
+const TACTIC_PROFILES   = {}
 
-/** Return a position one hex further from the threat. */
-function stepAway(from, threat) {
-  const dq = Math.sign((from.q ?? 0) - (threat.q ?? 0))
-  const dr = Math.sign((from.r ?? 0) - (threat.r ?? 0))
-  return { q: (from.q ?? 0) + dq, r: (from.r ?? 0) + dr }
-}
-
-// ── Target selection heuristics ───────────────────────────────────────────────
-
-/** Get all living enemies of the given creature from the combatants array. */
-function getEnemies(creature, combatants) {
-  return combatants.filter(c => c.isAlive && c.type !== creature.type)
-}
-
-/** Get all living allies of the given creature. */
-function getAllies(creature, combatants) {
-  return combatants.filter(c => c.isAlive && c.type === creature.type && c.id !== creature.id)
-}
-
-/**
- * Select the highest-priority target for an aggressive creature.
- * Priority: lowest HP → nearest → random
- */
-function selectAggressiveTarget(creature, enemies) {
-  if (enemies.length === 0) return null
-
-  // First, find enemies in melee range (1 hex)
-  const adjacent = enemies.filter(e => hexDistance(creature.position, e.position) <= 1)
-  if (adjacent.length > 0) {
-    // Attack the lowest-HP adjacent enemy
-    return adjacent.reduce((a, b) => (a.hp.current < b.hp.current ? a : b))
-  }
-
-  // Otherwise target the nearest enemy
-  return enemies.reduce((nearest, e) => {
-    const dNearest = hexDistance(creature.position, nearest.position)
-    const dE       = hexDistance(creature.position, e.position)
-    return dE < dNearest ? e : nearest
-  })
-}
-
-/**
- * Select the target for a defensive/support creature (protect allies).
- * Targets the enemy threatening the most-injured ally.
- */
-function selectDefensiveTarget(creature, enemies, allies) {
-  if (enemies.length === 0) return null
-  // Find the most-injured ally
-  const injuredAlly = allies.reduce((a, b) => {
-    const aRatio = a.hp.current / a.hp.max
-    const bRatio = b.hp.current / b.hp.max
-    return aRatio < bRatio ? a : b
-  }, { hp: { current: Infinity, max: 1 }, position: creature.position })
-
-  // Prefer the enemy nearest to the injured ally
-  return enemies.reduce((nearest, e) => {
-    const dNearest = hexDistance(injuredAlly.position, nearest.position)
-    const dE       = hexDistance(injuredAlly.position, e.position)
-    return dE < dNearest ? e : nearest
-  })
-}
-
-// ── Tactic profiles ───────────────────────────────────────────────────────────
-
-const TACTIC_PROFILES = {
-  aggressive: (creature, combatants) => {
-    const enemies = getEnemies(creature, combatants)
-    if (enemies.length === 0) return { action: 'dodge', targetId: null, newPosition: null, reason: 'No enemies visible.' }
-
-    const hpRatio = creature.hp.current / creature.hp.max
-
-    // Morale break: flee if below 25% HP and outnumbered
-    if (hpRatio < 0.25 && enemies.length > getAllies(creature, combatants).length) {
-      const retreatPos = stepAway(creature.position, enemies[0].position)
-      return { action: 'flee', targetId: null, newPosition: retreatPos, reason: `${creature.name} is badly wounded and retreating!` }
-    }
-
-    const target = selectAggressiveTarget(creature, enemies)
-    const dist   = hexDistance(creature.position, target.position)
-
-    if (dist <= 1) {
-      return { action: 'attack', targetId: target.id, newPosition: null, reason: `${creature.name} attacks the closest enemy (${target.name}).` }
-    }
-
-    // Move toward target
-    const newPos = stepToward(creature.position, target.position)
-    return { action: 'move', targetId: target.id, newPosition: newPos, reason: `${creature.name} moves toward ${target.name}.` }
-  },
-
-  defensive: (creature, combatants) => {
-    const enemies = getEnemies(creature, combatants)
-    const allies  = getAllies(creature, combatants)
-    if (enemies.length === 0) return { action: 'help', targetId: null, newPosition: null, reason: 'No enemies — assisting allies.' }
-
-    const hpRatio = creature.hp.current / creature.hp.max
-
-    // Dodge if very low HP
-    if (hpRatio < 0.15) {
-      return { action: 'dodge', targetId: null, newPosition: null, reason: `${creature.name} takes the Dodge action to survive.` }
-    }
-
-    const target = selectDefensiveTarget(creature, enemies, allies)
-    if (!target) return { action: 'dodge', targetId: null, newPosition: null, reason: 'Holding position.' }
-
-    const dist = hexDistance(creature.position, target.position)
-    if (dist <= 1) {
-      return { action: 'attack', targetId: target.id, newPosition: null, reason: `${creature.name} defends an ally by attacking ${target.name}.` }
-    }
-
-    const newPos = stepToward(creature.position, target.position)
-    return { action: 'move', targetId: target.id, newPosition: newPos, reason: `${creature.name} moves to intercept ${target.name}.` }
-  },
-
-  ranged: (creature, combatants) => {
-    const enemies = getEnemies(creature, combatants)
-    if (enemies.length === 0) return { action: 'dodge', targetId: null, newPosition: null, reason: 'No targets.' }
-
-    // Ranged creatures prefer to stay at range 2-5 hexes
-    const target  = enemies.reduce((a, b) => (a.hp.current < b.hp.current ? a : b))
-    const dist    = hexDistance(creature.position, target.position)
-
-    if (dist === 0 || dist === 1) {
-      // Too close — disengage and back up
-      const retreatPos = stepAway(creature.position, target.position)
-      return { action: 'move', targetId: target.id, newPosition: retreatPos, reason: `${creature.name} backs away to use ranged attack.` }
-    }
-
-    // Attack at range
-    return { action: 'attack', targetId: target.id, newPosition: null, reason: `${creature.name} attacks ${target.name} from range.` }
-  },
-
-  cowardly: (creature, combatants) => {
-    const enemies  = getEnemies(creature, combatants)
-    const hpRatio  = creature.hp.current / creature.hp.max
-
-    if (hpRatio < 0.5 && enemies.length > 0) {
-      const retreatPos = stepAway(creature.position, enemies[0].position)
-      return { action: 'flee', targetId: null, newPosition: retreatPos, reason: `${creature.name} flees in terror!` }
-    }
-
-    if (enemies.length > 0) {
-      const target = selectAggressiveTarget(creature, enemies)
-      return { action: 'attack', targetId: target.id, newPosition: null, reason: `${creature.name} attacks nervously.` }
-    }
-
-    return { action: 'dodge', targetId: null, newPosition: null, reason: 'Cowering.' }
-  },
-}
-
-// ── Creature profile assignment ───────────────────────────────────────────────
-
-const CREATURE_PROFILES = {
-  goblin:      'cowardly',
-  goblin_boss: 'aggressive',
-  bandit:      'aggressive',
-  orc:         'aggressive',
-  bugbear:     'aggressive',
-  ogre:        'aggressive',
-  skeleton:    'aggressive',
-  zombie:      'aggressive',
-  troll:       'aggressive',
-  archer:      'ranged',
-  mage:        'ranged',
-  cultist:     'defensive',
-}
-
-// ── Main export ───────────────────────────────────────────────────────────────
-
-/**
- * Choose the best tactic for a creature on its turn.
- *
- * @param {object}   creature    - The active combatant
- * @param {object[]} combatants  - All combatants (alive and dead)
- * @param {object}   [options]
- * @param {boolean}  [options.useAI=false] - Call AI API for decision (requires OPENAI_API_KEY)
- * @returns {{ action, targetId, newPosition, reason }}
- */
-function chooseTactic(creature, combatants, options = {}) {
-  const profileKey = CREATURE_PROFILES[creature.creatureId ?? creature.id] ?? 'aggressive'
-  const profile    = TACTIC_PROFILES[profileKey] ?? TACTIC_PROFILES.aggressive
-
-  try {
-    return profile(creature, combatants)
-  } catch (err) {
-    console.error(`[Tactics] Error for ${creature.name}:`, err.message)
-    // Fallback: basic attack
-    const enemies = getEnemies(creature, combatants)
-    const target  = enemies[0] ?? null
-    return { action: target ? 'attack' : 'dodge', targetId: target?.id ?? null, newPosition: null, reason: 'Fallback tactic.' }
-  }
-}
-
-/**
- * Assign a tactic profile to a creature by ID.
- * Useful for custom encounters.
- */
 function setCreatureProfile(creatureId, profile) {
-  if (!TACTIC_PROFILES[profile]) throw new Error(`Unknown profile: ${profile}`)
   CREATURE_PROFILES[creatureId] = profile
 }
 
-module.exports = { chooseTactic, setCreatureProfile, hexDistance, TACTIC_PROFILES, CREATURE_PROFILES }
+function chooseTactic(creature, combatants, _options) {
+  const profileKey = CREATURE_PROFILES[creature.id]
+    || (creature.side === 'party' ? 'lore_bard' : 'cult_fanatic')
+  try {
+    return makeDecision(profileKey, creature, combatants, 1)
+  } catch (_) {
+    return { action: { type: 'dodge' }, reasoning: 'fallback' }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPORTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+module.exports = {
+  // Battlefield
+  assessBattlefield,
+  // Targeting
+  selectHighestThreat,
+  selectWeakest,
+  selectClosestCharmedAlly,
+  // Bard evaluators
+  evalSurvivalInvisibility,
+  evalOpeningAoEDisable,
+  evalConcentrationAllDisabled,
+  evalConcentrationMeleeViciousMockery,
+  evalConcentrationFinishWithCrossbow,
+  evalConcentrationBreathWeapon,
+  evalConcentrationRangedViciousMockery,
+  evalConcentrationSelfHeal,
+  evalRecastHypnoticPattern,
+  evalCastHoldPerson,
+  evalFallbackCantrip,
+  evalDodge,
+  // Enemy evaluators
+  evalEnemyInvisibleFallback,
+  evalFlyingTargetRanged,
+  evalOpeningSpiritualWeapon,
+  evalShakeAwakeAllies,
+  evalMeleeAttack,
+  evalInflictWounds,
+  evalRangedCantripWithApproach,
+  // Reaction evaluators
+  evalCuttingWords,
+  evalCounterspell,
+  // Monster evaluators
+  evalDragonBreathWeapon,
+  evalDragonMultiattack,
+  evalGiantRockThrow,
+  evalGiantMelee,
+  evalMageFireball,
+  evalMageFireBolt,
+  evalMageMistyStep,
+  evalArchmageConeOfCold,
+  evalLichPowerWordStun,
+  evalLichFingerOfDeath,
+  evalLichCloudkill,
+  evalLegendaryResistance,
+  // Profiles
+  PROFILES,
+  REACTION_PROFILES,
+  getProfile,
+  getProfileNames,
+  registerProfile,
+  // Decision engine
+  makeDecision,
+  makeReaction,
+  // AI factories
+  makeTacticalAI,
+  makeReactionAI,
+  // Legacy
+  hexDistance,
+  chooseTactic,
+  setCreatureProfile,
+  TACTIC_PROFILES,
+  CREATURE_PROFILES,
+}
