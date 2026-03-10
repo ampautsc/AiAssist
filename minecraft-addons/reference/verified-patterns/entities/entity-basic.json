@@ -1,0 +1,55 @@
+{
+  "_comment": "Basic entity - FROM OFFICIAL DOCS",
+  "_source": "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/entityreference/examples/entitycomponents/minecraftcomponent_damage_sensor",
+  "_note_damage_sensor": "triggers can be object OR array. Both work.",
+  
+  "format_version": "1.21.40",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "namespace:entity_name",
+      "is_spawnable": true,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {},
+    "components": {
+      "minecraft:type_family": {
+        "family": ["custom", "mob"]
+      },
+      "minecraft:health": {
+        "value": 10,
+        "max": 10
+      },
+      "minecraft:collision_box": {
+        "width": 0.5,
+        "height": 0.5
+      },
+      "minecraft:physics": {
+        "has_gravity": true,
+        "has_collision": true
+      },
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:damage_sensor": {
+        "_comment": "triggers can be object OR array - both are valid",
+        "_example_object": "Bat uses object: {\"cause\":\"fall\",\"deals_damage\":false}",
+        "_example_array": "Bee uses array: [{\"cause\":\"fall\",\"deals_damage\":\"no\"}]",
+        "triggers": {
+          "cause": "fall",
+          "deals_damage": false
+        }
+      },
+      "minecraft:knockback_resistance": {
+        "value": 0.0
+      },
+      "minecraft:despawn": {
+        "despawn_from_distance": {}
+      }
+    },
+    "events": {
+      "minecraft:entity_spawned": {}
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "minecraft_main_menu": {
+    "description": "Minecraft Bedrock main menu",
+    "resolution": "2560x1440",
+    "last_verified": "2026-01-18",
+    "elements": [
+      {
+        "type": "button",
+        "label": "Play",
+        "x": 869,
+        "y": 471,
+        "width": 400,
+        "height": 80,
+        "verified": true,
+        "confidence": 100,
+        "detection_method": "Click listener - Creator manually clicked",
+        "tested_date": "2026-01-18"
+      },
+      {
+        "type": "button",
+        "label": "Settings",
+        "x": 1279,
+        "y": 876,
+        "width": 195,
+        "height": 40,
+        "verified": true,
+        "confidence": 90,
+        "detection_method": "OCR",
+        "tested_date": "2026-01-18"
+      }
+    ]
+  },
+  "minecraft_worlds_list": {
+    "description": "Minecraft worlds selection screen",
+    "resolution": "2560x1440",
+    "elements": [
+      {
+        "type": "world_entry",
+        "label": "First World (Creator's test world)",
+        "x": 223,
+        "y": 389,
+        "width": 800,
+        "height": 100,
+        "verified": true,
+        "detection_method": "Click listener - Creator manually clicked",
+        "tested_date": "2026-01-18"
+      },
+      {
+        "type": "world_entry",
+        "label": "Second World",
+        "x": 1280,
+        "y": 620,
+        "width": 800,
+        "height": 100,
+        "verified": false
+      }
+    ]
+  }
+}

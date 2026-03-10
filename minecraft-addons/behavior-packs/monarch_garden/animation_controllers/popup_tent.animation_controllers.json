@@ -1,0 +1,23 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.tent.setup": {
+      "initial_state": "check_setup",
+      "states": {
+        "check_setup": {
+          "transitions": [
+            { "done": "q.mark_variant == 1" },
+            { "do_setup": "q.mark_variant == 0" }
+          ]
+        },
+        "do_setup": {
+          "on_entry": ["@s monarch:setup_barriers"],
+          "transitions": [
+            { "done": "1" }
+          ]
+        },
+        "done": {}
+      }
+    }
+  }
+}

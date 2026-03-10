@@ -1,0 +1,74 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:torch_sensor",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {
+      "monarch:sensor_inactive": {
+        "minecraft:is_hidden_when_invisible": {}
+      },
+      "monarch:sensor_active": {
+        "minecraft:is_hidden_when_invisible": {}
+      }
+    },
+    "components": {
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.1,
+        "height": 0.1
+      },
+      "minecraft:health": {
+        "value": 1,
+        "max": 1
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1.0
+      },
+      "minecraft:entity_sensor": {
+        "relative_range": false,
+        "subsensors": [
+          {
+            "range": [10, 10],
+            "minimum_count": 1,
+            "cooldown": 1.0,
+            "event_filters": {
+              "any_of": [
+                { "test": "is_family", "subject": "other", "value": "player" },
+                { "test": "is_family", "subject": "other", "value": "monster" },
+                { "test": "is_family", "subject": "other", "value": "mob" }
+              ]
+            },
+            "event": "monarch:entity_detected"
+          }
+        ]
+      },
+      "minecraft:persistent": {}
+    },
+    "events": {
+      "monarch:entity_detected": {
+        "queue_command": {
+          "command": "scriptevent monarch:motion_detected"
+        }
+      }
+    }
+  }
+}

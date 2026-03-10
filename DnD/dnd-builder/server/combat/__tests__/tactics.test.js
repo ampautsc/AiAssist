@@ -1,0 +1,1516 @@
+/**
+ * AI Tactics Module — Tests
+ * 
+ * Tests for the generic priority-based tactical AI system.
+ * Each evaluator is tested individually, then profiles and the decision engine.
+ */
+
+const { describe, it, beforeEach } = require('node:test');
+const assert = require('node:assert/strict');
+
+const dice = require('../engine/dice');
+const { createCreature } = require('../data/creatures');
+const tactics = require('../ai/tactics');
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS — create test combatants with deterministic dice
+// ═══════════════════════════════════════════════════════════════════════════
+
+let testId = 0;
+function makeBard(overrides = {}) {
+  return createCreature('gem_dragonborn_lore_bard_8', {
+    id: `bard-${++testId}`,
+    position: { x: 0, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeFanatic(overrides = {}) {
+  return createCreature('cult_fanatic', {
+    id: `fanatic-${++testId}`,
+    position: { x: 2, y: 0 },
+    name: overrides.name || 'Cult Fanatic',
+    ...overrides,
+  });
+}
+
+function makeContext(me, others = [], round = 2) {
+  const allCombatants = [me, ...others];
+  return tactics.assessBattlefield(me, allCombatants, round);
+}
+
+// Set deterministic dice for all tests
+beforeEach(() => {
+  dice.setDiceMode('average');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BATTLEFIELD ASSESSMENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('assessBattlefield', () => {
+  it('categorizes allies and enemies correctly', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ name: 'Fan1' });
+    const f2 = makeFanatic({ name: 'Fan2' });
+    const ctx = makeContext(bard, [f1, f2]);
+
+    assert.equal(ctx.enemies.length, 2);
+    assert.equal(ctx.allies.length, 0);
+    assert.equal(ctx.activeEnemies.length, 2);
+  });
+
+  it('tracks HP percentage', () => {
+    const bard = makeBard();
+    bard.currentHP = 17;
+    const ctx = makeContext(bard);
+    assert.ok(ctx.hpPct < 0.26);
+  });
+
+  it('detects enemies in melee', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ position: { x: 1, y: 0 } }); // 5ft away
+    const f2 = makeFanatic({ position: { x: 10, y: 0 } }); // 50ft away
+    const ctx = makeContext(bard, [f1, f2]);
+
+    assert.equal(ctx.enemiesInMelee.length, 1);
+    assert.equal(ctx.activeEnemies.length, 2);
+  });
+
+  it('detects flying and invisibility state', () => {
+    const bard = makeBard();
+    bard.flying = true;
+    bard.conditions.push('invisible');
+    const ctx = makeContext(bard);
+
+    assert.ok(ctx.isFlying);
+    assert.ok(ctx.isInvisible);
+    assert.ok(!ctx.canFly); // already flying
+  });
+
+  it('detects charmed allies', () => {
+    const f1 = makeFanatic({ name: 'Fan1' });
+    const f2 = makeFanatic({ name: 'Fan2' });
+    f2.conditions.push('charmed_hp');
+    const ctx = makeContext(f1, [f2]);
+
+    assert.equal(ctx.charmedAllies.length, 1);
+    assert.equal(ctx.charmedAllies[0].name, 'Fan2');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TARGETING HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('selectHighestThreat', () => {
+  it('prefers casters over non-casters', () => {
+    const f1 = makeFanatic({ name: 'Fighter' });
+    delete f1.spellsKnown;
+    const f2 = makeFanatic({ name: 'Caster' });
+    const result = tactics.selectHighestThreat([f1, f2]);
+    assert.equal(result.name, 'Caster');
+  });
+
+  it('returns null for empty array', () => {
+    assert.equal(tactics.selectHighestThreat([]), null);
+  });
+});
+
+describe('selectWeakest', () => {
+  it('selects lowest HP', () => {
+    const f1 = makeFanatic({ name: 'Healthy' });
+    const f2 = makeFanatic({ name: 'Hurt' });
+    f2.currentHP = 5;
+    assert.equal(tactics.selectWeakest([f1, f2]).name, 'Hurt');
+  });
+});
+
+describe('selectClosestCharmedAlly', () => {
+  it('selects closest charmed ally', () => {
+    const me = makeFanatic({ position: { x: 0, y: 0 } });
+    const a1 = makeFanatic({ name: 'Far', position: { x: 10, y: 0 } });
+    a1.conditions.push('charmed_hp');
+    const a2 = makeFanatic({ name: 'Near', position: { x: 1, y: 0 } });
+    a2.conditions.push('charmed_hp');
+    assert.equal(tactics.selectClosestCharmedAlly(me, [a1, a2]).name, 'Near');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EVALUATORS — BARD / CONTROLLER
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('evalSurvivalInvisibility', () => {
+  it('triggers when HP < 25% with GI slot available', () => {
+    const bard = makeBard();
+    bard.currentHP = 15; // ~22%
+    const ctx = makeContext(bard, [makeFanatic()]);
+
+    const result = tactics.evalSurvivalInvisibility(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Greater Invisibility');
+    assert.ok(result.reasoning.includes('CRITICAL'));
+  });
+
+  it('does NOT trigger when HP >= 25%', () => {
+    const bard = makeBard();
+    bard.currentHP = 50; // ~75%
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalSurvivalInvisibility(ctx), null);
+  });
+
+  it('does NOT trigger when already invisible', () => {
+    const bard = makeBard();
+    bard.currentHP = 10;
+    bard.conditions.push('invisible');
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalSurvivalInvisibility(ctx), null);
+  });
+
+  it('does NOT trigger without GI slot', () => {
+    const bard = makeBard();
+    bard.currentHP = 10;
+    bard.spellSlots[4] = 0;
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalSurvivalInvisibility(ctx), null);
+  });
+
+  it('includes Gem Flight as bonus action when available', () => {
+    const bard = makeBard();
+    bard.currentHP = 10;
+    const ctx = makeContext(bard, [makeFanatic()]);
+    const result = tactics.evalSurvivalInvisibility(ctx);
+    assert.ok(result.bonusAction);
+    assert.equal(result.bonusAction.type, 'gem_flight');
+  });
+});
+
+describe('evalOpeningAoEDisable', () => {
+  it('triggers round 1, no concentration, 3rd level slot, HP known', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard, [makeFanatic(), makeFanatic()], 1);
+    const result = tactics.evalOpeningAoEDisable(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Hypnotic Pattern');
+    assert.ok(result.reasoning.includes('ROUND 1'));
+  });
+
+  it('does NOT trigger after round 1', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard, [makeFanatic()], 2);
+    assert.equal(tactics.evalOpeningAoEDisable(ctx), null);
+  });
+
+  it('does NOT trigger if already concentrating', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const ctx = makeContext(bard, [makeFanatic()], 1);
+    assert.equal(tactics.evalOpeningAoEDisable(ctx), null);
+  });
+
+  it('does NOT trigger without 3rd level slot', () => {
+    const bard = makeBard();
+    bard.spellSlots[3] = 0;
+    const ctx = makeContext(bard, [makeFanatic()], 1);
+    assert.equal(tactics.evalOpeningAoEDisable(ctx), null);
+  });
+
+  it('includes Gem Flight bonus action when available', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard, [makeFanatic()], 1);
+    const result = tactics.evalOpeningAoEDisable(ctx);
+    assert.ok(result.bonusAction);
+    assert.equal(result.bonusAction.type, 'gem_flight');
+  });
+});
+
+describe('evalConcentrationAllDisabled', () => {
+  it('triggers when concentrating and all enemies disabled', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const f1 = makeFanatic();
+    f1.conditions.push('incapacitated', 'charmed_hp');
+    const f2 = makeFanatic();
+    f2.conditions.push('incapacitated', 'charmed_hp');
+    const ctx = makeContext(bard, [f1, f2]);
+
+    const result = tactics.evalConcentrationAllDisabled(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'dodge');
+    assert.ok(result.reasoning.includes('disabled'));
+  });
+
+  it('does NOT trigger when active enemies remain', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalConcentrationAllDisabled(ctx), null);
+  });
+});
+
+describe('evalConcentrationMeleeViciousMockery', () => {
+  it('triggers when concentrating with enemy in melee', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const f1 = makeFanatic({ position: { x: 1, y: 0 } }); // 5ft
+    const ctx = makeContext(bard, [f1]);
+
+    const result = tactics.evalConcentrationMeleeViciousMockery(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Vicious Mockery');
+    assert.ok(result.reasoning.includes('melee'));
+  });
+
+  it('does NOT trigger without concentration', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(bard, [f1]);
+    assert.equal(tactics.evalConcentrationMeleeViciousMockery(ctx), null);
+  });
+});
+
+describe('evalConcentrationFinishWithCrossbow', () => {
+  it('triggers when concentrating, 1 enemy with <= 10 HP', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const f1 = makeFanatic();
+    f1.currentHP = 8;
+    const ctx = makeContext(bard, [f1]);
+
+    const result = tactics.evalConcentrationFinishWithCrossbow(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'attack');
+    assert.ok(result.action.weapon.name.includes('Crossbow'));
+  });
+
+  it('does NOT trigger with 2+ active enemies', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Something';
+    const f1 = makeFanatic();
+    f1.currentHP = 5;
+    const f2 = makeFanatic();
+    const ctx = makeContext(bard, [f1, f2]);
+    assert.equal(tactics.evalConcentrationFinishWithCrossbow(ctx), null);
+  });
+
+  it('does NOT trigger if target HP > 10', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Something';
+    const f1 = makeFanatic();
+    f1.currentHP = 20;
+    const ctx = makeContext(bard, [f1]);
+    assert.equal(tactics.evalConcentrationFinishWithCrossbow(ctx), null);
+  });
+});
+
+describe('evalConcentrationBreathWeapon', () => {
+  it('triggers with 2+ enemies in breath range while concentrating', () => {
+    const bard = makeBard();
+    bard.concentrating = 'HP';
+    const f1 = makeFanatic({ position: { x: 2, y: 0 } }); // 10ft
+    const f2 = makeFanatic({ position: { x: 3, y: 0 } }); // 15ft
+    const ctx = makeContext(bard, [f1, f2]);
+
+    const result = tactics.evalConcentrationBreathWeapon(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'breath_weapon');
+    assert.equal(result.action.targets.length, 2);
+  });
+
+  it('does NOT trigger with 0 breath uses', () => {
+    const bard = makeBard();
+    bard.concentrating = 'HP';
+    bard.breathWeapon.uses = 0;
+    const f1 = makeFanatic({ position: { x: 2, y: 0 } });
+    const f2 = makeFanatic({ position: { x: 3, y: 0 } });
+    const ctx = makeContext(bard, [f1, f2]);
+    assert.equal(tactics.evalConcentrationBreathWeapon(ctx), null);
+  });
+});
+
+describe('evalConcentrationRangedViciousMockery', () => {
+  it('triggers when concentrating with active enemies at range', () => {
+    const bard = makeBard();
+    bard.concentrating = 'HP';
+    const f1 = makeFanatic({ position: { x: 8, y: 0 } }); // 40ft
+    const ctx = makeContext(bard, [f1]);
+
+    const result = tactics.evalConcentrationRangedViciousMockery(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Vicious Mockery');
+  });
+});
+
+describe('evalConcentrationSelfHeal', () => {
+  it('returns bonus-action-only when concentrating and HP < 50%', () => {
+    const bard = makeBard();
+    bard.concentrating = 'HP';
+    bard.currentHP = 30; // ~45%
+    const ctx = makeContext(bard);
+
+    const result = tactics.evalConcentrationSelfHeal(ctx);
+    assert.ok(result);
+    assert.ok(result._bonusActionOnly);
+    assert.equal(result.bonusAction.type, 'cast_healing_word');
+  });
+
+  it('does NOT trigger when HP >= 50%', () => {
+    const bard = makeBard();
+    bard.concentrating = 'HP';
+    bard.currentHP = 50;
+    const ctx = makeContext(bard);
+    assert.equal(tactics.evalConcentrationSelfHeal(ctx), null);
+  });
+
+  it('does NOT trigger without concentration', () => {
+    const bard = makeBard();
+    bard.currentHP = 10;
+    const ctx = makeContext(bard);
+    assert.equal(tactics.evalConcentrationSelfHeal(ctx), null);
+  });
+});
+
+describe('evalRecastHypnoticPattern', () => {
+  it('triggers when not concentrating and 2+ active enemies with 3rd slot', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard, [makeFanatic(), makeFanatic()]);
+    const result = tactics.evalRecastHypnoticPattern(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Hypnotic Pattern');
+  });
+
+  it('does NOT trigger with concentration active', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const ctx = makeContext(bard, [makeFanatic(), makeFanatic()]);
+    assert.equal(tactics.evalRecastHypnoticPattern(ctx), null);
+  });
+
+  it('does NOT trigger with only 1 active enemy', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalRecastHypnoticPattern(ctx), null);
+  });
+});
+
+describe('evalCastHoldPerson', () => {
+  it('triggers when not concentrating with 2nd level slot and active enemies', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    const ctx = makeContext(bard, [f1]);
+    const result = tactics.evalCastHoldPerson(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Hold Person');
+  });
+
+  it('does NOT trigger with concentration active', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hex';
+    const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalCastHoldPerson(ctx), null);
+  });
+});
+
+describe('evalFallbackCantrip', () => {
+  it('picks Vicious Mockery when known', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    const ctx = makeContext(bard, [f1]);
+    const result = tactics.evalFallbackCantrip(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Vicious Mockery');
+  });
+
+  it('picks Sacred Flame when VM not known', () => {
+    const bard = makeBard();
+    bard.spellsKnown = bard.spellsKnown.filter(s => s !== 'Vicious Mockery');
+    bard.cantrips = ['Sacred Flame'];
+    bard.spellsKnown.push('Sacred Flame');
+    const f1 = makeFanatic();
+    const ctx = makeContext(bard, [f1]);
+    const result = tactics.evalFallbackCantrip(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Sacred Flame');
+  });
+
+  it('returns null with no active enemies', () => {
+    const bard = makeBard();
+    const ctx = makeContext(bard);
+    assert.equal(tactics.evalFallbackCantrip(ctx), null);
+  });
+});
+
+describe('evalDodge', () => {
+  it('always returns dodge', () => {
+    const result = tactics.evalDodge({});
+    assert.ok(result);
+    assert.equal(result.action.type, 'dodge');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EVALUATORS — CULT FANATIC / ENEMY
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('evalEnemyInvisibleFallback', () => {
+  it('triggers when all enemies are invisible', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    bard.conditions.push('invisible');
+    const ctx = makeContext(f1, [bard]);
+
+    const result = tactics.evalEnemyInvisibleFallback(ctx);
+    assert.ok(result);
+    assert.ok(result.reasoning.includes('invisible'));
+  });
+
+  it('does NOT trigger when enemy is visible', () => {
+    const f1 = makeFanatic();
+    const bard = makeBard();
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalEnemyInvisibleFallback(ctx), null);
+  });
+
+  it('casts Shield of Faith on self when has slot and not concentrating', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    bard.conditions.push('invisible');
+    const ctx = makeContext(f1, [bard]);
+
+    const result = tactics.evalEnemyInvisibleFallback(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Shield of Faith');
+  });
+
+  it('shakes awake charmed ally when no slots', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    f1.spellSlots = { 1: 0, 2: 0 };
+    const f2 = makeFanatic({ name: 'CharmedAlly', position: { x: 1, y: 0 } });
+    f2.conditions.push('charmed_hp');
+    // Invisible enemy
+    const bard = makeBard();
+    bard.conditions.push('invisible');
+    const ctx = makeContext(f1, [bard, f2]);
+
+    const result = tactics.evalEnemyInvisibleFallback(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'shake_awake');
+  });
+});
+
+describe('evalFlyingTargetRanged', () => {
+  it('uses Hold Person against flying target', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    bard.flying = true;
+    const ctx = makeContext(f1, [bard], 1);
+
+    const result = tactics.evalFlyingTargetRanged(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Hold Person');
+    assert.ok(result.reasoning.includes('flying'));
+  });
+
+  it('falls back to Sacred Flame vs flying when no Hold Person slot', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    f1.spellSlots[2] = 0;
+    const bard = makeBard();
+    bard.flying = true;
+    const ctx = makeContext(f1, [bard], 1);
+
+    const result = tactics.evalFlyingTargetRanged(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Sacred Flame');
+  });
+
+  it('does NOT trigger against grounded targets', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalFlyingTargetRanged(ctx), null);
+  });
+
+  it('does NOT trigger when ally already has Hold Person on target', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const f2 = makeFanatic({ name: 'AllyHolder', position: { x: 1, y: 0 } });
+    f2.concentrating = 'Hold Person';
+    const bard = makeBard();
+    bard.flying = true;
+    const ctx = makeContext(f1, [bard, f2], 1);
+
+    const result = tactics.evalFlyingTargetRanged(ctx);
+    assert.ok(result);
+    // Should fall back to Sacred Flame, not Hold Person
+    assert.equal(result.action.spell, 'Sacred Flame');
+  });
+});
+
+describe('evalOpeningSpiritualWeapon', () => {
+  it('triggers on round 1 with SW slot and target in melee', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard], 1);
+
+    const result = tactics.evalOpeningSpiritualWeapon(ctx);
+    assert.ok(result);
+    assert.equal(result.bonusAction.spell, 'Spiritual Weapon');
+    assert.equal(result.action.type, 'multiattack');
+  });
+
+  it('does NOT trigger after round 1', () => {
+    const f1 = makeFanatic();
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard], 2);
+    assert.equal(tactics.evalOpeningSpiritualWeapon(ctx), null);
+  });
+
+  it('does NOT trigger if SW already active', () => {
+    const f1 = makeFanatic();
+    f1.spiritualWeapon = { active: true };
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard], 1);
+    assert.equal(tactics.evalOpeningSpiritualWeapon(ctx), null);
+  });
+});
+
+describe('evalShakeAwakeAllies', () => {
+  it('shakes nearby charmed ally', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const f2 = makeFanatic({ name: 'Charmed', position: { x: 1, y: 0 } });
+    f2.conditions.push('charmed_hp');
+    const bard = makeBard({ position: { x: 5, y: 0 } });
+    const ctx = makeContext(f1, [bard, f2]);
+
+    const result = tactics.evalShakeAwakeAllies(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'shake_awake');
+    assert.equal(result.action.target.name, 'Charmed');
+  });
+
+  it('does NOT trigger when no charmed allies', () => {
+    const f1 = makeFanatic();
+    const bard = makeBard();
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalShakeAwakeAllies(ctx), null);
+  });
+});
+
+describe('evalMeleeAttack', () => {
+  it('uses multiattack when in melee with multiattack feature', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard]);
+
+    const result = tactics.evalMeleeAttack(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'multiattack');
+  });
+
+  it('does NOT trigger when target out of melee range', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 10, y: 0 } }); // 50ft
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalMeleeAttack(ctx), null);
+  });
+
+  it('does NOT trigger when target is flying and unreachable', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 0, y: 0 } });
+    bard.flying = true;
+    const ctx = makeContext(f1, [bard]);
+    // distanceBetween returns 25ft when target is flying
+    assert.equal(tactics.evalMeleeAttack(ctx), null);
+  });
+});
+
+describe('evalInflictWounds', () => {
+  it('triggers in melee with 1st level slot', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard]);
+
+    const result = tactics.evalInflictWounds(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Inflict Wounds');
+  });
+
+  it('does NOT trigger when out of melee', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 10, y: 0 } });
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalInflictWounds(ctx), null);
+  });
+
+  it('does NOT trigger without spell slots', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    f1.spellSlots[1] = 0;
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(f1, [bard]);
+    assert.equal(tactics.evalInflictWounds(ctx), null);
+  });
+});
+
+describe('evalRangedCantripWithApproach', () => {
+  it('uses Sacred Flame + move toward', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 10, y: 0 } });
+    const ctx = makeContext(f1, [bard]);
+
+    const result = tactics.evalRangedCantripWithApproach(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Sacred Flame');
+    assert.ok(result.movement);
+    assert.equal(result.movement.type, 'move_toward');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REACTION EVALUATORS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('evalCuttingWords', () => {
+  it('triggers when attack would hit and d8 could save', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 3;
+    const result = tactics.evalCuttingWords(bard, {
+      type: 'enemy_attack_roll',
+      roll: 17,      // hits AC 14
+      targetAC: 14,
+      attacker: makeFanatic(),
+    });
+    assert.ok(result);
+    assert.equal(result.type, 'cutting_words');
+  });
+
+  it('does NOT trigger if attack would miss', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 3;
+    const result = tactics.evalCuttingWords(bard, {
+      type: 'enemy_attack_roll',
+      roll: 12,
+      targetAC: 14,
+      attacker: makeFanatic(),
+    });
+    assert.equal(result, null);
+  });
+
+  it('does NOT trigger if d8 max can\'t save', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 3;
+    const result = tactics.evalCuttingWords(bard, {
+      type: 'enemy_attack_roll',
+      roll: 25,      // so far above AC that -8 still hits
+      targetAC: 14,
+      attacker: makeFanatic(),
+    });
+    assert.equal(result, null);
+  });
+
+  it('does NOT trigger if already reacted', () => {
+    const bard = makeBard();
+    bard.reactedThisRound = true;
+    bard.bardicInspirationUses = 3;
+    assert.equal(tactics.evalCuttingWords(bard, {
+      type: 'enemy_attack_roll',
+      roll: 15, targetAC: 14, attacker: makeFanatic(),
+    }), null);
+  });
+
+  it('does NOT trigger without inspiration uses', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 0;
+    assert.equal(tactics.evalCuttingWords(bard, {
+      type: 'enemy_attack_roll',
+      roll: 15, targetAC: 14, attacker: makeFanatic(),
+    }), null);
+  });
+});
+
+describe('evalCounterspell', () => {
+  it('counters Hold Person', () => {
+    const bard = makeBard();
+    const result = tactics.evalCounterspell(bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Hold Person',
+      caster: makeFanatic(),
+    });
+    assert.ok(result);
+    assert.equal(result.type, 'counterspell');
+    assert.equal(result.slotLevel, 3);
+  });
+
+  it('counters Inflict Wounds', () => {
+    const bard = makeBard();
+    const result = tactics.evalCounterspell(bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Inflict Wounds',
+      caster: makeFanatic(),
+    });
+    assert.ok(result);
+    assert.equal(result.type, 'counterspell');
+  });
+
+  it('does NOT counter non-dangerous spells', () => {
+    const bard = makeBard();
+    assert.equal(tactics.evalCounterspell(bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Light',
+      caster: makeFanatic(),
+    }), null);
+  });
+
+  it('does NOT trigger without 3rd level slot', () => {
+    const bard = makeBard();
+    bard.spellSlots[3] = 0;
+    assert.equal(tactics.evalCounterspell(bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Hold Person',
+      caster: makeFanatic(),
+    }), null);
+  });
+
+  it('does NOT trigger if already reacted', () => {
+    const bard = makeBard();
+    bard.reactedThisRound = true;
+    assert.equal(tactics.evalCounterspell(bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Hold Person',
+      caster: makeFanatic(),
+    }), null);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROFILES
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Profile registry', () => {
+  it('has lore_bard profile', () => {
+    assert.ok(tactics.getProfile('lore_bard'));
+    assert.ok(tactics.getProfile('lore_bard').length > 0);
+  });
+
+  it('has cult_fanatic profile', () => {
+    assert.ok(tactics.getProfile('cult_fanatic'));
+  });
+
+  it('has generic profiles', () => {
+    assert.ok(tactics.getProfile('generic_melee'));
+    assert.ok(tactics.getProfile('generic_ranged'));
+  });
+
+  it('returns null for unknown profile', () => {
+    assert.equal(tactics.getProfile('nonexistent'), null);
+  });
+
+  it('lists all profile names', () => {
+    const names = tactics.getProfileNames();
+    assert.ok(names.includes('lore_bard'));
+    assert.ok(names.includes('cult_fanatic'));
+    assert.ok(names.includes('generic_melee'));
+    assert.ok(names.includes('generic_ranged'));
+  });
+
+  it('allows runtime profile registration', () => {
+    tactics.registerProfile('test_profile', [tactics.evalDodge]);
+    assert.ok(tactics.getProfile('test_profile'));
+    assert.equal(tactics.getProfile('test_profile').length, 1);
+    // Clean up
+    delete tactics.PROFILES['test_profile'];
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DECISION ENGINE — makeDecision
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('makeDecision', () => {
+  it('runs lore_bard profile — round 1 opens with HP', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    const f2 = makeFanatic();
+    const decision = tactics.makeDecision('lore_bard', bard, [bard, f1, f2], 1);
+
+    assert.ok(decision);
+    assert.equal(decision.action.spell, 'Hypnotic Pattern');
+    assert.ok(decision.reasoning.includes('ROUND 1'));
+  });
+
+  it('runs lore_bard — survival GI overrides round 1', () => {
+    const bard = makeBard();
+    bard.currentHP = 10;
+    const f1 = makeFanatic();
+    const decision = tactics.makeDecision('lore_bard', bard, [bard, f1], 1);
+
+    assert.ok(decision);
+    assert.equal(decision.action.spell, 'Greater Invisibility');
+  });
+
+  it('runs lore_bard — concentrating with all disabled → dodge', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    const f1 = makeFanatic();
+    f1.conditions.push('incapacitated', 'charmed_hp');
+    const decision = tactics.makeDecision('lore_bard', bard, [bard, f1], 3);
+
+    assert.equal(decision.action.type, 'dodge');
+  });
+
+  it('runs lore_bard — merges self-heal bonus action', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    bard.currentHP = 30; // ~45%, triggers self-heal
+    const f1 = makeFanatic({ position: { x: 1, y: 0 } }); // in melee
+    const decision = tactics.makeDecision('lore_bard', bard, [bard, f1], 3);
+
+    // Should get Vicious Mockery action (melee eval) + Healing Word bonus
+    assert.equal(decision.action.spell, 'Vicious Mockery');
+    assert.ok(decision.bonusAction);
+    assert.equal(decision.bonusAction.type, 'cast_healing_word');
+  });
+
+  it('runs cult_fanatic — round 1 opens with SW + multiattack', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const decision = tactics.makeDecision('cult_fanatic', f1, [f1, bard], 1);
+
+    assert.ok(decision);
+    assert.equal(decision.action.type, 'multiattack');
+    assert.ok(decision.bonusAction);
+    assert.equal(decision.bonusAction.spell, 'Spiritual Weapon');
+  });
+
+  it('runs cult_fanatic — invisible target → Shield of Faith', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    bard.conditions.push('invisible');
+    const decision = tactics.makeDecision('cult_fanatic', f1, [f1, bard], 2);
+
+    assert.equal(decision.action.spell, 'Shield of Faith');
+  });
+
+  it('runs cult_fanatic — flying target → Hold Person', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const bard = makeBard();
+    bard.flying = true;
+    const decision = tactics.makeDecision('cult_fanatic', f1, [f1, bard], 2);
+
+    assert.equal(decision.action.spell, 'Hold Person');
+  });
+
+  it('runs cult_fanatic — shakes charmed ally', () => {
+    const f1 = makeFanatic({ position: { x: 0, y: 0 } });
+    const f2 = makeFanatic({ name: 'Charmed', position: { x: 1, y: 0 } });
+    f2.conditions.push('charmed_hp');
+    const bard = makeBard({ position: { x: 5, y: 0 } });
+    const decision = tactics.makeDecision('cult_fanatic', f1, [f1, bard, f2], 3);
+
+    assert.equal(decision.action.type, 'shake_awake');
+  });
+
+  it('throws for unknown profile', () => {
+    assert.throws(
+      () => tactics.makeDecision('nonexistent', makeBard(), [], 1),
+      /Unknown AI profile/
+    );
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// makeReaction
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('makeReaction', () => {
+  it('lore_bard Cutting Words on borderline attack', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 3;
+    const reaction = tactics.makeReaction('lore_bard', bard, {
+      type: 'enemy_attack_roll',
+      roll: 17,
+      targetAC: 14,
+      attacker: makeFanatic(),
+    });
+    assert.ok(reaction);
+    assert.equal(reaction.type, 'cutting_words');
+  });
+
+  it('lore_bard Counterspell on Hold Person', () => {
+    const bard = makeBard();
+    const reaction = tactics.makeReaction('lore_bard', bard, {
+      type: 'enemy_casting_spell',
+      spell: 'Hold Person',
+      caster: makeFanatic(),
+    });
+    assert.ok(reaction);
+    assert.equal(reaction.type, 'counterspell');
+  });
+
+  it('cult_fanatic has no reactions', () => {
+    const f1 = makeFanatic();
+    const reaction = tactics.makeReaction('cult_fanatic', f1, {
+      type: 'enemy_attack_roll',
+      roll: 20, targetAC: 13, attacker: makeBard(),
+    });
+    assert.equal(reaction, null);
+  });
+
+  it('unknown profile returns null', () => {
+    const reaction = tactics.makeReaction('ghost', makeBard(), {
+      type: 'enemy_attack_roll', roll: 20, targetAC: 14, attacker: makeFanatic(),
+    });
+    assert.equal(reaction, null);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// makeTacticalAI — factory for encounter runner
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('makeTacticalAI', () => {
+  it('creates a getDecision function from ID-based profile map', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    const getDecision = tactics.makeTacticalAI({
+      [bard.id]: 'lore_bard',
+      [f1.id]: 'cult_fanatic',
+    });
+
+    const bardDecision = getDecision(bard, [bard, f1], 1, []);
+    assert.ok(bardDecision);
+    assert.equal(bardDecision.action.spell, 'Hypnotic Pattern');
+
+    const fanaticDecision = getDecision(f1, [bard, f1], 1, []);
+    assert.ok(fanaticDecision);
+    // Fanatic round 1 depends on position — should get some valid action
+    assert.ok(fanaticDecision.action);
+  });
+
+  it('creates a getDecision function from resolver function', () => {
+    const resolver = (c) => c.side === 'party' ? 'lore_bard' : 'cult_fanatic';
+    const getDecision = tactics.makeTacticalAI(resolver);
+
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    const decision = getDecision(bard, [bard, f1], 1, []);
+    assert.ok(decision);
+    assert.equal(decision.action.spell, 'Hypnotic Pattern');
+  });
+
+  it('falls back to generic_melee for unknown combatants', () => {
+    const getDecision = tactics.makeTacticalAI({});
+    const creature = makeFanatic();
+    const enemy = makeBard({ position: { x: 1, y: 0 } });
+    
+    // generic_melee with enemy in melee should try to attack
+    const decision = getDecision(creature, [creature, enemy], 2, []);
+    assert.ok(decision);
+    // Should get melee attack or dodge
+    assert.ok(['multiattack', 'attack', 'dodge'].includes(decision.action.type));
+  });
+});
+
+describe('makeReactionAI', () => {
+  it('creates a getReaction function from profile map', () => {
+    const bard = makeBard();
+    bard.bardicInspirationUses = 3;
+    const getReaction = tactics.makeReactionAI({ [bard.id]: 'lore_bard' });
+    
+    const reaction = getReaction(bard, {
+      type: 'enemy_attack_roll',
+      roll: 16, targetAC: 14, attacker: makeFanatic(),
+    });
+    assert.ok(reaction);
+    assert.equal(reaction.type, 'cutting_words');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INTEGRATION — full encounter with AI module
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Integration — AI + Encounter Runner', () => {
+  it('runs a complete encounter with AI-driven decisions', () => {
+    dice.setDiceMode('average');
+    const bard = makeBard({ id: 'hero', position: { x: 0, y: 0 } });
+    const f1 = makeFanatic({ id: 'enemy1', name: 'Fanatic 1', position: { x: 2, y: 0 } });
+    const f2 = makeFanatic({ id: 'enemy2', name: 'Fanatic 2', position: { x: 2, y: 1 } });
+
+    const runner = require('../engine/encounterRunner');
+    const getDecision = tactics.makeTacticalAI({
+      'hero': 'lore_bard',
+      'enemy1': 'cult_fanatic',
+      'enemy2': 'cult_fanatic',
+    });
+
+    const result = runner.runEncounter({
+      combatants: [bard, f1, f2],
+      getDecision,
+      maxRounds: 10,
+      verbose: false,
+    });
+
+    assert.ok(result.winner);
+    assert.ok(result.rounds > 0);
+    assert.ok(result.analytics.length === 3);
+    assert.ok(result.log.length > 0);
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MONSTER AI HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function makeDragon(overrides = {}) {
+  return createCreature('young_red_dragon', {
+    id: `dragon-${++testId}`,
+    position: { x: 5, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeHillGiant(overrides = {}) {
+  return createCreature('hill_giant', {
+    id: `giant-${++testId}`,
+    position: { x: 5, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeMage(overrides = {}) {
+  return createCreature('mage', {
+    id: `mage-${++testId}`,
+    position: { x: 5, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeArchmage(overrides = {}) {
+  return createCreature('archmage', {
+    id: `archmage-${++testId}`,
+    position: { x: 5, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeLich(overrides = {}) {
+  return createCreature('lich', {
+    id: `lich-${++testId}`,
+    position: { x: 5, y: 0 },
+    ...overrides,
+  });
+}
+
+function makeOgre(overrides = {}) {
+  return createCreature('ogre', {
+    id: `ogre-${++testId}`,
+    position: { x: 3, y: 0 },
+    ...overrides,
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DRAGON PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Dragon profile — evalDragonBreathWeapon', () => {
+  it('uses breath weapon on round 1 with enemy in range', () => {
+    const dragon = makeDragon();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(dragon, [bard], 1);
+    const result = tactics.evalDragonBreathWeapon(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'breath_weapon');
+    assert.ok(result.action.targets.length > 0);
+  });
+
+  it('skips breath weapon when no uses remain', () => {
+    const dragon = makeDragon();
+    dragon.breathWeapon.uses = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(dragon, [bard], 1);
+    const result = tactics.evalDragonBreathWeapon(ctx);
+    assert.equal(result, null);
+  });
+
+  it('skips breath weapon after round 1 with only 1 target', () => {
+    const dragon = makeDragon();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(dragon, [bard], 3);
+    const result = tactics.evalDragonBreathWeapon(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Dragon profile — evalDragonMultiattack', () => {
+  it('uses multiattack when available', () => {
+    const dragon = makeDragon();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(dragon, [bard], 2);
+    const result = tactics.evalDragonMultiattack(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'multiattack');
+  });
+});
+
+describe('Dragon profile — makeDecision', () => {
+  it('prioritizes breath weapon over multiattack on round 1', () => {
+    const dragon = makeDragon();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('dragon', dragon, [dragon, bard], 1);
+    assert.equal(decision.action.type, 'breath_weapon');
+  });
+
+  it('falls back to multiattack when breath weapon exhausted', () => {
+    const dragon = makeDragon();
+    dragon.breathWeapon.uses = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('dragon', dragon, [dragon, bard], 2);
+    assert.equal(decision.action.type, 'multiattack');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GIANT BRUISER PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Giant Bruiser profile — evalGiantRockThrow', () => {
+  it('throws rock at flying target', () => {
+    const giant = makeHillGiant();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    bard.flying = true;
+    const ctx = makeContext(giant, [bard], 2);
+    const result = tactics.evalGiantRockThrow(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'attack');
+    assert.ok(result.action.weapon.type === 'ranged');
+  });
+
+  it('does not throw rock when in melee range and target grounded', () => {
+    const giant = makeHillGiant({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(giant, [bard], 2);
+    const result = tactics.evalGiantRockThrow(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Giant Bruiser profile — evalGiantMelee', () => {
+  it('uses multiattack when available', () => {
+    const giant = makeHillGiant({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(giant, [bard], 2);
+    const result = tactics.evalGiantMelee(ctx);
+    assert.ok(result);
+    assert.equal(result.action.type, 'multiattack');
+  });
+
+  it('includes movement when target is distant', () => {
+    const giant = makeHillGiant({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 10, y: 0 } });
+    const ctx = makeContext(giant, [bard], 2);
+    const result = tactics.evalGiantMelee(ctx);
+    assert.ok(result);
+    assert.ok(result.movement);
+    assert.equal(result.movement.type, 'move_toward');
+  });
+});
+
+describe('Giant Bruiser profile — makeDecision', () => {
+  it('throws rocks at flying targets', () => {
+    const giant = makeHillGiant();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    bard.flying = true;
+    const decision = tactics.makeDecision('giant_bruiser', giant, [giant, bard], 2);
+    assert.equal(decision.action.type, 'attack');
+  });
+
+  it('uses melee when in range', () => {
+    const giant = makeHillGiant({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const decision = tactics.makeDecision('giant_bruiser', giant, [giant, bard], 2);
+    assert.equal(decision.action.type, 'multiattack');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAGE CASTER PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Mage profile — evalMageFireball', () => {
+  it('casts Fireball when 3rd level slots available', () => {
+    const mage = makeMage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(mage, [bard], 1);
+    const result = tactics.evalMageFireball(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Fireball');
+  });
+
+  it('skips Fireball when no 3rd level slots', () => {
+    const mage = makeMage();
+    mage.spellSlots[3] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(mage, [bard], 1);
+    const result = tactics.evalMageFireball(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Mage profile — evalMageFireBolt', () => {
+  it('casts Fire Bolt at enemies', () => {
+    const mage = makeMage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(mage, [bard], 3);
+    const result = tactics.evalMageFireBolt(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Fire Bolt');
+  });
+});
+
+describe('Mage profile — evalMageMistyStep', () => {
+  it('uses Misty Step when enemy in melee', () => {
+    const mage = makeMage({ position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const ctx = makeContext(mage, [bard], 2);
+    const result = tactics.evalMageMistyStep(ctx);
+    assert.ok(result);
+    assert.ok(result._bonusActionOnly);
+    assert.equal(result.bonusAction.spell, 'Misty Step');
+  });
+
+  it('skips Misty Step when no enemies in melee', () => {
+    const mage = makeMage();
+    const bard = makeBard({ position: { x: 10, y: 0 } });
+    const ctx = makeContext(mage, [bard], 2);
+    const result = tactics.evalMageMistyStep(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Mage profile — makeDecision', () => {
+  it('opens with Fireball', () => {
+    const mage = makeMage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('mage_caster', mage, [mage, bard], 1);
+    assert.equal(decision.action.spell, 'Fireball');
+  });
+
+  it('falls back to Fire Bolt when out of slots', () => {
+    const mage = makeMage();
+    mage.spellSlots = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('mage_caster', mage, [mage, bard], 3);
+    assert.equal(decision.action.spell, 'Fire Bolt');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ARCHMAGE PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Archmage profile — evalArchmageConeOfCold', () => {
+  it('opens with Cone of Cold on round 1', () => {
+    const arch = makeArchmage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(arch, [bard], 1);
+    const result = tactics.evalArchmageConeOfCold(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Cone of Cold');
+  });
+
+  it('skips Cone of Cold after round 2', () => {
+    const arch = makeArchmage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(arch, [bard], 3);
+    const result = tactics.evalArchmageConeOfCold(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Archmage profile — makeDecision', () => {
+  it('uses Cone of Cold before Fireball', () => {
+    const arch = makeArchmage();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('archmage_caster', arch, [arch, bard], 1);
+    assert.equal(decision.action.spell, 'Cone of Cold');
+  });
+
+  it('falls back to Fireball after Cone of Cold used', () => {
+    const arch = makeArchmage();
+    arch.spellSlots[5] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('archmage_caster', arch, [arch, bard], 3);
+    assert.equal(decision.action.spell, 'Fireball');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LICH PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Lich profile — evalLichPowerWordStun', () => {
+  it('uses PW:Stun on target with ≤150 HP', () => {
+    const lich = makeLich();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    bard.currentHP = 67; // Bard's max HP
+    const ctx = makeContext(lich, [bard], 1);
+    const result = tactics.evalLichPowerWordStun(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Power Word Stun');
+  });
+
+  it('skips PW:Stun when no 8th level slots', () => {
+    const lich = makeLich();
+    lich.spellSlots[8] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(lich, [bard], 1);
+    const result = tactics.evalLichPowerWordStun(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Lich profile — evalLichFingerOfDeath', () => {
+  it('uses Finger of Death for heavy damage', () => {
+    const lich = makeLich();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(lich, [bard], 2);
+    const result = tactics.evalLichFingerOfDeath(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Finger of Death');
+  });
+
+  it('skips when no 7th level slots', () => {
+    const lich = makeLich();
+    lich.spellSlots[7] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const ctx = makeContext(lich, [bard], 2);
+    const result = tactics.evalLichFingerOfDeath(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Lich profile — evalLichCloudkill', () => {
+  it('uses Cloudkill when 2+ enemies and not concentrating', () => {
+    const lich = makeLich();
+    const bard1 = makeBard({ id: 'bard-a', position: { x: 6, y: 0 } });
+    const bard2 = makeBard({ id: 'bard-b', position: { x: 6, y: 1 } });
+    const ctx = makeContext(lich, [bard1, bard2], 2);
+    const result = tactics.evalLichCloudkill(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Cloudkill');
+  });
+
+  it('skips Cloudkill when already concentrating', () => {
+    const lich = makeLich();
+    lich.concentrating = 'Something';
+    const bard1 = makeBard({ id: 'bard-a', position: { x: 6, y: 0 } });
+    const bard2 = makeBard({ id: 'bard-b', position: { x: 6, y: 1 } });
+    const ctx = makeContext(lich, [bard1, bard2], 2);
+    const result = tactics.evalLichCloudkill(ctx);
+    assert.equal(result, null);
+  });
+});
+
+describe('Lich profile — evalLegendaryResistance (reaction)', () => {
+  it('auto-succeeds a failed save', () => {
+    const lich = makeLich();
+    const result = tactics.evalLegendaryResistance(lich, {
+      type: 'failed_save',
+      spell: 'Hypnotic Pattern',
+    });
+    assert.ok(result);
+    assert.equal(result.type, 'legendary_resistance');
+  });
+
+  it('skips when no uses remain', () => {
+    const lich = makeLich();
+    lich.legendaryResistance.uses = 0;
+    const result = tactics.evalLegendaryResistance(lich, {
+      type: 'failed_save',
+      spell: 'Hypnotic Pattern',
+    });
+    assert.equal(result, null);
+  });
+});
+
+describe('Lich profile — makeDecision', () => {
+  it('prioritizes PW:Stun over Finger of Death', () => {
+    const lich = makeLich();
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    bard.currentHP = 67;
+    const decision = tactics.makeDecision('lich_caster', lich, [lich, bard], 1);
+    assert.equal(decision.action.spell, 'Power Word Stun');
+  });
+
+  it('falls to Finger of Death when PW:Stun slot spent', () => {
+    const lich = makeLich();
+    lich.spellSlots[8] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('lich_caster', lich, [lich, bard], 2);
+    assert.equal(decision.action.spell, 'Finger of Death');
+  });
+
+  it('falls to Fireball when high slots spent', () => {
+    const lich = makeLich();
+    lich.spellSlots[8] = 0;
+    lich.spellSlots[7] = 0;
+    lich.spellSlots[5] = 0;
+    const bard = makeBard({ position: { x: 6, y: 0 } });
+    const decision = tactics.makeDecision('lich_caster', lich, [lich, bard], 3);
+    assert.equal(decision.action.spell, 'Fireball');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UNDEAD MELEE PROFILE TESTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Undead Melee profile — approach and attack', () => {
+  it('attacks when in melee range', () => {
+    const zombie = createCreature('zombie', { id: 'zombie-1', position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 1, y: 0 } });
+    const decision = tactics.makeDecision('undead_melee', zombie, [zombie, bard], 2);
+    assert.ok(decision.action.type === 'attack' || decision.action.type === 'multiattack');
+  });
+
+  it('approaches when too far for melee', () => {
+    const zombie = createCreature('zombie', { id: 'zombie-1', position: { x: 0, y: 0 } });
+    const bard = makeBard({ position: { x: 20, y: 0 } });
+    const decision = tactics.makeDecision('undead_melee', zombie, [zombie, bard], 2);
+    assert.ok(decision.movement);
+    assert.equal(decision.movement.type, 'move_toward');
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROFILE REGISTRATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Profile registry — all scenario monsters have profiles', () => {
+  const expectedProfiles = [
+    'lore_bard', 'cult_fanatic', 'generic_melee', 'generic_ranged',
+    'dragon', 'giant_bruiser', 'mage_caster', 'archmage_caster',
+    'lich_caster', 'undead_melee',
+  ];
+
+  for (const profile of expectedProfiles) {
+    it(`profile '${profile}' exists and has evaluators`, () => {
+      const p = tactics.getProfile(profile);
+      assert.ok(p, `Profile ${profile} not found`);
+      assert.ok(p.length > 0, `Profile ${profile} has no evaluators`);
+    });
+
+    it(`profile '${profile}' has a matching reaction profile`, () => {
+      assert.ok(profile in tactics.REACTION_PROFILES, `Missing reaction profile for ${profile}`);
+    });
+  }
+});

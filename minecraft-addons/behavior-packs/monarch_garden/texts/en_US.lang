@@ -1,0 +1,4 @@
+pack.name=Monarch Garden Behavior Pack
+pack.description=Butterflies, Milkweed, and the Monarch Lifecycle
+
+entity.monarch:milkweed_seed_entity.name=Milkweed Seed

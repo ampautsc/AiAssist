@@ -1,0 +1,65 @@
+{
+  "test_fixtures": {
+    "minecraft_main_menu": {
+      "description": "Minecraft Bedrock Edition main menu - 2560x1440 resolution",
+      "expected_elements": [
+        {
+          "type": "button",
+          "label": "Settings",
+          "method": "OCR",
+          "min_confidence": 85,
+          "approximate_location": {
+            "x_range": [1200, 1350],
+            "y_range": [850, 920]
+          }
+        },
+        {
+          "type": "button", 
+          "label": "Play",
+          "method": "visual_or_coordinate",
+          "note": "May not be OCR-detectable due to stylized font"
+        }
+      ],
+      "verification_after_play_click": {
+        "expected_screen": "worlds_list",
+        "must_have_elements": [
+          "World name or 'Create New' button",
+          "No longer on main menu (Settings button in different place or not visible)"
+        ]
+      }
+    },
+    "minecraft_worlds_list": {
+      "description": "Worlds selection screen after clicking Play",
+      "expected_elements": [
+        {
+          "type": "button",
+          "text_contains": ["Create", "New", "World"],
+          "method": "OCR"
+        },
+        {
+          "type": "text",
+          "text_pattern": "world name entries",
+          "note": "Should see world names if any exist"
+        }
+      ]
+    }
+  },
+  "verified_coordinates": {
+    "note": "These are TESTED and VERIFIED - do not modify without re-testing",
+    "minecraft_main_menu": {
+      "Settings": {
+        "x": 1279,
+        "y": 876,
+        "verified_date": "2026-01-18",
+        "verification_method": "OCR detected at 90% confidence",
+        "tested_by": "Sis"
+      },
+      "Play": {
+        "x": null,
+        "y": null,
+        "status": "NOT YET VERIFIED",
+        "last_attempt": "2026-01-18 - claimed success but did not verify expected elements"
+      }
+    }
+  }
+}

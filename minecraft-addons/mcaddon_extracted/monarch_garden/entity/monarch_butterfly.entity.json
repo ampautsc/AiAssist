@@ -1,0 +1,28 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:butterfly",
+      "materials": {
+        "default": "parrot"
+      },
+      "textures": {
+        "default": "textures/entity/monarch_butterfly"
+      },
+      "geometry": {
+        "default": "geometry.parrot"
+      },
+      "render_controllers": ["controller.render.parrot"],
+      "animations": {
+        "flying": "animation.parrot.flying"
+      },
+      "scripts": {
+        "animate": ["flying"]
+      },
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 10
+      }
+    }
+  }
+}

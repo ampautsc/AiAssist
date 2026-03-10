@@ -1,0 +1,51 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "monarch:chrysalis",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false
+    },
+    "component_groups": {
+      "monarch:transform_to_butterfly": {
+        "minecraft:transformation": {
+          "into": "monarch:butterfly",
+          "delay": 0.5
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": ["chrysalis", "immobile", "mob"]
+      },
+      "minecraft:health": {
+        "value": 3,
+        "max": 3
+      },
+      "minecraft:collision_box": {
+        "width": 0.25,
+        "height": 0.4
+      },
+      "minecraft:physics": {},
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:timer": {
+        "looping": false,
+        "time": 400,
+        "time_down_event": {
+          "event": "monarch:emerge_butterfly"
+        }
+      }
+    },
+    "events": {
+      "monarch:emerge_butterfly": {
+        "add": {
+          "component_groups": ["monarch:transform_to_butterfly"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "Fighter": {
+    "description": "A master of martial combat, skilled with a variety of weapons and armor.",
+    "hit_die": "1d10",
+    "primary_ability": "Strength or Dexterity",
+    "saves": ["Strength", "Constitution"],
+    "proficiencies": {
+      "armor": ["All armor", "Shields"],
+      "weapons": ["Simple weapons", "Martial weapons"],
+      "tools": [],
+      "skills": ["Choose 2 from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, Survival"]
+    },
+    "equipment": [
+      "(a) chain mail or (b) leather armor, longbow, and 20 arrows",
+      "(a) a martial weapon and a shield or (b) two martial weapons",
+      "(a) a light crossbow and 20 bolts or (b) two handaxes",
+      "(a) a dungeoneer's pack or (b) an explorer's pack"
+    ]
+  },
+  "Wizard": {
+    "description": "A scholarly magic-user capable of manipulating the structures of reality.",
+    "hit_die": "1d6",
+    "primary_ability": "Intelligence",
+    "saves": ["Intelligence", "Wisdom"],
+    "proficiencies": {
+      "armor": [],
+      "weapons": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light crossbows"],
+      "tools": [],
+      "skills": ["Choose 2 from Arcana, History, Insight, Investigation, Medicine, Religion"]
+    },
+    "equipment": [
+      "(a) a quarterstaff or (b) a dagger",
+      "(a) a component pouch or (b) an arcane focus",
+      "(a) a scholar's pack or (b) an explorer's pack",
+      "A spellbook"
+    ],
+    "spellcasting": true
+  },
+  "Rogue": {
+    "description": "A scoundrel who uses stealth and trickery to overcome obstacles and enemies.",
+    "hit_die": "1d8",
+    "primary_ability": "Dexterity",
+    "saves": ["Dexterity", "Intelligence"],
+    "proficiencies": {
+      "armor": ["Light armor"],
+      "weapons": ["Simple weapons", "Hand crossbows", "Longswords", "Rapiers", "Shortswords"],
+      "tools": ["Thieves' tools"],
+      "skills": ["Choose 4 from Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth"]
+    },
+    "equipment": [
+      "(a) a rapier or (b) a shortsword",
+      "(a) a shortbow and quiver of 20 arrows or (b) a shortsword",
+      "(a) a burglar's pack, (b) a dungeoneer's pack, or (c) an explorer's pack",
+      "Leather armor, two daggers, and thieves' tools"
+    ]
+  },
+  "Cleric": {
+    "description": "A priestly champion who wields divine magic in service of a higher power.",
+    "hit_die": "1d8",
+    "primary_ability": "Wisdom",
+    "saves": ["Wisdom", "Charisma"],
+    "proficiencies": {
+      "armor": ["Light armor", "Medium armor", "Shields"],
+      "weapons": ["Simple weapons"],
+      "tools": [],
+      "skills": ["Choose 2 from History, Insight, Medicine, Persuasion, Religion"]
+    },
+    "equipment": [
+      "(a) a mace or (b) a warhammer (if proficient)",
+      "(a) scale mail, (b) leather armor, or (c) chain mail (if proficient)",
+      "(a) a light crossbow and 20 bolts or (b) any simple weapon",
+      "(a) a priest's pack or (b) an explorer's pack",
+      "A shield and a holy symbol"
+    ],
+    "spellcasting": true
+  },
+  "Barbarian": {
+    "description": "A fierce warrior of primitive background who can enter a battle rage.",
+    "hit_die": "1d12",
+    "primary_ability": "Strength",
+    "saves": ["Strength", "Constitution"],
+    "proficiencies": {
+      "armor": ["Light armor", "Medium armor", "Shields"],
+      "weapons": ["Simple weapons", "Martial weapons"],
+      "tools": [],
+      "skills": ["Choose 2 from Animal Handling, Athletics, Intimidation, Nature, Perception, Survival"]
+    },
+    "equipment": [
+      "(a) a greataxe or (b) any martial melee weapon",
+      "(a) two handaxes or (b) any simple weapon",
+      "An explorer's pack and four javelins"
+    ],
+    "spellcasting": false
+  },
+  "Bard": {
+    "description": "An inspiring magician whose power echoes the music of creation.",
+    "hit_die": "1d8",
+    "primary_ability": "Charisma",
+    "saves": ["Dexterity", "Charisma"],
+    "proficiencies": {
+      "armor": ["Light armor"],
+      "weapons": ["Simple weapons", "Hand crossbows", "Longswords", "Rapiers", "Shortswords"],
+      "tools": ["Three musical instruments of your choice"],
+      "skills": ["Choose any 3"]
+    },
+    "equipment": [
+      "(a) a rapier, (b) a longsword, or (c) any simple weapon",
+      "(a) a diplomat's pack or (b) an entertainer's pack",
+      "(a) a lute or (b) any other musical instrument",
+      "Leather armor and a dagger"
+    ],
+    "spellcasting": true
+  },
+  "Druid": {
+    "description": "A priest of the Old Faith, wielding the powers of nature and adopting animal forms.",
+    "hit_die": "1d8",
+    "primary_ability": "Wisdom",
+    "saves": ["Intelligence", "Wisdom"],
+    "proficiencies": {
+      "armor": ["Light armor", "Medium armor", "Shields"],
+      "weapons": ["Clubs", "Daggers", "Darts", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Sickles", "Slings", "Spears"],
+      "tools": ["Herbalism kit"],
+      "skills": ["Choose 2 from Arcana, Animal Handling, Insight, Medicine, Nature, Perception, Religion, Survival"]
+    },
+    "equipment": [
+      "(a) a wooden shield or (b) any simple weapon",
+      "(a) a scimitar or (b) any simple melee weapon",
+      "Leather armor, an explorer's pack, and a druidic focus"
+    ],
+    "spellcasting": true
+  },
+  "Monk": {
+    "description": "A master of martial arts, harnessing the power of the body in pursuit of physical and spiritual perfection.",
+    "hit_die": "1d8",
+    "primary_ability": "Dexterity & Wisdom",
+    "saves": ["Strength", "Dexterity"],
+    "proficiencies": {
+      "armor": [],
+      "weapons": ["Simple weapons", "Shortswords"],
+      "tools": ["Choose one type of artisan's tools or one musical instrument"],
+      "skills": ["Choose 2 from Acrobatics, Athletics, History, Insight, Religion, Stealth"]
+    },
+    "equipment": [
+      "(a) a shortsword or (b) any simple weapon",
+      "(a) a dungeoneer's pack or (b) an explorer's pack",
+      "10 darts"
+    ],
+    "spellcasting": false
+  },
+  "Paladin": {
+    "description": "A holy warrior bound to a sacred oath.",
+    "hit_die": "1d10",
+    "primary_ability": "Strength & Charisma",
+    "saves": ["Wisdom", "Charisma"],
+    "proficiencies": {
+      "armor": ["All armor", "Shields"],
+      "weapons": ["Simple weapons", "Martial weapons"],
+      "tools": [],
+      "skills": ["Choose 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion"]
+    },
+    "equipment": [
+      "(a) a martial weapon and a shield or (b) two martial weapons",
+      "(a) five javelins or (b) any simple melee weapon",
+      "(a) a priest's pack or (b) an explorer's pack",
+      "Chain mail and a holy symbol"
+    ],
+    "spellcasting": true
+  },
+  "Ranger": {
+    "description": "A warrior who uses martial prowess and nature magic to combat threats on the edges of civilization.",
+    "hit_die": "1d10",
+    "primary_ability": "Dexterity & Wisdom",
+    "saves": ["Strength", "Dexterity"],
+    "proficiencies": {
+      "armor": ["Light armor", "Medium armor", "Shields"],
+      "weapons": ["Simple weapons", "Martial weapons"],
+      "tools": [],
+      "skills": ["Choose 3 from Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, Survival"]
+    },
+    "equipment": [
+      "(a) scale mail or (b) leather armor",
+      "(a) two shortswords or (b) two simple melee weapons",
+      "(a) a dungeoneer's pack or (b) an explorer's pack",
+      "A longbow and a quiver of 20 arrows"
+    ],
+    "spellcasting": true
+  },
+  "Sorcerer": {
+    "description": "A spellcaster who draws on inherent magic from a gift or bloodline.",
+    "hit_die": "1d6",
+    "primary_ability": "Charisma",
+    "saves": ["Constitution", "Charisma"],
+    "proficiencies": {
+      "armor": [],
+      "weapons": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light crossbows"],
+      "tools": [],
+      "skills": ["Choose 2 from Arcana, Deception, Insight, Intimidation, Persuasion, Religion"]
+    },
+    "equipment": [
+      "(a) a light crossbow and 20 bolts or (b) any simple weapon",
+      "(a) a component pouch or (b) an arcane focus",
+      "(a) a dungeoneer's pack or (b) an explorer's pack",
+      "Two daggers"
+    ],
+    "spellcasting": true
+  },
+  "Warlock": {
+    "description": "A wielder of magic that is derived from a bargain with an extraplanar entity.",
+    "hit_die": "1d8",
+    "primary_ability": "Charisma",
+    "saves": ["Wisdom", "Charisma"],
+    "proficiencies": {
+      "armor": ["Light armor"],
+      "weapons": ["Simple weapons"],
+      "tools": [],
+      "skills": ["Choose 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion"]
+    },
+    "equipment": [
+      "(a) a light crossbow and 20 bolts or (b) any simple weapon",
+      "(a) a component pouch or (b) an arcane focus",
+      "(a) a scholar's pack or (b) a dungeoneer's pack",
+      "Leather armor, any simple weapon, and two daggers"
+    ],
+    "spellcasting": true
+  }
+}

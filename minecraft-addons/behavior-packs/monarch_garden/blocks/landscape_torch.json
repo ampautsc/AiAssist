@@ -1,0 +1,69 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:block": {
+    "description": {
+      "identifier": "monarch:landscape_torch",
+      "menu_category": {
+        "category": "items",
+        "group": "itemGroup.name.torch"
+      },
+      "states": {
+        "monarch:lit": [false, true]
+      }
+    },
+    "components": {
+      "minecraft:custom_components": ["monarch:motion_sensor"],
+      "minecraft:tick": {
+        "interval_range": [10, 10],
+        "looping": true
+      },
+      "minecraft:geometry": "geometry.monarch.landscape_torch",
+      "minecraft:light_dampening": 0,
+      "minecraft:light_emission": 0,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:collision_box": {
+        "origin": [-1, 0, -1],
+        "size": [2, 10, 2]
+      },
+      "minecraft:selection_box": {
+        "origin": [-5, 0, -5],
+        "size": [10, 10, 10]
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "landscape_torch_off",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:placement_filter": {
+        "conditions": [
+          {
+            "allowed_faces": ["up"]
+          }
+        ]
+      },
+      "minecraft:loot": "loot_tables/blocks/landscape_torch.json"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('monarch:lit') == true",
+        "components": {
+          "minecraft:light_emission": 14,
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "landscape_torch_lit",
+              "render_method": "opaque",
+              "face_dimming": false,
+              "ambient_occlusion": false
+            }
+          }
+        }
+      }
+    ]
+  }
+}

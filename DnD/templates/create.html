@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Create Character - D&D 5e Character Creator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-plus-circle"></i> Create New Character</h1>
+        <p class="lead">Follow the steps below to create your D&D 5e character</p>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="progress" style="height: 30px;">
+            <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">
+                Step 1 of 6
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 1: Ability Scores -->
+<div class="step-container" id="step1">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-bullseye"></i> Step 1: Ability Scores</h3>
+        </div>
+        <div class="card-body">
+            <p>Choose how to generate your ability scores:</p>
+            
+            <div class="btn-group-vertical w-100" role="group">
+                <button type="button" class="btn btn-outline-primary btn-lg mb-2" onclick="selectAbilityMethod('standard')">
+                    <strong>Standard Array</strong><br>
+                    <small>Use the standard array: 15, 14, 13, 12, 10, 8</small>
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-lg mb-2" onclick="selectAbilityMethod('pointbuy')">
+                    <strong>Point Buy</strong><br>
+                    <small>27 points to distribute (scores 8-15)</small>
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-lg mb-2" onclick="selectAbilityMethod('manual')">
+                    <strong>Manual Entry</strong><br>
+                    <small>Enter your own scores</small>
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-lg" onclick="selectAbilityMethod('roll')">
+                    <strong>Roll 4d6 Drop Lowest</strong><br>
+                    <small>Roll for each ability score</small>
+                </button>
+            </div>
+
+            <div id="abilityScoreInput" class="mt-4" style="display: none;">
+                <!-- Will be populated based on method selected -->
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-primary" id="step1Next" onclick="nextStep(2)" disabled>
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 2: Race Selection -->
+<div class="step-container" id="step2" style="display: none;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-person"></i> Step 2: Choose Your Race</h3>
+        </div>
+        <div class="card-body">
+            <div id="raceList">
+                <p>Loading races...</p>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="previousStep(1)">
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" id="step2Next" onclick="nextStep(3)" disabled>
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 3: Class Selection -->
+<div class="step-container" id="step3" style="display: none;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-shield"></i> Step 3: Choose Your Class</h3>
+        </div>
+        <div class="card-body">
+            <div id="classList">
+                <p>Loading classes...</p>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="previousStep(2)">
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" id="step3Next" onclick="nextStep(4)" disabled>
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 4: Background -->
+<div class="step-container" id="step4" style="display: none;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-book"></i> Step 4: Choose Your Background</h3>
+        </div>
+        <div class="card-body">
+            <div id="backgroundList">
+                <p>Loading backgrounds...</p>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="previousStep(3)">
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" id="step4Next" onclick="nextStep(5)" disabled>
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 5: Details -->
+<div class="step-container" id="step5" style="display: none;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-pencil"></i> Step 5: Character Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="charName" class="form-label">Character Name</label>
+                <input type="text" class="form-control" id="charName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="alignment" class="form-label">Alignment</label>
+                <select class="form-select" id="alignment">
+                    <option value="Lawful Good">Lawful Good</option>
+                    <option value="Neutral Good">Neutral Good</option>
+                    <option value="Chaotic Good">Chaotic Good</option>
+                    <option value="Lawful Neutral">Lawful Neutral</option>
+                    <option value="True Neutral">True Neutral</option>
+                    <option value="Chaotic Neutral">Chaotic Neutral</option>
+                    <option value="Lawful Evil">Lawful Evil</option>
+                    <option value="Neutral Evil">Neutral Evil</option>
+                    <option value="Chaotic Evil">Chaotic Evil</option>
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="previousStep(4)">
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-primary" onclick="nextStep(6)">
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 6: Review & Save -->
+<div class="step-container" id="step6" style="display: none;">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h3><i class="bi bi-check-circle"></i> Step 6: Review & Save</h3>
+        </div>
+        <div class="card-body">
+            <div id="characterSummary">
+                <!-- Will be populated with character summary -->
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="previousStep(5)">
+                    <i class="bi bi-arrow-left"></i> Previous
+                </button>
+                <button class="btn btn-success btn-lg" onclick="saveCharacter()">
+                    <i class="bi bi-save"></i> Save Character
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/character-creator.js') }}"></script>
+{% endblock %}

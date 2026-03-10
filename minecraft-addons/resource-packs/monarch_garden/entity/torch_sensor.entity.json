@@ -1,0 +1,22 @@
+{
+  "format_version": "1.21.40",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "monarch:torch_sensor",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/invisible"
+      },
+      "geometry": {
+        "default": "geometry.invisible"
+      },
+      "render_controllers": ["controller.render.default"],
+      "spawn_egg": {
+        "base_color": "#000000",
+        "overlay_color": "#000000"
+      }
+    }
+  }
+}
