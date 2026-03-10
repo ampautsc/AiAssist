@@ -74,6 +74,57 @@ function selectClosestCharmedAlly(me, charmedAllies) {
   })
 }
 
+/**
+ * Get enemies that can be hit by an AoE spell.
+ * Places the AoE optimally at the centroid of enemies within casting range,
+ * then returns only enemies within the AoE radius of that point.
+ * 
+ * @param {object} caster - the creature casting the spell
+ * @param {object[]} enemies - array of potential targets
+ * @param {number} castRange - how far the caster can place the AoE center (in feet)
+ * @param {number} aoeRadius - radius/half-side of the AoE effect (in feet)
+ * @returns {object[]} enemies that can be hit by optimally-placed AoE
+ */
+function getEnemiesInAoE(caster, enemies, castRange, aoeRadius) {
+  if (!enemies || enemies.length === 0) return []
+  
+  // For self/cone spells (castRange === 0), use caster position as center
+  // Otherwise, find enemies within casting range first
+  const reachable = castRange === 0
+    ? enemies.filter(e => mech.distanceBetween(caster, e) <= aoeRadius)
+    : enemies.filter(e => mech.distanceBetween(caster, e) <= castRange + aoeRadius)
+  
+  if (reachable.length === 0) return []
+  if (castRange === 0) return reachable
+  
+  // Calculate centroid of reachable enemies (in grid units)
+  const avgX = reachable.reduce((sum, e) => sum + (e.position?.x || 0), 0) / reachable.length
+  const avgY = reachable.reduce((sum, e) => sum + (e.position?.y || 0), 0) / reachable.length
+  
+  // Check if centroid is within casting range of caster
+  const casterX = caster.position?.x || 0
+  const casterY = caster.position?.y || 0
+  const distToCentroid = Math.max(Math.abs(avgX - casterX), Math.abs(avgY - casterY)) * 5
+  if (distToCentroid > castRange) {
+    // Can't reach the centroid, use closest enemy as AoE center instead
+    const closest = reachable.reduce((c, e) => 
+      mech.distanceBetween(caster, e) < mech.distanceBetween(caster, c) ? e : c
+    )
+    return reachable.filter(e => {
+      const dx = Math.abs((e.position?.x || 0) - (closest.position?.x || 0)) * 5
+      const dy = Math.abs((e.position?.y || 0) - (closest.position?.y || 0)) * 5
+      return Math.max(dx, dy) <= aoeRadius
+    })
+  }
+  
+  // Filter to enemies within AoE radius of the centroid
+  return reachable.filter(e => {
+    const dx = Math.abs((e.position?.x || 0) - avgX) * 5
+    const dy = Math.abs((e.position?.y || 0) - avgY) * 5
+    return Math.max(dx, dy) <= aoeRadius
+  })
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BARD / PARTY EVALUATORS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,8 +146,11 @@ function evalOpeningAoEDisable(ctx) {
   if (round !== 1) return null
   if (me.concentrating) return null
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
+  // Hypnotic Pattern: 120ft range, 30ft cube (15ft radius from center)
+  const targets = getEnemiesInAoE(me, activeEnemies, 120, 15)
+  if (targets.length === 0) return null
   return {
-    action: { spell: 'Hypnotic Pattern', level: 3, targets: activeEnemies },
+    action: { spell: 'Hypnotic Pattern', level: 3, targets },
     reasoning: 'ROUND 1 opening — casting Hypnotic Pattern to disable enemies',
     bonusAction: me.gemFlight && me.gemFlight.uses > 0 ? { type: 'gem_flight' } : null,
   }
@@ -173,8 +227,11 @@ function evalRecastHypnoticPattern(ctx) {
   if (me.concentrating) return null
   if (activeEnemies.length < 2) return null
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
+  // Hypnotic Pattern: 120ft range, 30ft cube (15ft radius from center)
+  const targets = getEnemiesInAoE(me, activeEnemies, 120, 15)
+  if (targets.length < 2) return null
   return {
-    action: { spell: 'Hypnotic Pattern', level: 3, targets: activeEnemies },
+    action: { spell: 'Hypnotic Pattern', level: 3, targets },
     reasoning: 'Recasting Hypnotic Pattern to disable multiple enemies',
   }
 }
@@ -445,8 +502,11 @@ function evalMageFireball(ctx) {
   const { me, activeEnemies } = ctx
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
   if (activeEnemies.length === 0) return null
+  // Fireball: 150ft range, 20ft sphere radius
+  const targets = getEnemiesInAoE(me, activeEnemies, 150, 20)
+  if (targets.length === 0) return null
   return {
-    action: { spell: 'Fireball', level: 3, targets: activeEnemies },
+    action: { spell: 'Fireball', level: 3, targets },
     reasoning: 'Casting Fireball for AoE damage',
   }
 }
@@ -477,8 +537,11 @@ function evalArchmageConeOfCold(ctx) {
   if (round > 2) return null
   if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
   if (activeEnemies.length === 0) return null
+  // Cone of Cold: self-origin, 60ft cone
+  const targets = getEnemiesInAoE(me, activeEnemies, 0, 60)
+  if (targets.length === 0) return null
   return {
-    action: { spell: 'Cone of Cold', level: 5, targets: activeEnemies },
+    action: { spell: 'Cone of Cold', level: 5, targets },
     reasoning: 'Opening with Cone of Cold for massive damage',
   }
 }
@@ -509,8 +572,11 @@ function evalLichCloudkill(ctx) {
   if (me.concentrating) return null
   if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
   if (activeEnemies.length < 2) return null
+  // Cloudkill: 120ft range, 20ft sphere radius
+  const targets = getEnemiesInAoE(me, activeEnemies, 120, 20)
+  if (targets.length < 2) return null
   return {
-    action: { spell: 'Cloudkill', level: 5, targets: activeEnemies },
+    action: { spell: 'Cloudkill', level: 5, targets },
     reasoning: 'Casting Cloudkill on multiple enemies',
   }
 }
