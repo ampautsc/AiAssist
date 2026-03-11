@@ -1,0 +1,7 @@
+/target
+.env 
+credentials.json
+*.log
+output.txt
+claude_desktop_config.json
+.env*
