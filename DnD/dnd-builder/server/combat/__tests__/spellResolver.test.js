@@ -129,6 +129,32 @@ describe('resolveSpell — Hypnotic Pattern', () => {
     assert.equal(result.details.affectedCount, 1);
     assert.deepEqual(f1.conditions, []); // dead target not affected
   });
+
+  it('resolves targets from aoeCenter when provided (engine-resolved)', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    f1.position = { x: 10, y: 0 };
+    const f2 = makeFanatic(2);
+    f2.position = { x: 11, y: 0 };
+    // f3 is far away — should NOT be hit
+    const f3 = makeFanatic(3);
+    f3.position = { x: 30, y: 0 };
+    const all = [bard, f1, f2, f3];
+    const log = [];
+
+    // Use aoeCenter at (10, 0) — f1 and f2 are within 15ft (cube half-side), f3 is 100ft away
+    const result = resolver.resolveSpell(bard, {
+      spell: 'Hypnotic Pattern',
+      level: 3,
+      aoeCenter: { x: 10, y: 0 },
+    }, all, log);
+
+    assert.equal(result.success, true);
+    assert.equal(result.details.affectedCount, 2);
+    assert.ok(f1.conditions.includes('charmed_hp'));
+    assert.ok(f2.conditions.includes('charmed_hp'));
+    assert.deepEqual(f3.conditions, []); // far away — not affected
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

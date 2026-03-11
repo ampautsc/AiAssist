@@ -18,6 +18,7 @@
 const spellRegistry = require('../data/spells');
 const dice = require('./dice');
 const mech = require('./mechanics');
+const { resolveAoETargets } = require('./targetResolver');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SLOT MANAGEMENT
@@ -318,11 +319,17 @@ function resolveSpell(caster, action, allCombatants, log, options = {}) {
     }
     
   } else if (spellDef.save && spellDef.targeting.type === 'area') {
-    // AoE save spell (Hypnotic Pattern)
-    const targets = action.targets || [];
+    // AoE save spell (Hypnotic Pattern, Fireball, etc.)
+    // Engine resolves targets from aoeCenter if provided; falls back to action.targets
+    const targets = action.aoeCenter
+      ? resolveAoETargets(caster, spellDef, action.aoeCenter, allCombatants)
+      : (action.targets || []);
     let affectedCount = 0;
     
-    log.push(`  ACTION: Cast ${spellName} (Level ${level} slot, ${caster.spellSlots[level]} remaining). DC ${dc} ${spellDef.save.ability.toUpperCase()} save. ${spellDef.targeting.shape || 'area'}.`);
+    const shapeDesc = spellDef.targeting.shape
+      ? `${spellDef.targeting.size || spellDef.targeting.radius || spellDef.targeting.length || ''}ft ${spellDef.targeting.shape}`
+      : 'area';
+    log.push(`  ACTION: Cast ${spellName} (Level ${level} slot, ${caster.spellSlots[level]} remaining). DC ${dc} ${spellDef.save.ability.toUpperCase()} save. ${shapeDesc}.`);
     
     for (const target of targets) {
       if (!mech.isAlive(target) || mech.isIncapacitated(target)) continue;

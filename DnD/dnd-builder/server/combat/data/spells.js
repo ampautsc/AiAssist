@@ -13,7 +13,7 @@
  *   range:         number — in feet (0 = self, 5 = touch)
  *   duration:      number — rounds (0 = instantaneous, 10 = 1 minute)
  *   concentration: boolean
- *   targeting:     { type: 'single'|'self'|'area', shape?: string, size?: number }
+ *   targeting:     { type: 'single'|'self'|'area', shape?: 'cube'|'sphere'|'cone'|'cylinder'|'wall', size?: number, radius?: number, length?: number }
  *   save:          { ability: 'wis'|'dex'|'str'|'con', negatesAll?: boolean } | null
  *   attack:        { type: 'melee_spell'|'ranged_spell' } | null
  *   damage:        { dice: string, type: string, bonus?: number } | null
@@ -235,7 +235,7 @@ const SPELLS = {
     range: 120,
     duration: 10,    // 1 minute
     concentration: true,
-    targeting: { type: 'area', shape: '30ft cube' },
+    targeting: { type: 'area', shape: 'cube', size: 30 },
     save: { ability: 'wis', negatesAll: true },
     attack: null,
     damage: null,
@@ -325,7 +325,7 @@ const SPELLS = {
     range: 0,       // self (60ft cone)
     duration: 0,
     concentration: false,
-    targeting: { type: 'area', shape: '60ft cone' },
+    targeting: { type: 'area', shape: 'cone', length: 60 },
     save: { ability: 'con', negatesAll: false },     // half damage on success
     attack: null,
     damage: { dice: '8d8', type: 'cold' },
@@ -479,7 +479,7 @@ const SPELLS = {
     range: 150,
     duration: 0,
     concentration: false,
-    targeting: { type: 'area', shape: '20ft sphere' },
+    targeting: { type: 'area', shape: 'sphere', radius: 20 },
     save: { ability: 'dex', negatesAll: false },     // half damage on success
     attack: null,
     damage: { dice: '8d6', type: 'fire' },
@@ -547,7 +547,7 @@ const SPELLS = {
     range: 300,
     duration: 0,
     concentration: false,
-    targeting: { type: 'area', shape: '20ft radius, 40ft high cylinder' },
+    targeting: { type: 'area', shape: 'cylinder', radius: 20, height: 40 },
     save: { ability: 'dex', negatesAll: false },     // half damage on success
     attack: null,
     damage: { dice: '2d8', type: 'bludgeoning', bonusDice: '4d6', bonusType: 'cold' },
@@ -571,7 +571,7 @@ const SPELLS = {
     range: 120,
     duration: 10,    // 1 minute
     concentration: true,
-    targeting: { type: 'area', shape: '20ft sphere' },
+    targeting: { type: 'area', shape: 'sphere', radius: 20 },
     save: { ability: 'con', negatesAll: false },     // half damage on success
     attack: null,
     damage: { dice: '5d8', type: 'poison' },
@@ -591,7 +591,7 @@ const SPELLS = {
     range: 120,
     duration: 10,    // 1 minute
     concentration: true,
-    targeting: { type: 'area', shape: 'wall or dome' },
+    targeting: { type: 'area', shape: 'wall' },
     save: null,
     attack: null,
     damage: null,
@@ -689,7 +689,7 @@ const SPELLS = {
     range: 0,       // self (15ft cube)
     duration: 0,
     concentration: false,
-    targeting: { type: 'area', shape: '15ft cube' },
+    targeting: { type: 'area', shape: 'cube', size: 15 },
     save: { ability: 'con', negatesAll: false },     // half damage on success
     attack: null,
     damage: { dice: '2d8', type: 'thunder' },
@@ -736,6 +736,28 @@ function getAllSpellNames() {
   return Object.keys(SPELLS);
 }
 
+/**
+ * Get the effective radius (in feet) of a spell's AoE for target resolution.
+ * - cube: half the side length (5e: creatures within the cube)
+ * - sphere: the radius
+ * - cone: the length (cone's max extent)
+ * - cylinder: the radius
+ * - wall: 0 (special handling)
+ * @param {object} targeting - the spell's targeting object
+ * @returns {number} effective radius in feet
+ */
+function getAoERadius(targeting) {
+  if (!targeting || targeting.type !== 'area') return 0;
+  switch (targeting.shape) {
+    case 'cube':     return Math.floor(targeting.size / 2);
+    case 'sphere':   return targeting.radius || 0;
+    case 'cone':     return targeting.length || 0;
+    case 'cylinder': return targeting.radius || 0;
+    case 'wall':     return 0;
+    default:         return 0;
+  }
+}
+
 module.exports = {
   SPELLS,
   getSpell,
@@ -745,4 +767,5 @@ module.exports = {
   getConcentrationSpells,
   isConcentrationSpell,
   getAllSpellNames,
+  getAoERadius,
 };

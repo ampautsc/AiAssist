@@ -9,6 +9,7 @@
 'use strict'
 
 const mech = require('../engine/mechanics')
+const { computeOptimalCenter, getEffectiveRadius, isInAoE } = require('../engine/aoeGeometry')
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BATTLEFIELD ASSESSMENT
@@ -75,54 +76,30 @@ function selectClosestCharmedAlly(me, charmedAllies) {
 }
 
 /**
- * Get enemies that can be hit by an AoE spell.
- * Places the AoE optimally at the centroid of enemies within casting range,
- * then returns only enemies within the AoE radius of that point.
- * 
+ * Plan optimal AoE placement and estimate how many enemies it will hit.
+ * The AI uses this to decide IF an AoE is worth casting and WHERE to center it.
+ * The game engine (targetResolver) will independently determine the actual targets.
+ *
  * @param {object} caster - the creature casting the spell
  * @param {object[]} enemies - array of potential targets
  * @param {number} castRange - how far the caster can place the AoE center (in feet)
- * @param {number} aoeRadius - radius/half-side of the AoE effect (in feet)
- * @returns {object[]} enemies that can be hit by optimally-placed AoE
+ * @param {object} targeting - structured targeting geometry from spell data
+ * @returns {{ center: { x: number, y: number }, estimatedCount: number }|null}
  */
-function getEnemiesInAoE(caster, enemies, castRange, aoeRadius) {
-  if (!enemies || enemies.length === 0) return []
+function planAoEPlacement(caster, enemies, castRange, targeting) {
+  if (!enemies || enemies.length === 0) return null
   
-  // For self/cone spells (castRange === 0), use caster position as center
-  // Otherwise, find enemies within casting range first
-  const reachable = castRange === 0
-    ? enemies.filter(e => mech.distanceBetween(caster, e) <= aoeRadius)
-    : enemies.filter(e => mech.distanceBetween(caster, e) <= castRange + aoeRadius)
+  const aoeRadius = getEffectiveRadius(targeting)
+  const center = computeOptimalCenter(caster, enemies, castRange, aoeRadius)
+  if (!center) return null
   
-  if (reachable.length === 0) return []
-  if (castRange === 0) return reachable
+  // Estimate how many enemies fall within the AoE from this center
+  const estimatedCount = enemies.filter(e => {
+    const pos = e.position || { x: 0, y: 0 }
+    return isInAoE(pos, center, targeting)
+  }).length
   
-  // Calculate centroid of reachable enemies (in grid units)
-  const avgX = reachable.reduce((sum, e) => sum + (e.position?.x || 0), 0) / reachable.length
-  const avgY = reachable.reduce((sum, e) => sum + (e.position?.y || 0), 0) / reachable.length
-  
-  // Check if centroid is within casting range of caster
-  const casterX = caster.position?.x || 0
-  const casterY = caster.position?.y || 0
-  const distToCentroid = Math.max(Math.abs(avgX - casterX), Math.abs(avgY - casterY)) * 5
-  if (distToCentroid > castRange) {
-    // Can't reach the centroid, use closest enemy as AoE center instead
-    const closest = reachable.reduce((c, e) => 
-      mech.distanceBetween(caster, e) < mech.distanceBetween(caster, c) ? e : c
-    )
-    return reachable.filter(e => {
-      const dx = Math.abs((e.position?.x || 0) - (closest.position?.x || 0)) * 5
-      const dy = Math.abs((e.position?.y || 0) - (closest.position?.y || 0)) * 5
-      return Math.max(dx, dy) <= aoeRadius
-    })
-  }
-  
-  // Filter to enemies within AoE radius of the centroid
-  return reachable.filter(e => {
-    const dx = Math.abs((e.position?.x || 0) - avgX) * 5
-    const dy = Math.abs((e.position?.y || 0) - avgY) * 5
-    return Math.max(dx, dy) <= aoeRadius
-  })
+  return { center, estimatedCount }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,11 +123,12 @@ function evalOpeningAoEDisable(ctx) {
   if (round !== 1) return null
   if (me.concentrating) return null
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
-  // Hypnotic Pattern: 120ft range, 30ft cube (15ft radius from center)
-  const targets = getEnemiesInAoE(me, activeEnemies, 120, 15)
-  if (targets.length === 0) return null
+  // Hypnotic Pattern: 120ft range, 30ft cube
+  const targeting = { shape: 'cube', size: 30 }
+  const plan = planAoEPlacement(me, activeEnemies, 120, targeting)
+  if (!plan || plan.estimatedCount === 0) return null
   return {
-    action: { spell: 'Hypnotic Pattern', level: 3, targets },
+    action: { spell: 'Hypnotic Pattern', level: 3, aoeCenter: plan.center },
     reasoning: 'ROUND 1 opening — casting Hypnotic Pattern to disable enemies',
     bonusAction: me.gemFlight && me.gemFlight.uses > 0 ? { type: 'gem_flight' } : null,
   }
@@ -227,11 +205,12 @@ function evalRecastHypnoticPattern(ctx) {
   if (me.concentrating) return null
   if (activeEnemies.length < 2) return null
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
-  // Hypnotic Pattern: 120ft range, 30ft cube (15ft radius from center)
-  const targets = getEnemiesInAoE(me, activeEnemies, 120, 15)
-  if (targets.length < 2) return null
+  // Hypnotic Pattern: 120ft range, 30ft cube
+  const targeting = { shape: 'cube', size: 30 }
+  const plan = planAoEPlacement(me, activeEnemies, 120, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
   return {
-    action: { spell: 'Hypnotic Pattern', level: 3, targets },
+    action: { spell: 'Hypnotic Pattern', level: 3, aoeCenter: plan.center },
     reasoning: 'Recasting Hypnotic Pattern to disable multiple enemies',
   }
 }
@@ -502,11 +481,12 @@ function evalMageFireball(ctx) {
   const { me, activeEnemies } = ctx
   if (!me.spellSlots || !(me.spellSlots[3] > 0)) return null
   if (activeEnemies.length === 0) return null
-  // Fireball: 150ft range, 20ft sphere radius
-  const targets = getEnemiesInAoE(me, activeEnemies, 150, 20)
-  if (targets.length === 0) return null
+  // Fireball: 150ft range, 20ft sphere
+  const targeting = { shape: 'sphere', radius: 20 }
+  const plan = planAoEPlacement(me, activeEnemies, 150, targeting)
+  if (!plan || plan.estimatedCount === 0) return null
   return {
-    action: { spell: 'Fireball', level: 3, targets },
+    action: { spell: 'Fireball', level: 3, aoeCenter: plan.center },
     reasoning: 'Casting Fireball for AoE damage',
   }
 }
@@ -538,10 +518,11 @@ function evalArchmageConeOfCold(ctx) {
   if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
   if (activeEnemies.length === 0) return null
   // Cone of Cold: self-origin, 60ft cone
-  const targets = getEnemiesInAoE(me, activeEnemies, 0, 60)
-  if (targets.length === 0) return null
+  const targeting = { shape: 'cone', length: 60 }
+  const plan = planAoEPlacement(me, activeEnemies, 0, targeting)
+  if (!plan || plan.estimatedCount === 0) return null
   return {
-    action: { spell: 'Cone of Cold', level: 5, targets },
+    action: { spell: 'Cone of Cold', level: 5, aoeCenter: plan.center },
     reasoning: 'Opening with Cone of Cold for massive damage',
   }
 }
@@ -572,11 +553,12 @@ function evalLichCloudkill(ctx) {
   if (me.concentrating) return null
   if (!me.spellSlots || !(me.spellSlots[5] > 0)) return null
   if (activeEnemies.length < 2) return null
-  // Cloudkill: 120ft range, 20ft sphere radius
-  const targets = getEnemiesInAoE(me, activeEnemies, 120, 20)
-  if (targets.length < 2) return null
+  // Cloudkill: 120ft range, 20ft sphere
+  const targeting = { shape: 'sphere', radius: 20 }
+  const plan = planAoEPlacement(me, activeEnemies, 120, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
   return {
-    action: { spell: 'Cloudkill', level: 5, targets },
+    action: { spell: 'Cloudkill', level: 5, aoeCenter: plan.center },
     reasoning: 'Casting Cloudkill on multiple enemies',
   }
 }
@@ -786,6 +768,7 @@ module.exports = {
   selectHighestThreat,
   selectWeakest,
   selectClosestCharmedAlly,
+  planAoEPlacement,
   // Bard evaluators
   evalSurvivalInvisibility,
   evalOpeningAoEDisable,

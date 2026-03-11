@@ -428,6 +428,37 @@ describe('runEncounter — spell casting integration', () => {
     // Incapacitation is now a stalemate (draw), not a win
     assert.equal(result.winner, 'draw');
   });
+
+  it('bard can cast Hypnotic Pattern with aoeCenter (engine-resolved targets)', () => {
+    const bard = makeBard();
+    bard.position = { x: 0, y: 0 };
+    const f1 = makeFanatic(1);
+    f1.position = { x: 5, y: 0 };   // 25ft from origin
+    const f2 = makeFanatic(2);
+    f2.position = { x: 6, y: 0 };   // 30ft from origin
+    
+    function hpAI(combatant, allCombatants, round) {
+      if (combatant.side === 'party' && round === 1) {
+        return {
+          reasoning: 'Cast HP centered on enemies',
+          // AI declares intent: spell + center point. Engine resolves WHO is affected.
+          action: { type: 'cast_spell', spell: 'Hypnotic Pattern', level: 3, aoeCenter: { x: 5, y: 0 } },
+        };
+      }
+      return passiveAI();
+    }
+    
+    const result = runner.runEncounter({
+      combatants: [bard, f1, f2],
+      getDecision: hpAI,
+      maxRounds: 12,
+      verbose: false,
+    });
+    
+    // Both fanatics within 15ft (cube half-side) of center (5,0)
+    // f1 at (5,0) = 0ft from center, f2 at (6,0) = 5ft from center
+    assert.equal(result.winner, 'draw');
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

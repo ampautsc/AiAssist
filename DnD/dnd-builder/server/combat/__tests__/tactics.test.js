@@ -223,6 +223,18 @@ describe('evalOpeningAoEDisable', () => {
     assert.ok(result.bonusAction);
     assert.equal(result.bonusAction.type, 'gem_flight');
   });
+
+  it('returns aoeCenter instead of targets (engine resolves targets)', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ position: { x: 10, y: 0 } });
+    const ctx = makeContext(bard, [f1], 1);
+    const result = tactics.evalOpeningAoEDisable(ctx);
+    assert.ok(result);
+    assert.ok(result.action.aoeCenter, 'should have aoeCenter');
+    assert.equal(typeof result.action.aoeCenter.x, 'number');
+    assert.equal(typeof result.action.aoeCenter.y, 'number');
+    assert.equal(result.action.targets, undefined, 'should NOT have targets array');
+  });
 });
 
 describe('evalConcentrationAllDisabled', () => {
@@ -1249,6 +1261,8 @@ describe('Mage profile — evalMageFireball', () => {
     const result = tactics.evalMageFireball(ctx);
     assert.ok(result);
     assert.equal(result.action.spell, 'Fireball');
+    assert.ok(result.action.aoeCenter, 'should have aoeCenter');
+    assert.equal(result.action.targets, undefined, 'should NOT have targets array');
   });
 
   it('skips Fireball when no 3rd level slots', () => {

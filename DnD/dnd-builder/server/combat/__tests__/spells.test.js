@@ -121,6 +121,12 @@ describe('spell data integrity', () => {
       it('has valid targeting', () => {
         assert.ok(spell.targeting);
         assert.ok(['single', 'self', 'area'].includes(spell.targeting.type));
+        if (spell.targeting.type === 'area' && spell.targeting.shape) {
+          assert.ok(
+            ['cube', 'sphere', 'cone', 'cylinder', 'wall'].includes(spell.targeting.shape),
+            `${spell.name}: invalid shape '${spell.targeting.shape}'`
+          );
+        }
       });
 
       it('has tags array', () => {
