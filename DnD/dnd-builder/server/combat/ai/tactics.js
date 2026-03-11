@@ -9,7 +9,7 @@
 'use strict'
 
 const mech = require('../engine/mechanics')
-const { computeOptimalCenter, getEffectiveRadius, isInAoE } = require('../engine/aoeGeometry')
+const { computeOptimalCenter, getEffectiveRadius, isInAoE, canAoEReachFlying } = require('../engine/aoeGeometry')
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BATTLEFIELD ASSESSMENT
@@ -90,13 +90,21 @@ function planAoEPlacement(caster, enemies, castRange, targeting) {
   if (!enemies || enemies.length === 0) return null
   
   const aoeRadius = getEffectiveRadius(targeting)
-  const center = computeOptimalCenter(caster, enemies, castRange, aoeRadius)
+
+  // Filter out flying enemies the AoE can't reach — don't let them influence placement
+  const reachesFlying = canAoEReachFlying(targeting)
+  const reachableEnemies = reachesFlying
+    ? enemies
+    : enemies.filter(e => !e.flying)
+  if (reachableEnemies.length === 0) return null
+
+  const center = computeOptimalCenter(caster, reachableEnemies, castRange, aoeRadius)
   if (!center) return null
   
   // Estimate how many enemies fall within the AoE from this center
-  const estimatedCount = enemies.filter(e => {
+  const estimatedCount = reachableEnemies.filter(e => {
     const pos = e.position || { x: 0, y: 0 }
-    return isInAoE(pos, center, targeting)
+    return isInAoE(pos, center, targeting, { flying: !!e.flying })
   }).length
   
   return { center, estimatedCount }
@@ -169,11 +177,12 @@ function evalConcentrationBreathWeapon(ctx) {
   const { me, activeEnemies } = ctx
   if (!me.concentrating) return null
   if (!me.breathWeapon || !(me.breathWeapon.uses > 0)) return null
-  const range = me.breathWeapon.range || 15
-  const targets = activeEnemies.filter(e => mech.distanceBetween(me, e) <= range)
-  if (targets.length < 2) return null
+  // Breath weapon: self-origin cone
+  const targeting = me.breathWeapon.targeting || { shape: 'cone', length: me.breathWeapon.range || 15 }
+  const plan = planAoEPlacement(me, activeEnemies, 0, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
   return {
-    action: { type: 'breath_weapon', targets },
+    action: { type: 'breath_weapon', aoeCenter: plan.center },
     reasoning: 'Concentrating — multiple enemies in breath range, using breath weapon',
   }
 }
@@ -422,12 +431,13 @@ function evalCounterspell(creature, event) {
 function evalDragonBreathWeapon(ctx) {
   const { me, round, activeEnemies } = ctx
   if (!me.breathWeapon || !(me.breathWeapon.uses > 0)) return null
-  const range = me.breathWeapon.range || 30
-  const inRange = activeEnemies.filter(e => mech.distanceBetween(me, e) <= range)
-  if (inRange.length === 0) return null
-  if (round !== 1 && inRange.length < 2) return null
+  // Breath weapon: self-origin cone
+  const targeting = me.breathWeapon.targeting || { shape: 'cone', length: me.breathWeapon.range || 30 }
+  const plan = planAoEPlacement(me, activeEnemies, 0, targeting)
+  if (!plan || plan.estimatedCount === 0) return null
+  if (round !== 1 && plan.estimatedCount < 2) return null
   return {
-    action: { type: 'breath_weapon', targets: inRange },
+    action: { type: 'breath_weapon', aoeCenter: plan.center },
     reasoning: 'Using breath weapon on clustered enemies',
   }
 }
@@ -445,6 +455,19 @@ function evalDragonMultiattack(ctx) {
     result.movement = { type: 'move_toward', target }
   }
   return result
+}
+
+function evalDragonFear(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.dragonFear || !(me.dragonFear.uses > 0)) return null
+  // Dragon Fear: self-origin cone (30ft default)
+  const targeting = me.dragonFear.targeting || { shape: 'cone', length: me.dragonFear.range || 30 }
+  const plan = planAoEPlacement(me, activeEnemies, 0, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
+  return {
+    action: { type: 'dragon_fear', aoeCenter: plan.center },
+    reasoning: 'Using Dragon Fear to frighten clustered enemies',
+  }
 }
 
 function evalGiantRockThrow(ctx) {
@@ -578,6 +601,7 @@ const PROFILES = {
   lore_bard: [
     evalSurvivalInvisibility,
     evalOpeningAoEDisable,
+    evalDragonFear,
     evalConcentrationAllDisabled,
     evalConcentrationMeleeViciousMockery,
     evalConcentrationFinishWithCrossbow,
@@ -795,6 +819,7 @@ module.exports = {
   evalCounterspell,
   // Monster evaluators
   evalDragonBreathWeapon,
+  evalDragonFear,
   evalDragonMultiattack,
   evalGiantRockThrow,
   evalGiantMelee,

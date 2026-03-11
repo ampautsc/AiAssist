@@ -12,6 +12,8 @@
 
 'use strict'
 
+const FLYING_ALTITUDE_FT = 30  // assumed altitude when airborne (matches mechanics.js)
+
 /**
  * Get the effective radius (in feet) of a spell's AoE targeting geometry.
  * - cube:     half the side length
@@ -37,14 +39,17 @@ function getEffectiveRadius(targeting) {
 
 /**
  * Check whether a grid position is inside an AoE centered at a given point.
- * Uses Chebyshev distance on the grid (max of |dx|, |dy|) × 5ft.
+ * Uses Chebyshev distance on the grid (max of |dx|, |dy|) × 5ft for ground targets.
+ * When the target is flying, computes 3D distance using FLYING_ALTITUDE_FT.
  *
  * @param {{ x?: number, y?: number }} position - the position to test
  * @param {{ x?: number, y?: number }} center   - the AoE center point
  * @param {object|null} targeting - structured targeting geometry
+ * @param {object} [options]      - additional options
+ * @param {boolean} [options.flying=false] - whether the target is flying (at FLYING_ALTITUDE_FT)
  * @returns {boolean} true if position is within the AoE
  */
-function isInAoE(position, center, targeting) {
+function isInAoE(position, center, targeting, options = {}) {
   if (!targeting || !targeting.shape) return false
 
   // Wall requires special handling — not a simple radius check
@@ -56,8 +61,56 @@ function isInAoE(position, center, targeting) {
   const cx = center?.x || 0
   const cy = center?.y || 0
 
-  const distFeet = Math.max(Math.abs(px - cx), Math.abs(py - cy)) * 5
-  return distFeet <= radius
+  const horizontalDist = Math.max(Math.abs(px - cx), Math.abs(py - cy)) * 5
+  const isFlying = !!options.flying
+
+  if (!isFlying) {
+    // Ground-to-ground: simple 2D Chebyshev
+    return horizontalDist <= radius
+  }
+
+  // ── Flying creature at FLYING_ALTITUDE_FT ──────────────────────────────
+  // Each shape handles vertical extent differently:
+  switch (targeting.shape) {
+    case 'cube':
+      // Cube uses Chebyshev in 3D: max(horizontal, vertical) ≤ half-side
+      return Math.max(horizontalDist, FLYING_ALTITUDE_FT) <= radius
+
+    case 'sphere':
+      // Sphere uses 3D Euclidean: sqrt(horizontal² + altitude²) ≤ radius
+      return Math.sqrt(horizontalDist * horizontalDist + FLYING_ALTITUDE_FT * FLYING_ALTITUDE_FT) <= radius
+
+    case 'cone': {
+      // Cone uses 3D Euclidean: sqrt(horizontal² + altitude²) ≤ length
+      const coneLen = targeting.length || 0
+      return Math.sqrt(horizontalDist * horizontalDist + FLYING_ALTITUDE_FT * FLYING_ALTITUDE_FT) <= coneLen
+    }
+
+    case 'cylinder':
+      // Cylinder: horizontal ≤ radius AND altitude ≤ height
+      return horizontalDist <= radius && FLYING_ALTITUDE_FT <= (targeting.height || 0)
+
+    default:
+      return false
+  }
+}
+
+/**
+ * Quick check whether an AoE shape can potentially reach flying altitude.
+ * Used by AI to skip flying enemies when planning ground-level AoEs.
+ *
+ * @param {object|null} targeting - structured targeting geometry
+ * @returns {boolean} true if the AoE can reach FLYING_ALTITUDE_FT
+ */
+function canAoEReachFlying(targeting) {
+  if (!targeting || !targeting.shape) return false
+  switch (targeting.shape) {
+    case 'cube':     return (getEffectiveRadius(targeting) >= FLYING_ALTITUDE_FT)
+    case 'sphere':   return ((targeting.radius || 0) >= FLYING_ALTITUDE_FT)
+    case 'cone':     return ((targeting.length || 0) >= FLYING_ALTITUDE_FT)
+    case 'cylinder': return ((targeting.height || 0) >= FLYING_ALTITUDE_FT)
+    default:         return false
+  }
 }
 
 /**
@@ -134,7 +187,9 @@ function computeOptimalCenter(caster, enemies, castRange, aoeRadius) {
 }
 
 module.exports = {
+  FLYING_ALTITUDE_FT,
   getEffectiveRadius,
   isInAoE,
+  canAoEReachFlying,
   computeOptimalCenter,
 }

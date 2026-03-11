@@ -20,6 +20,7 @@
 const dice      = require('./dice')
 const mech      = require('./mechanics')
 const { resolveSpell } = require('./spellResolver')
+const { resolveAoETargets } = require('./targetResolver')
 
 const DEFAULT_MAX_ROUNDS = 20
 
@@ -213,7 +214,15 @@ function resolveBreathWeapon(attacker, action, allCombatants, log) {
   if (!bw || bw.uses <= 0) return
 
   bw.uses--
-  const targets = action.targets || []
+
+  // Engine-resolved targeting: if action has aoeCenter and breath has targeting geometry,
+  // resolve targets through the geometry engine instead of trusting the AI's target list.
+  let targets
+  if (action.aoeCenter && bw.targeting) {
+    targets = resolveAoETargets(attacker, { targeting: bw.targeting }, action.aoeCenter, allCombatants)
+  } else {
+    targets = action.targets || []
+  }
 
   log.push(`  ${attacker.name} uses BREATH WEAPON (DC ${bw.dc} ${bw.save} save, ${bw.damage})!`)
 
@@ -252,7 +261,15 @@ function resolveDragonFear(actor, action, allCombatants, log) {
     return
   }
   df.uses--
-  const targets = action.targets || []
+
+  // Engine-resolved targeting: if action has aoeCenter and dragonFear has targeting geometry,
+  // resolve targets through the geometry engine.
+  let targets
+  if (action.aoeCenter && df.targeting) {
+    targets = resolveAoETargets(actor, { targeting: df.targeting }, action.aoeCenter, allCombatants)
+  } else {
+    targets = action.targets || []
+  }
   for (const target of targets) {
     if (!mech.isAlive(target)) continue
     if (mech.hasCondition(target, 'frightened')) {

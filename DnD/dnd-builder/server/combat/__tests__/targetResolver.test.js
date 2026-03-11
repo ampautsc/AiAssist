@@ -217,3 +217,107 @@ describe('resolveAoETargets — edge cases', () => {
     assert.equal(targets.length, 0)
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════
+// resolveAoETargets — flying creature interaction
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('resolveAoETargets — flying creatures', () => {
+  it('Hypnotic Pattern (30ft cube) does NOT hit flying creature at same position', () => {
+    const hp = {
+      name: 'Hypnotic Pattern',
+      range: 120,
+      targeting: { type: 'area', shape: 'cube', size: 30 },
+    }
+    const caster = makeCaster()
+    const flyingEnemy = makeCombatant({
+      name: 'FlyingEnemy',
+      position: { x: 10, y: 0 },
+      flying: true,
+    })
+    const groundEnemy = makeCombatant({
+      name: 'GroundEnemy',
+      position: { x: 10, y: 0 },
+    })
+    const aoeCenter = { x: 10, y: 0 }
+    const all = [caster, flyingEnemy, groundEnemy]
+
+    const targets = resolver.resolveAoETargets(caster, hp, aoeCenter, all)
+    assert.ok(!targets.includes(flyingEnemy), 'Flying enemy should be missed by 30ft cube')
+    assert.ok(targets.includes(groundEnemy), 'Ground enemy should be hit')
+  })
+
+  it('Fireball (20ft sphere) does NOT hit flying creature', () => {
+    const fb = {
+      name: 'Fireball',
+      range: 150,
+      targeting: { type: 'area', shape: 'sphere', radius: 20 },
+    }
+    const caster = makeCaster()
+    const flyingEnemy = makeCombatant({
+      name: 'FlyingEnemy',
+      position: { x: 10, y: 0 },
+      flying: true,
+    })
+    const aoeCenter = { x: 10, y: 0 }
+    const all = [caster, flyingEnemy]
+
+    const targets = resolver.resolveAoETargets(caster, fb, aoeCenter, all)
+    assert.equal(targets.length, 0, 'Flying enemy should be missed by 20ft sphere')
+  })
+
+  it('Cone of Cold (60ft cone) CAN hit flying creature', () => {
+    const coc = {
+      name: 'Cone of Cold',
+      range: 0,
+      targeting: { type: 'area', shape: 'cone', length: 60 },
+    }
+    const caster = makeCaster({ position: { x: 0, y: 0 } })
+    const flyingEnemy = makeCombatant({
+      name: 'FlyingEnemy',
+      position: { x: 8, y: 0 },   // 40ft horizontal; 3D = sqrt(40²+30²)≈50ft ≤ 60
+      flying: true,
+    })
+    const aoeCenter = { x: 0, y: 0 }
+    const all = [caster, flyingEnemy]
+
+    const targets = resolver.resolveAoETargets(caster, coc, aoeCenter, all)
+    assert.ok(targets.includes(flyingEnemy), 'Flying enemy within 60ft cone should be hit')
+  })
+
+  it('Ice Storm (cylinder 20r/40h) CAN hit flying creature within radius', () => {
+    const is = {
+      name: 'Ice Storm',
+      range: 300,
+      targeting: { type: 'area', shape: 'cylinder', radius: 20, height: 40 },
+    }
+    const caster = makeCaster()
+    const flyingEnemy = makeCombatant({
+      name: 'FlyingEnemy',
+      position: { x: 10, y: 0 },   // at AoE center
+      flying: true,
+    })
+    const aoeCenter = { x: 10, y: 0 }
+    const all = [caster, flyingEnemy]
+
+    const targets = resolver.resolveAoETargets(caster, is, aoeCenter, all)
+    assert.ok(targets.includes(flyingEnemy), 'Flying enemy within Ice Storm cylinder should be hit')
+  })
+
+  it('grounded creature is still hit normally even when others fly', () => {
+    const fb = {
+      name: 'Fireball',
+      range: 150,
+      targeting: { type: 'area', shape: 'sphere', radius: 20 },
+    }
+    const caster = makeCaster()
+    const flyingEnemy = makeCombatant({ name: 'Flyer', position: { x: 10, y: 0 }, flying: true })
+    const groundEnemy = makeCombatant({ name: 'Ground', position: { x: 10, y: 0 } })
+    const aoeCenter = { x: 10, y: 0 }
+    const all = [caster, flyingEnemy, groundEnemy]
+
+    const targets = resolver.resolveAoETargets(caster, fb, aoeCenter, all)
+    assert.ok(!targets.includes(flyingEnemy))
+    assert.ok(targets.includes(groundEnemy))
+  })
+})

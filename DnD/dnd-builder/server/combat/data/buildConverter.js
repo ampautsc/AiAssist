@@ -235,7 +235,8 @@ function buildToCreature(build, overrides = {}) {
       damageType: breathDamageType,
       save: 'dex',
       dc: 8 + profBonus + mods.con,
-      shape: '15ft cone',
+      range: 15,
+      targeting: { type: 'area', shape: 'cone', length: 15 },
     };
   }
 
@@ -244,7 +245,7 @@ function buildToCreature(build, overrides = {}) {
     creature.gemFlight = {
       uses: profBonus,
       max: profBonus,
-      duration: 10,
+      maxRounds: 10,
       active: false,
       roundsRemaining: 0,
     };
@@ -260,8 +261,18 @@ function buildToCreature(build, overrides = {}) {
       dc: 8 + profBonus + mods.cha,
       save: 'wis',
       range: 30,
-      shape: '30ft cone',
+      targeting: { type: 'area', shape: 'cone', length: 30 },
     };
+  }
+
+  // ── Flight Mechanics ──────────────────────────────────────────────
+  // Species fly speed (e.g. Aarakocra) or Winged Boots: creature starts airborne.
+  // This is distinct from Gem Flight which requires activation via bonus action.
+  if (speciesFlySpeed || hasWingedBoots) {
+    creature.flying = true;
+    if (!creature.tags.includes('flying')) {
+      creature.tags.push('flying');
+    }
   }
 
   return creature;

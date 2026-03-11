@@ -327,7 +327,7 @@ describe('evalConcentrationBreathWeapon', () => {
     const result = tactics.evalConcentrationBreathWeapon(ctx);
     assert.ok(result);
     assert.equal(result.action.type, 'breath_weapon');
-    assert.equal(result.action.targets.length, 2);
+    assert.ok(result.action.aoeCenter, 'should return aoeCenter for engine-resolved targeting');
   });
 
   it('does NOT trigger with 0 breath uses', () => {
@@ -1135,7 +1135,7 @@ describe('Dragon profile — evalDragonBreathWeapon', () => {
     const result = tactics.evalDragonBreathWeapon(ctx);
     assert.ok(result);
     assert.equal(result.action.type, 'breath_weapon');
-    assert.ok(result.action.targets.length > 0);
+    assert.ok(result.action.aoeCenter, 'should return aoeCenter for engine-resolved targeting');
   });
 
   it('skips breath weapon when no uses remain', () => {
@@ -1164,6 +1164,48 @@ describe('Dragon profile — evalDragonMultiattack', () => {
     const result = tactics.evalDragonMultiattack(ctx);
     assert.ok(result);
     assert.equal(result.action.type, 'multiattack');
+  });
+});
+
+describe('evalDragonFear', () => {
+  it('triggers when 2+ enemies are within dragon fear cone range', () => {
+    const bard = makeBard({ position: { x: 0, y: 0 } });
+    const f1 = makeFanatic({ position: { x: 3, y: 0 } }); // 15ft — within 30ft cone
+    const f2 = makeFanatic({ position: { x: 4, y: 0 } }); // 20ft — within 30ft cone
+    const ctx = makeContext(bard, [f1, f2]);
+
+    const result = tactics.evalDragonFear(ctx);
+    assert.ok(result, 'should fire with 2 enemies in range');
+    assert.equal(result.action.type, 'dragon_fear');
+    assert.ok(result.action.aoeCenter, 'should return aoeCenter for engine-resolved targeting');
+  });
+
+  it('does not trigger with 0 dragonFear uses', () => {
+    const bard = makeBard({ position: { x: 0, y: 0 } });
+    bard.dragonFear.uses = 0;
+    const f1 = makeFanatic({ position: { x: 3, y: 0 } });
+    const f2 = makeFanatic({ position: { x: 4, y: 0 } });
+    const ctx = makeContext(bard, [f1, f2]);
+
+    assert.equal(tactics.evalDragonFear(ctx), null);
+  });
+
+  it('does not trigger when creature has no dragonFear', () => {
+    const bard = makeBard({ position: { x: 0, y: 0 } });
+    delete bard.dragonFear;
+    const f1 = makeFanatic({ position: { x: 3, y: 0 } });
+    const ctx = makeContext(bard, [f1]);
+
+    assert.equal(tactics.evalDragonFear(ctx), null);
+  });
+
+  it('does not trigger with only 1 enemy in range', () => {
+    const bard = makeBard({ position: { x: 0, y: 0 } });
+    const f1 = makeFanatic({ position: { x: 3, y: 0 } }); // within range
+    const f2 = makeFanatic({ position: { x: 20, y: 0 } }); // way outside
+    const ctx = makeContext(bard, [f1, f2]);
+
+    assert.equal(tactics.evalDragonFear(ctx), null);
   });
 });
 

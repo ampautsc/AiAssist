@@ -46,7 +46,7 @@ function resolveAoETargets(caster, spellDef, aoeCenter, allCombatants, options =
 
     // Spatial check: is this combatant within the AoE?
     const pos = c.position || { x: 0, y: 0 }
-    return geo.isInAoE(pos, aoeCenter, targeting)
+    return geo.isInAoE(pos, aoeCenter, targeting, { flying: !!c.flying })
   })
 }
 

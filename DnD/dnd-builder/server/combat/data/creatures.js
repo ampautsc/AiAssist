@@ -187,6 +187,11 @@ function createCreature(key, overrides = {}) {
     creature.spiritualWeapon = deepClone(t.features.spiritualWeapon)
   }
 
+  // Naturally flying creatures (tagged 'flying') start airborne
+  if (t.tags && t.tags.includes('flying')) {
+    creature.flying = true
+  }
+
   // Apply any extra overrides from caller
   const { id: _id, name: _name, position: _pos, ...rest } = overrides
   Object.assign(creature, rest)
@@ -251,6 +256,7 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
       range:       15,
       uses:         3,
       max:          3,
+      targeting:   { type: 'area', shape: 'cone', length: 15 },
     },
     gemFlight: {
       uses:            3,
@@ -263,6 +269,9 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
       dc:   15,
       uses:  1,
       max:   1,
+      save:  'wis',
+      range: 30,
+      targeting: { type: 'area', shape: 'cone', length: 30 },
     },
   },
 }
@@ -471,6 +480,7 @@ CREATURE_TEMPLATES['young_red_dragon'] = {
       uses:         1,
       max:          1,
       recharge:     '5-6',
+      targeting:   { type: 'area', shape: 'cone', length: 30 },
     },
   },
 }

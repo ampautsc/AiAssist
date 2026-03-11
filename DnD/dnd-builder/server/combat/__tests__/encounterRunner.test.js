@@ -323,6 +323,33 @@ describe('resolveBreathWeapon', () => {
     assert.equal(f1.currentHP, 33 - 9);
     assert.equal(bard.breathWeapon.uses, 2);
   });
+
+  it('resolves targets from aoeCenter using geometry engine', () => {
+    const bard = createCreature('gem_dragonborn_lore_bard_8', { position: { x: 0, y: 0 } });
+    const f1 = createCreature('cult_fanatic', { id: 'cf1', name: 'CF1', position: { x: 2, y: 0 } }); // 10ft — within 15ft cone
+    const f2 = createCreature('cult_fanatic', { id: 'cf2', name: 'CF2', position: { x: 5, y: 0 } }); // 25ft — outside 15ft cone
+    const log = [];
+
+    // aoeCenter is caster position (self-origin cone)
+    runner.resolveBreathWeapon(bard, { aoeCenter: { x: 0, y: 0 } }, [bard, f1, f2], log);
+
+    assert.equal(bard.breathWeapon.uses, 2);
+    // f1 should take damage (within cone), f2 should not (outside cone)
+    assert.ok(f1.currentHP < 33, 'f1 should be damaged — within 15ft cone');
+    assert.equal(f2.currentHP, 33, 'f2 should be undamaged — outside 15ft cone');
+  });
+
+  it('falls back to action.targets when no aoeCenter', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    const f2 = makeFanatic(2);
+    const log = [];
+
+    // Legacy path: explicit targets array
+    runner.resolveBreathWeapon(bard, { targets: [f1] }, [bard, f1, f2], log);
+    assert.ok(f1.currentHP < 33, 'f1 explicitly targeted');
+    assert.equal(f2.currentHP, 33, 'f2 not in targets array');
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -539,6 +566,34 @@ describe('resolveDragonFear', () => {
     runner.resolveDragonFear(bard, { targets: [f1] }, [bard, f1], log);
     assert.ok(!f1.conditions.includes('frightened'));
     assert.ok(log.some(l => l.includes('no uses remaining')));
+  });
+
+  it('resolves targets from aoeCenter using geometry engine', () => {
+    const bard = createCreature('gem_dragonborn_lore_bard_8', { position: { x: 0, y: 0 } });
+    const f1 = createCreature('cult_fanatic', { id: 'cf1', name: 'CF1', position: { x: 4, y: 0 } }); // 20ft — within 30ft cone
+    const f2 = createCreature('cult_fanatic', { id: 'cf2', name: 'CF2', position: { x: 8, y: 0 } }); // 40ft — outside 30ft cone
+    const log = [];
+
+    runner.resolveDragonFear(bard, { aoeCenter: { x: 0, y: 0 } }, [bard, f1, f2], log);
+
+    assert.equal(bard.dragonFear.uses, 0);
+    // f1 within 30ft cone — should be targeted (frightened on fail)
+    assert.ok(f1.conditions.includes('frightened'), 'f1 within cone should be frightened');
+    // f2 outside 30ft cone — should NOT be targeted
+    assert.ok(!f2.conditions.includes('frightened'), 'f2 outside cone should not be targeted');
+  });
+
+  it('engine-resolved targeting skips flying creature for 15ft breath cone', () => {
+    const bard = createCreature('gem_dragonborn_lore_bard_8', { position: { x: 0, y: 0 } });
+    const f1 = createCreature('cult_fanatic', { id: 'cf1', name: 'CF1', position: { x: 2, y: 0 } }); // 10ft, grounded
+    const f2 = createCreature('cult_fanatic', { id: 'cf2', name: 'CF2', position: { x: 2, y: 0 } }); // same pos, flying
+    f2.flying = true;
+    const log = [];
+
+    // Breath weapon uses 15ft cone — can't reach 30ft altitude
+    runner.resolveBreathWeapon(bard, { aoeCenter: { x: 0, y: 0 } }, [bard, f1, f2], log);
+    assert.ok(f1.currentHP < 33, 'grounded f1 should be hit');
+    assert.equal(f2.currentHP, 33, 'flying f2 should be missed by 15ft cone');
   });
 });
 

@@ -99,6 +99,23 @@ describe('createCreature — bard', () => {
     assert.ok(bard.gemFlight);
     assert.equal(bard.gemFlight.uses, 3);
     assert.equal(bard.gemFlight.active, false);
+    assert.equal(bard.gemFlight.maxRounds, 10, 'gemFlight should use maxRounds field');
+  });
+
+  it('breath weapon has structured cone targeting geometry', () => {
+    const bard = createCreature('gem_dragonborn_lore_bard_8');
+    assert.ok(bard.breathWeapon.targeting, 'breathWeapon should have targeting geometry');
+    assert.equal(bard.breathWeapon.targeting.type, 'area');
+    assert.equal(bard.breathWeapon.targeting.shape, 'cone');
+    assert.equal(bard.breathWeapon.targeting.length, 15);
+  });
+
+  it('dragonFear has structured cone targeting geometry', () => {
+    const bard = createCreature('gem_dragonborn_lore_bard_8');
+    assert.ok(bard.dragonFear, 'bard should have dragonFear');
+    assert.ok(bard.dragonFear.targeting, 'dragonFear should have targeting geometry');
+    assert.equal(bard.dragonFear.targeting.shape, 'cone');
+    assert.equal(bard.dragonFear.targeting.length, 30);
   });
 
   it('creates a bard with light crossbow', () => {
@@ -480,6 +497,18 @@ describe('createCreature — young red dragon', () => {
     assert.equal(d.weapons[0].attackBonus, 10);
     assert.equal(d.weapons[1].attackBonus, 10);
   });
+
+  it('starts flying because it has the flying tag', () => {
+    const d = createCreature('young_red_dragon');
+    assert.equal(d.flying, true, 'Young Red Dragon should start airborne');
+  });
+
+  it('breath weapon has structured targeting geometry', () => {
+    const d = createCreature('young_red_dragon');
+    assert.ok(d.breathWeapon.targeting, 'breath weapon should have targeting geometry');
+    assert.equal(d.breathWeapon.targeting.shape, 'cone');
+    assert.equal(d.breathWeapon.targeting.length, 30);
+  });
 });
 
 // ── Giants ──────────────────────────────────────────────────────────────
@@ -786,7 +815,10 @@ describe('all monster templates — runtime state', () => {
       const c = createCreature(key);
       assert.deepEqual(c.conditions, []);
       assert.equal(c.concentrating, null);
-      assert.equal(c.flying, false);
+      // Naturally flying creatures (tagged 'flying') start airborne
+      const template = require('../data/creatures').getTemplate(key);
+      const expectFlying = !!(template.tags && template.tags.includes('flying'));
+      assert.equal(c.flying, expectFlying, `${key}: flying should be ${expectFlying}`);
       assert.equal(c.totalDamageDealt, 0);
       assert.equal(c.totalDamageTaken, 0);
       assert.equal(c.reactedThisRound, false);
