@@ -1570,3 +1570,80 @@ describe('Profile registry — all scenario monsters have profiles', () => {
     });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: assessBattlefield includes helplessEnemies
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('assessBattlefield — helplessEnemies', () => {
+  it('categorizes incapacitated enemies as helpless', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ name: 'Active' });
+    const f2 = makeFanatic({ name: 'Paralyzed' });
+    f2.conditions.push('paralyzed');
+
+    const ctx = makeContext(bard, [f1, f2]);
+    assert.equal(ctx.activeEnemies.length, 1, 'Only 1 active enemy');
+    assert.equal(ctx.helplessEnemies.length, 1, 'Paralyzed enemy is helpless');
+    assert.equal(ctx.helplessEnemies[0].name, 'Paralyzed');
+  });
+
+  it('helplessEnemies is empty when no enemies are incapacitated', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic({ name: 'Active1' });
+    const f2 = makeFanatic({ name: 'Active2' });
+
+    const ctx = makeContext(bard, [f1, f2]);
+    assert.equal(ctx.helplessEnemies.length, 0);
+    assert.equal(ctx.activeEnemies.length, 2);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: evalAttackHelpless — enemies attack incapacitated targets
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('evalAttackHelpless', () => {
+  it('attacks helpless enemy when no active enemies remain', () => {
+    const fanatic = makeFanatic({ name: 'Attacker' });
+    fanatic.side = 'enemy';
+    const bard = makeBard();
+    bard.conditions.push('paralyzed');
+    bard.position = { x: 1, y: 0 };
+    fanatic.position = { x: 0, y: 0 };
+
+    const ctx = tactics.assessBattlefield(fanatic, [fanatic, bard], 2);
+    assert.equal(ctx.activeEnemies.length, 0, 'No active enemies (bard is paralyzed)');
+    assert.equal(ctx.helplessEnemies.length, 1, 'Bard is helpless');
+
+    // Make a decision — cult_fanatic profile should pick evalAttackHelpless
+    const decision = tactics.makeDecision('cult_fanatic', fanatic, [fanatic, bard], 2);
+    assert.ok(decision, 'Should produce a decision');
+    assert.ok(decision.reasoning.includes('helpless') || decision.action.type === 'attack' || decision.action.type === 'multiattack',
+      `Should attack helpless target, got: ${decision.reasoning}`);
+  });
+
+  it('prefers active enemies over helpless ones', () => {
+    const fanatic = makeFanatic({ name: 'Attacker' });
+    fanatic.side = 'enemy';
+    const bard1 = makeBard({ id: 'bard-active' });
+    bard1.name = 'Active Bard';
+    bard1.position = { x: 1, y: 0 };
+    const bard2 = makeBard({ id: 'bard-helpless' });
+    bard2.name = 'Helpless Bard';
+    bard2.conditions.push('paralyzed');
+    bard2.position = { x: 2, y: 0 };
+    fanatic.position = { x: 0, y: 0 };
+
+    const ctx = tactics.assessBattlefield(fanatic, [fanatic, bard1, bard2], 2);
+    assert.equal(ctx.activeEnemies.length, 1, '1 active enemy');
+    assert.equal(ctx.helplessEnemies.length, 1, '1 helpless enemy');
+
+    // Decision should target the active bard, not the helpless one
+    const decision = tactics.makeDecision('cult_fanatic', fanatic, [fanatic, bard1, bard2], 2);
+    assert.ok(decision, 'Should produce a decision');
+    // The cult_fanatic should use melee/ranged evaluators targeting the active bard
+    assert.ok(!decision.reasoning.includes('helpless'),
+      `Should target active enemy first, not helpless. Got: ${decision.reasoning}`);
+  });
+});

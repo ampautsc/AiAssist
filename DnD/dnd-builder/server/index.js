@@ -10,14 +10,19 @@
 
 'use strict'
 
+const path       = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
+
 const express    = require('express')
 const cors       = require('cors')
 const http       = require('http')
+const mongoose   = require('mongoose')
 const { WebSocketServer } = require('ws')
-const { v4: uuidv4 }     = require('uuid')
+const { randomUUID }      = require('crypto')
 
 const charactersRouter = require('./routes/characters')
 const partiesRouter    = require('./routes/parties')
+const apiRouter        = require('./routes/api')
 
 // ── App setup ─────────────────────────────────────────────────────────────────
 const app    = express()
@@ -28,6 +33,7 @@ app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:4173'] }))
 app.use(express.json())
 
 // ── REST API routes ───────────────────────────────────────────────────────────
+app.use('/api', apiRouter)
 app.use('/api/characters', charactersRouter)
 app.use('/api/parties',    partiesRouter)
 
@@ -111,7 +117,7 @@ wss.on('connection', (ws, req) => {
 
         const session = sessions.get(partyId)
         currentSessionId = partyId
-        session.participants.set(ws, { playerId: playerId ?? uuidv4(), characterId })
+        session.participants.set(ws, { playerId: playerId ?? randomUUID(), characterId })
 
         // Send full state to the new joiner
         sendTo(ws, { type: 'GAME_STATE', payload: session.gameState })
@@ -236,9 +242,25 @@ function rollDice(notation) {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT ?? 3001
-server.listen(PORT, () => {
-  console.log(`[Server] DnD Builder server running on http://localhost:${PORT}`)
-  console.log(`[Server] WebSocket endpoint: ws://localhost:${PORT}/ws`)
+
+async function start() {
+  // Connect to MongoDB
+  if (process.env.MONGODB_URI) {
+    await mongoose.connect(process.env.MONGODB_URI)
+    console.log('[DB] Connected to MongoDB')
+  } else {
+    console.warn('[DB] MONGODB_URI not set — API routes requiring DB will fail')
+  }
+
+  server.listen(PORT, () => {
+    console.log(`[Server] DnD Builder server running on http://localhost:${PORT}`)
+    console.log(`[Server] WebSocket endpoint: ws://localhost:${PORT}/ws`)
+  })
+}
+
+start().catch(err => {
+  console.error('[Server] Failed to start:', err)
+  process.exit(1)
 })
 
 module.exports = { app, server, wss, broadcast, rollDice }

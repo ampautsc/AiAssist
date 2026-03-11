@@ -317,6 +317,9 @@ function detectAbilities(build) {
   }
 
   if (a.limitedFlight) a.permanentFlight = false;
+  // Also check species fly speed — some species have speed.fly but hasFlight=false
+  const speciesFlySpeed = sp.speed && sp.speed.fly ? sp.speed.fly : 0;
+  if (speciesFlySpeed > 0 && !a.limitedFlight) a.permanentFlight = true;
   a.canFly = a.permanentFlight || a.limitedFlight || a.itemFlight;
   a.flyTurn = (a.permanentFlight || a.itemFlight) ? 0 :
               (a.limitedFlight ? 2 : 99);
@@ -763,7 +766,7 @@ function runCombatEngineEvaluation(builds, options = {}) {
       const stalemates = simResult.runs.filter(r => r.winner === 'draw').length;
 
       // Score: win rate is primary, efficiency secondary
-      const baseScore = (victories * 100 + stalemates * 50) / numRuns;
+      const baseScore = (victories * 100 + stalemates * 25) / numRuns;
       const efficiencyBonus = Math.min(20,
         (10 - avgRounds) * 1.5 +
         (avgHPPct / 100) * 10
@@ -772,6 +775,11 @@ function runCombatEngineEvaluation(builds, options = {}) {
 
       // Get best simulation for notes
       const bestRun = simResult.runs.find(r => r.winner === 'party') || simResult.runs[0];
+
+      // Compute actual metrics from simulation runs
+      const survived3 = simResult.runs.filter(r => r.rounds >= 3 || r.winner === 'party').length;
+      const survived5 = simResult.runs.filter(r => r.rounds >= 5 || r.winner === 'party').length;
+      const ccValue = pct(victories / numRuns + stalemates / numRuns * 0.3);
 
       allResults.push({
         buildId: build._id,
@@ -800,10 +808,10 @@ function runCombatEngineEvaluation(builds, options = {}) {
         avgFinalHP,
         avgHPPct: Math.round(avgHPPct),
         score: Math.round(score * 100) / 100,
-        // Legacy fields for dashboard compatibility
-        ccPct: winRate > 0.5 ? 70 : 40,
-        conc3Rounds: avgHPPct > 50 ? 85 : 60,
-        conc5Rounds: avgHPPct > 30 ? 75 : 45,
+        // Metrics computed from actual simulation data
+        ccPct: ccValue,
+        conc3Rounds: pct(survived3 / numRuns),
+        conc5Rounds: pct(survived5 / numRuns),
         hpAfter5: avgFinalHP,
         counterRisk: 0,
         // Empty roundLog (old per-round format) — replaced by combatSummary

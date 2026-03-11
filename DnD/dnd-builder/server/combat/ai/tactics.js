@@ -28,6 +28,7 @@ function assessBattlefield(creature, allCombatants, round) {
   const allies  = alive.filter(c => c.side === creature.side  && c.id !== creature.id)
 
   const activeEnemies = enemies.filter(e => !mech.isIncapacitated(e))
+  const helplessEnemies = enemies.filter(e => mech.isIncapacitated(e))
   const enemiesInMelee = activeEnemies.filter(e => mech.distanceBetween(creature, e) <= 5)
   const charmedAllies  = allies.filter(a => mech.hasCondition(a, 'charmed_hp'))
 
@@ -43,6 +44,7 @@ function assessBattlefield(creature, allCombatants, round) {
     enemies,
     allies,
     activeEnemies,
+    helplessEnemies,
     enemiesInMelee,
     charmedAllies,
     hpPct,
@@ -262,6 +264,34 @@ function evalDodge(_ctx) {
     action: { type: 'dodge' },
     reasoning: 'No better option — taking dodge action',
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPLESS TARGET — Attack incapacitated enemies instead of doing nothing
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * When all active enemies are gone but helpless (incapacitated) enemies remain,
+ * attack them. In D&D 5e, even paralyzed creatures can be attacked — auto-crit
+ * if within 5 ft. This prevents infinite stalemates where enemies dodge helplessly.
+ */
+function evalAttackHelpless(ctx) {
+  const { me, activeEnemies, helplessEnemies } = ctx
+  if (activeEnemies.length > 0) return null       // prefer active targets
+  if (helplessEnemies.length === 0) return null
+
+  const target = helplessEnemies[0]
+  const dist   = mech.distanceBetween(me, target)
+
+  // Move toward and melee attack
+  const result = me.multiattack > 0
+    ? { action: { type: 'multiattack', target }, reasoning: 'Attacking helpless enemy' }
+    : { action: { type: 'attack', weapon: me.weapon, target }, reasoning: 'Attacking helpless enemy' }
+
+  if (dist > 5) {
+    result.movement = { type: 'move_toward', target }
+  }
+  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -621,16 +651,17 @@ const PROFILES = {
     evalMeleeAttack,
     evalInflictWounds,
     evalRangedCantripWithApproach,
+    evalAttackHelpless,
     evalDodge,
   ],
-  generic_melee:    [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
-  generic_ranged:   [evalRangedCantripWithApproach, evalMeleeAttack, evalDodge],
-  dragon:           [evalDragonBreathWeapon, evalDragonMultiattack, evalDodge],
-  giant_bruiser:    [evalGiantRockThrow, evalGiantMelee, evalDodge],
-  mage_caster:      [evalMageMistyStep, evalMageFireball, evalMageFireBolt, evalDodge],
-  archmage_caster:  [evalMageMistyStep, evalArchmageConeOfCold, evalMageFireball, evalMageFireBolt, evalDodge],
-  lich_caster:      [evalLichPowerWordStun, evalLichFingerOfDeath, evalLichCloudkill, evalMageFireball, evalMageFireBolt, evalDodge],
-  undead_melee:     [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
+  generic_melee:    [evalMeleeAttack, evalAttackHelpless, evalRangedCantripWithApproach, evalDodge],
+  generic_ranged:   [evalRangedCantripWithApproach, evalAttackHelpless, evalMeleeAttack, evalDodge],
+  dragon:           [evalDragonBreathWeapon, evalDragonMultiattack, evalAttackHelpless, evalDodge],
+  giant_bruiser:    [evalGiantRockThrow, evalGiantMelee, evalAttackHelpless, evalDodge],
+  mage_caster:      [evalMageMistyStep, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  archmage_caster:  [evalMageMistyStep, evalArchmageConeOfCold, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  lich_caster:      [evalLichPowerWordStun, evalLichFingerOfDeath, evalLichCloudkill, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  undead_melee:     [evalMeleeAttack, evalAttackHelpless, evalRangedCantripWithApproach, evalDodge],
 }
 
 const REACTION_PROFILES = {
@@ -814,6 +845,7 @@ module.exports = {
   evalMeleeAttack,
   evalInflictWounds,
   evalRangedCantripWithApproach,
+  evalAttackHelpless,
   // Reaction evaluators
   evalCuttingWords,
   evalCounterspell,

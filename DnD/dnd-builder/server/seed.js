@@ -396,25 +396,10 @@ async function seed() {
       rewards: 'DC 17 (highest non-instrument-disadvantage DC). Two independent crowd-control effects simultaneously. Dragon Fear is a huge action-economy win — frighten without concentration.',
       ratings: { combat: 9, social: 7, fun: 9, durability: 4 },
     },
-    // ── SET 7: WINGED STRIKER ───────────────────────────────────────
-    // CHA 20, Winged Boots (no-concentration flight), DC 16, AC 14
-    {
-      id: 'winged-striker',
-      name: 'Winged Striker',
-      archetype: 'evasion',
-      speciesAsiSecondary: 'CON',
-      levelChoices: [
-        { level: 4, type: 'feat', featName: 'Fey Touched', halfFeatStat: 'CHA' },
-        { level: 8, type: 'asi', asiIncreases: [{ stat: 'CHA', bonus: 1 }, { stat: 'CON', bonus: 1 }] },
-      ],
-      customLineageBonusFeat: { level: 1, type: 'feat', featName: 'Lucky' },
-      itemNames: ['Winged Boots', 'Cloak of Protection'],
-      philosophy: 'Winged Boots give flight WITHOUT concentration cost. CHA 20 DC 16. Tests item-flight vs species-flight.',
-      combatLoop: 'T1: Fly up (free movement). T2: Hypnotic Pattern DC 16 from the air. T3+: Untouchable by melee.',
-      risks: 'Low AC (14). No CON save advantage. Flight redundant for Fairy/Gem Dragonborn.',
-      rewards: 'DC 16 + free flight for all species. Tests whether flight matters more than instrument.',
-      ratings: { combat: 8, social: 6, fun: 8, durability: 6 },
-    },
+    // ── SET 7: WINGED STRIKER — REMOVED ─────────────────────────────
+    // Winged Boots gave free flight to ALL species, skewing every build
+    // toward evasion/flight dominance. Dropped to let species-native
+    // flight and other archetypes compete on their own merits.
   ];
 
   // Auto-generate species notes from actual DB traits

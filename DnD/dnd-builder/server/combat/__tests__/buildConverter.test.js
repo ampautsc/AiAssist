@@ -279,6 +279,113 @@ function mockWingedBootsBuild() {
   };
 }
 
+// Aven: species flight with "no medium or heavy armor" restriction
+function mockAvenMusician() {
+  return {
+    _id: 'build-aven-musician',
+    name: 'Aven — Bardic Musician',
+    level: 8,
+    baseStats: { str: 8, dex: 14, con: 14, int: 8, wis: 12, cha: 16 },
+    speciesAsi: [
+      { stat: 'CHA', bonus: 2 },
+      { stat: 'CON', bonus: 1 },
+    ],
+    species: {
+      name: 'Aven',
+      creatureType: 'Humanoid',
+      size: ['Medium'],
+      speed: { walk: 25, fly: 30 },
+      hasFlight: true,
+      flightRestriction: 'no medium or heavy armor',
+      darkvision: 0,
+      resistances: [],
+      conditionImmunities: [],
+      naturalArmorAC: null,
+      traitList: [
+        { name: 'Flight', description: 'You have a flying speed of 30 feet. You can\'t use your flying speed while you wear medium or heavy armor.' },
+        { name: 'Hawkeyed', description: 'Perception proficiency, no long range disadvantage.' },
+      ],
+    },
+    levelChoices: [
+      {
+        level: 4, type: 'feat',
+        feat: {
+          name: 'Fey Touched',
+          isHalfFeat: true,
+          grantsAdvConSaves: false,
+          grantsProfConSaves: false,
+          grantsArmorProficiency: null,
+          bonusSpells: ['Misty Step'],
+        },
+        halfFeatStat: 'CHA',
+      },
+    ],
+    items: [
+      { name: 'Instrument of the Bards (Cli Lyre)', acBonus: 0, saveBonus: 0, spellDcBonus: 0, spellAttackBonus: 0, requiresNoArmor: false, imposesCharmDisadvantage: true },
+      { name: 'Cloak of Protection', acBonus: 1, saveBonus: 1, spellDcBonus: 0, spellAttackBonus: 0, requiresNoArmor: false, imposesCharmDisadvantage: false },
+    ],
+  };
+}
+
+function mockAvenArmored() {
+  return {
+    _id: 'build-aven-armored',
+    name: 'Aven — Armored Tank',
+    level: 8,
+    baseStats: { str: 8, dex: 14, con: 14, int: 8, wis: 12, cha: 16 },
+    speciesAsi: [
+      { stat: 'CHA', bonus: 2 },
+      { stat: 'CON', bonus: 1 },
+    ],
+    species: {
+      name: 'Aven',
+      creatureType: 'Humanoid',
+      size: ['Medium'],
+      speed: { walk: 25, fly: 30 },
+      hasFlight: true,
+      flightRestriction: 'no medium or heavy armor',
+      darkvision: 0,
+      resistances: [],
+      conditionImmunities: [],
+      naturalArmorAC: null,
+      traitList: [
+        { name: 'Flight', description: 'You have a flying speed of 30 feet. You can\'t use your flying speed while you wear medium or heavy armor.' },
+        { name: 'Hawkeyed', description: 'Perception proficiency, no long range disadvantage.' },
+      ],
+    },
+    levelChoices: [
+      {
+        level: 4, type: 'feat',
+        feat: {
+          name: 'Moderately Armored',
+          isHalfFeat: false,
+          grantsAdvConSaves: false,
+          grantsProfConSaves: false,
+          grantsArmorProficiency: 'medium+shield',
+          bonusSpells: [],
+        },
+        halfFeatStat: null,
+      },
+      {
+        level: 8, type: 'feat',
+        feat: {
+          name: 'War Caster',
+          isHalfFeat: false,
+          grantsAdvConSaves: true,
+          grantsProfConSaves: false,
+          grantsArmorProficiency: null,
+          bonusSpells: [],
+        },
+        halfFeatStat: null,
+      },
+    ],
+    items: [
+      { name: 'Cloak of Protection', acBonus: 1, saveBonus: 1, spellDcBonus: 0, spellAttackBonus: 0, requiresNoArmor: false, imposesCharmDisadvantage: false },
+      { name: 'Stone of Good Luck (Luckstone)', acBonus: 0, saveBonus: 1, spellDcBonus: 0, spellAttackBonus: 0, requiresNoArmor: false, imposesCharmDisadvantage: false },
+    ],
+  };
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BASIC CONVERSION TESTS
@@ -586,6 +693,31 @@ describe('buildToCreature — species resources', () => {
     const build = mockWingedBootsBuild();
     const creature = buildToCreature(build);
     assert.equal(creature.hasWingedBoots, true);
+  });
+
+  it('Aven without armor flies normally', () => {
+    const build = mockAvenMusician();
+    const creature = buildToCreature(build);
+    assert.equal(creature.flying, true);
+    assert.ok(creature.tags.includes('flying'));
+    assert.equal(creature.flySpeed, 30);
+  });
+
+  it('Aven in medium armor (Moderately Armored) cannot fly', () => {
+    const build = mockAvenArmored();
+    const creature = buildToCreature(build);
+    assert.equal(creature.flying, false);
+    assert.ok(!creature.tags.includes('flying'));
+  });
+
+  it('Aarakocra without armor restriction flies even with flightRestriction field', () => {
+    // Aarakocra historically has "no medium or heavy armor" restriction
+    // but this test verifies it only blocks when the build actually wears medium armor
+    const build = mockAarakocraMusician();
+    build.species.flightRestriction = 'no medium or heavy armor';
+    const creature = buildToCreature(build);
+    assert.equal(creature.flying, true);
+    assert.ok(creature.tags.includes('flying'));
   });
 });
 

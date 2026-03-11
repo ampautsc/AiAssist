@@ -268,7 +268,17 @@ function buildToCreature(build, overrides = {}) {
   // ── Flight Mechanics ──────────────────────────────────────────────
   // Species fly speed (e.g. Aarakocra) or Winged Boots: creature starts airborne.
   // This is distinct from Gem Flight which requires activation via bonus action.
-  if (speciesFlySpeed || hasWingedBoots) {
+  //
+  // Flight restriction: Some species (e.g. Aven, Aarakocra) cannot fly in
+  // medium or heavy armor. If the species has a flightRestriction and the
+  // build took Moderately Armored (the only path to medium armor for bards),
+  // species flight is suppressed. Winged Boots are unaffected by armor.
+  const wearsMediumArmor = feats.some(f => f.grantsArmorProficiency);
+  const speciesFlightBlocked = speciesFlySpeed
+    && species.flightRestriction
+    && wearsMediumArmor;
+
+  if ((speciesFlySpeed && !speciesFlightBlocked) || hasWingedBoots) {
     creature.flying = true;
     if (!creature.tags.includes('flying')) {
       creature.tags.push('flying');
