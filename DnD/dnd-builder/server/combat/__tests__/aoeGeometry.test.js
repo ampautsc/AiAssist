@@ -101,6 +101,154 @@ describe('isInAoE — cone', () => {
   })
 })
 
+// ═══════════════════════════════════════════════════════════════════════════
+// isInCone — directional cone with angular check
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('isInCone — directional cone (ground targets)', () => {
+  const targeting = { shape: 'cone', length: 15 }
+  const caster = { x: 0, y: 0 }
+
+  it('includes target directly along aim axis', () => {
+    // Aim east, target 2 squares east (10ft)
+    assert.equal(geo.isInAoE({ x: 2, y: 0 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), true)
+  })
+
+  it('includes target at max cone length', () => {
+    // 3 squares × 5ft = 15ft = exactly cone length
+    assert.equal(geo.isInAoE({ x: 3, y: 0 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), true)
+  })
+
+  it('excludes target beyond cone length', () => {
+    // 4 squares × 5ft = 20ft > 15ft
+    assert.equal(geo.isInAoE({ x: 4, y: 0 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), false)
+  })
+
+  it('includes target within cone arc (at half-angle boundary)', () => {
+    // Caster (0,0), aim east. Target at (2,1): angle = arctan(1/2) ≈ 26.57° = half-angle
+    assert.equal(geo.isInAoE({ x: 2, y: 1 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), true)
+  })
+
+  it('excludes target outside cone arc (45°)', () => {
+    // Caster (0,0), aim east. Target at (1,1): angle = 45° > 26.57°
+    assert.equal(geo.isInAoE({ x: 1, y: 1 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), false)
+  })
+
+  it('excludes target behind the caster', () => {
+    // Caster (0,0), aim east. Target at (-2, 0): angle = 180°
+    assert.equal(geo.isInAoE({ x: -2, y: 0 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), false)
+  })
+
+  it('includes target at cone origin', () => {
+    // Target at same position as caster
+    assert.equal(geo.isInAoE({ x: 0, y: 0 }, { x: 3, y: 0 }, targeting, { casterPosition: caster }), true)
+  })
+
+  it('works with diagonal aim (NE direction)', () => {
+    // Aim NE. Target at (2,2) is on the NE axis
+    assert.equal(geo.isInAoE({ x: 2, y: 2 }, { x: 3, y: 3 }, targeting, { casterPosition: caster }), true)
+    // Target at (2,1) is ~18.4° off NE axis — within half-angle
+    assert.equal(geo.isInAoE({ x: 2, y: 1 }, { x: 3, y: 3 }, targeting, { casterPosition: caster }), true)
+    // Target at (3,0) is 45° off NE axis — outside cone
+    assert.equal(geo.isInAoE({ x: 3, y: 0 }, { x: 3, y: 3 }, targeting, { casterPosition: caster }), false)
+  })
+
+  it('matches DMG grid template for 15ft cone going east', () => {
+    // Standard DMG cone template going East from (0,0):
+    // Should include: (1,0), (2,0), (3,0), (2,1), (2,-1), (3,1), (3,-1) = 7 squares
+    const aim = { x: 3, y: 0 }
+    const inCone = [
+      { x: 1, y: 0 },   // 5ft, on axis
+      { x: 2, y: 0 },   // 10ft, on axis
+      { x: 3, y: 0 },   // 15ft, on axis
+      { x: 2, y: 1 },   // 10ft, angle ≈ 26.57°
+      { x: 2, y: -1 },  // 10ft, angle ≈ 26.57°
+      { x: 3, y: 1 },   // 15ft, angle ≈ 18.4°
+      { x: 3, y: -1 },  // 15ft, angle ≈ 18.4°
+    ]
+    const outOfCone = [
+      { x: 1, y: 1 },   // angle = 45° — too wide
+      { x: 1, y: -1 },  // angle = 45° — too wide
+      { x: 4, y: 0 },   // 20ft — too far
+    ]
+    for (const pos of inCone) {
+      assert.equal(geo.isInAoE(pos, aim, targeting, { casterPosition: caster }), true,
+        `(${pos.x},${pos.y}) should be in cone`)
+    }
+    for (const pos of outOfCone) {
+      assert.equal(geo.isInAoE(pos, aim, targeting, { casterPosition: caster }), false,
+        `(${pos.x},${pos.y}) should NOT be in cone`)
+    }
+  })
+})
+
+describe('isInCone — flying targets', () => {
+  it('60ft cone includes flying target within 3D range and cone arc', () => {
+    const targeting = { shape: 'cone', length: 60 }
+    // Target at (10,0) flying: horizontal = 50ft, sqrt(50²+30²) ≈ 58.3 ≤ 60
+    assert.equal(geo.isInAoE({ x: 10, y: 0 }, { x: 12, y: 0 }, targeting,
+      { flying: true, casterPosition: { x: 0, y: 0 } }), true)
+  })
+
+  it('15ft cone cannot reach flying target (altitude too high)', () => {
+    const targeting = { shape: 'cone', length: 15 }
+    // sqrt(0² + 30²) = 30 > 15
+    assert.equal(geo.isInAoE({ x: 0, y: 0 }, { x: 3, y: 0 }, targeting,
+      { flying: true, casterPosition: { x: 0, y: 0 } }), false)
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// computeOptimalConeDirection — AI direction picker
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('computeOptimalConeDirection', () => {
+  it('picks direction capturing the most enemies', () => {
+    const caster = { position: { x: 0, y: 0 } }
+    const enemies = [
+      { position: { x: 2, y: 0 } },   // east
+      { position: { x: 3, y: 0 } },   // east
+      { position: { x: 0, y: -3 } },  // south (alone)
+    ]
+    const result = geo.computeOptimalConeDirection(caster, enemies, 15)
+    assert.ok(result)
+    assert.equal(result.estimatedCount, 2, 'Should capture 2 enemies aiming east')
+  })
+
+  it('returns null when no enemies provided', () => {
+    const caster = { position: { x: 0, y: 0 } }
+    assert.equal(geo.computeOptimalConeDirection(caster, [], 15), null)
+  })
+
+  it('returns null when all enemies are at caster position', () => {
+    const caster = { position: { x: 0, y: 0 } }
+    const enemies = [{ position: { x: 0, y: 0 } }]
+    assert.equal(geo.computeOptimalConeDirection(caster, enemies, 15), null)
+  })
+
+  it('aim point is the enemy position that defines the best direction', () => {
+    const caster = { position: { x: 0, y: 0 } }
+    const enemies = [
+      { position: { x: 3, y: 0 } },  // only enemy
+    ]
+    const result = geo.computeOptimalConeDirection(caster, enemies, 15)
+    assert.ok(result)
+    assert.equal(result.center.x, 3)
+    assert.equal(result.center.y, 0)
+    assert.equal(result.estimatedCount, 1)
+  })
+})
+
+describe('isInAoE — cone backward compat (no casterPosition)', () => {
+  const targeting = { shape: 'cone', length: 60 }
+
+  it('falls back to 360° distance check without casterPosition', () => {
+    // Legacy behavior: distance-only check (no angular constraint)
+    assert.equal(geo.isInAoE({ x: 12, y: 0 }, { x: 0, y: 0 }, targeting), true)
+    assert.equal(geo.isInAoE({ x: 13, y: 0 }, { x: 0, y: 0 }, targeting), false)
+  })
+})
+
 describe('isInAoE — cylinder', () => {
   const targeting = { shape: 'cylinder', radius: 20, height: 40 }
 

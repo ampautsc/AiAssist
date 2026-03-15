@@ -1,0 +1,190 @@
+{
+  "id": "moonlit-ruins-001",
+  "title": "Moonlit Ruins",
+  "createdAt": "2026-03-11T19:20:00Z",
+  "map": {
+    "radius": 6,
+    "terrain": [
+      { "q": 0, "r": -2, "type": "wall" },
+      { "q": 1, "r": -2, "type": "wall" },
+      { "q": 2, "r": -2, "type": "wall" },
+      { "q": -1, "r": 2, "type": "water" },
+      { "q": 0, "r": 2, "type": "water" },
+      { "q": 1, "r": 2, "type": "water" },
+      { "q": -2, "r": 1, "type": "forest" },
+      { "q": -3, "r": 1, "type": "forest" },
+      { "q": 3, "r": -1, "type": "difficult" },
+      { "q": 3, "r": 0, "type": "difficult" }
+    ]
+  },
+  "initiative": ["elara", "bone-archer", "grave-warden"],
+  "actors": [
+    {
+      "id": "elara",
+      "name": "Elara",
+      "side": "player",
+      "class": "Bard",
+      "maxHp": 32,
+      "ac": 14,
+      "portrait": "elara.png"
+    },
+    {
+      "id": "bone-archer",
+      "name": "Bone Archer",
+      "side": "enemy",
+      "class": "Undead",
+      "maxHp": 18,
+      "ac": 13,
+      "portrait": "bone-archer.png"
+    },
+    {
+      "id": "grave-warden",
+      "name": "Grave Warden",
+      "side": "enemy",
+      "class": "Undead",
+      "maxHp": 26,
+      "ac": 15,
+      "portrait": "grave-warden.png"
+    }
+  ],
+  "turns": [
+    {
+      "index": 1,
+      "round": 1,
+      "turn": 1,
+      "actorId": "elara",
+      "targetId": "bone-archer",
+      "events": [
+        "Elara sings a cutting refrain and sends a psychic jab toward Bone Archer.",
+        "Bone Archer flinches, its arrow drifting wide."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -2, "r": 0 },
+          { "id": "bone-archer", "q": 3, "r": -1 },
+          { "id": "grave-warden", "q": 2, "r": 1 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 32 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 26 }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "round": 1,
+      "turn": 2,
+      "actorId": "bone-archer",
+      "targetId": "elara",
+      "events": [
+        "Bone Archer looses a rattling volley.",
+        "An arrow grazes Elara for 5 piercing damage."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -2, "r": 0 },
+          { "id": "bone-archer", "q": 3, "r": -1 },
+          { "id": "grave-warden", "q": 2, "r": 1 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 27 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 26 }
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "round": 1,
+      "turn": 3,
+      "actorId": "grave-warden",
+      "targetId": "elara",
+      "events": [
+        "Grave Warden advances through the rubble.",
+        "Its blade scrapes Elara's ward, dealing 6 slashing damage."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -2, "r": 0 },
+          { "id": "bone-archer", "q": 3, "r": -1 },
+          { "id": "grave-warden", "q": 1, "r": 1 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 21 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 26 }
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "round": 2,
+      "turn": 1,
+      "actorId": "elara",
+      "targetId": "grave-warden",
+      "events": [
+        "Elara pivots and unleashes a resonant thunder chord.",
+        "Grave Warden staggers, taking 9 thunder damage."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -1, "r": -1 },
+          { "id": "bone-archer", "q": 3, "r": -1 },
+          { "id": "grave-warden", "q": 1, "r": 1 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 21 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 17 }
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "round": 2,
+      "turn": 2,
+      "actorId": "bone-archer",
+      "targetId": "elara",
+      "events": [
+        "Bone Archer shifts along the ridge to line up another shot.",
+        "The arrow splinters against the stone at Elara's feet."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -1, "r": -1 },
+          { "id": "bone-archer", "q": 4, "r": -1 },
+          { "id": "grave-warden", "q": 1, "r": 1 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 21 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 17 }
+        ]
+      }
+    },
+    {
+      "index": 6,
+      "round": 2,
+      "turn": 3,
+      "actorId": "grave-warden",
+      "targetId": "elara",
+      "events": [
+        "Grave Warden presses in with a heavy swing.",
+        "Elara sidesteps, the strike carving a line in the stone."
+      ],
+      "snapshot": {
+        "positions": [
+          { "id": "elara", "q": -1, "r": -1 },
+          { "id": "bone-archer", "q": 4, "r": -1 },
+          { "id": "grave-warden", "q": 0, "r": 0 }
+        ],
+        "hp": [
+          { "id": "elara", "current": 21 },
+          { "id": "bone-archer", "current": 14 },
+          { "id": "grave-warden", "current": 17 }
+        ]
+      }
+    }
+  ]
+}

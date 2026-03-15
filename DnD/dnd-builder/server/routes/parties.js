@@ -12,7 +12,7 @@
 'use strict'
 
 const express  = require('express')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 const router = express.Router()
 
@@ -71,7 +71,7 @@ router.post('/', (req, res) => {
 
   const now = new Date().toISOString()
   const party = {
-    id:               uuidv4(),
+    id:               randomUUID(),
     name:             String(name).slice(0, 80),
     leaderId:         String(leaderId),
     memberIds:        [String(leaderId)],
@@ -168,7 +168,7 @@ router.post('/:id/start', (req, res) => {
   }
 
   party.status           = 'in_session'
-  party.currentSessionId = uuidv4()
+  party.currentSessionId = randomUUID()
   party.updatedAt        = new Date().toISOString()
 
   parties.set(party.id, party)

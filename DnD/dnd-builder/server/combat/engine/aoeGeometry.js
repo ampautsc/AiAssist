@@ -15,6 +15,14 @@
 const FLYING_ALTITUDE_FT = 30  // assumed altitude when airborne (matches mechanics.js)
 
 /**
+ * D&D 5e cone half-angle: width at distance d = d, meaning half-width = d/2.
+ * half-angle = arctan(0.5) ≈ 26.57°. This matches the DMG grid cone templates.
+ * We store both the angle and cosine for different comparison needs.
+ */
+const CONE_HALF_ANGLE_RAD = Math.atan(0.5)
+const CONE_HALF_ANGLE_COS = Math.cos(CONE_HALF_ANGLE_RAD) // 2/sqrt(5) ≈ 0.8944
+
+/**
  * Get the effective radius (in feet) of a spell's AoE targeting geometry.
  * - cube:     half the side length
  * - sphere:   the radius
@@ -54,6 +62,11 @@ function isInAoE(position, center, targeting, options = {}) {
 
   // Wall requires special handling — not a simple radius check
   if (targeting.shape === 'wall') return false
+
+  // ── Cone: directional arc check when casterPosition is provided ──────
+  if (targeting.shape === 'cone' && options.casterPosition) {
+    return isInCone(position, center, targeting, options)
+  }
 
   const radius = getEffectiveRadius(targeting)
   const px = position?.x || 0
@@ -188,8 +201,119 @@ function computeOptimalCenter(caster, enemies, castRange, aoeRadius) {
 
 module.exports = {
   FLYING_ALTITUDE_FT,
+  CONE_HALF_ANGLE_RAD,
   getEffectiveRadius,
   isInAoE,
+  isInCone,
   canAoEReachFlying,
   computeOptimalCenter,
+  computeOptimalConeDirection,
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Directional cone geometry
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if a position is inside a directional cone emanating from a caster
+ * toward an aim point. The cone's width at distance d equals d (D&D 5e PHB).
+ *
+ * The caster position is the cone origin. The `aimPoint` parameter defines
+ * the direction of the cone (any point along the desired axis works).
+ *
+ * @param {{ x?: number, y?: number }} position     - position to test
+ * @param {{ x?: number, y?: number }} aimPoint      - where the cone is aimed
+ * @param {object} targeting                          - { shape: 'cone', length: number }
+ * @param {object} options                            - { casterPosition, flying }
+ * @returns {boolean} true if position is within the directional cone
+ */
+function isInCone(position, aimPoint, targeting, options) {
+  const coneLength = targeting.length || 0
+  const px = position?.x || 0
+  const py = position?.y || 0
+  const ax = aimPoint?.x || 0
+  const ay = aimPoint?.y || 0
+  const ox = options.casterPosition?.x || 0
+  const oy = options.casterPosition?.y || 0
+  const isFlying = !!options.flying
+
+  // Vector from cone origin (caster) to target
+  const tDx = px - ox
+  const tDy = py - oy
+
+  // Distance from origin to target
+  const chebyshevDist = Math.max(Math.abs(tDx), Math.abs(tDy)) * 5
+  if (isFlying) {
+    const dist3D = Math.sqrt(chebyshevDist * chebyshevDist + FLYING_ALTITUDE_FT * FLYING_ALTITUDE_FT)
+    if (dist3D > coneLength) return false
+  } else {
+    if (chebyshevDist > coneLength) return false
+  }
+
+  // Target at cone origin → always inside
+  if (tDx === 0 && tDy === 0) return true
+
+  // Aim direction vector: from origin to aim point
+  const aDx = ax - ox
+  const aDy = ay - oy
+  const aimLen = Math.sqrt(aDx * aDx + aDy * aDy)
+
+  // Aim point = origin → no direction, treat as all-directions (degenerate case)
+  if (aimLen === 0) return true
+
+  // Angular check: cosine of angle between aim direction and target direction.
+  // Using cosine comparison directly avoids acos() floating-point precision issues.
+  // Higher cosine = smaller angle. In-cone when cosAngle >= cos(halfAngle).
+  const tLen = Math.sqrt(tDx * tDx + tDy * tDy)
+  const cosAngle = (tDx * aDx + tDy * aDy) / (tLen * aimLen)
+  return cosAngle >= CONE_HALF_ANGLE_COS - 1e-10  // tiny epsilon for float boundary
+}
+
+/**
+ * Find the optimal aim direction for a self-origin cone.
+ * Tests each enemy's direction as a candidate aim and picks the one
+ * that captures the most targets within the cone arc.
+ *
+ * @param {object} caster        - creature with .position
+ * @param {object[]} enemies     - creatures with .position (and optional .flying)
+ * @param {number} coneLength    - cone length in feet
+ * @returns {{ center: { x: number, y: number }, estimatedCount: number }|null}
+ */
+function computeOptimalConeDirection(caster, enemies, coneLength) {
+  if (!enemies || enemies.length === 0) return null
+
+  const ox = caster?.position?.x || 0
+  const oy = caster?.position?.y || 0
+  const targeting = { shape: 'cone', length: coneLength }
+
+  let bestAimPoint = null
+  let bestCount = 0
+
+  for (const candidate of enemies) {
+    const cx = candidate.position?.x || 0
+    const cy = candidate.position?.y || 0
+
+    // Skip enemies at caster position (no direction vector)
+    if (cx === ox && cy === oy) continue
+
+    // Use enemy position as aim point (defines direction ray from caster)
+    const aimPoint = { x: cx, y: cy }
+
+    // Count how many enemies fall within this cone direction
+    const count = enemies.filter(e => {
+      const pos = e.position || { x: 0, y: 0 }
+      return isInCone(pos, aimPoint, targeting, {
+        casterPosition: caster.position,
+        flying: !!e.flying,
+      })
+    }).length
+
+    if (count > bestCount) {
+      bestCount = count
+      bestAimPoint = aimPoint
+    }
+  }
+
+  if (!bestAimPoint) return null
+  return { center: bestAimPoint, estimatedCount: bestCount }
 }

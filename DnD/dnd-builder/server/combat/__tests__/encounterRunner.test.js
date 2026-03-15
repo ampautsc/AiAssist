@@ -257,6 +257,9 @@ describe('resolveWeaponAttack', () => {
     const f1 = makeFanatic(1);
     const bard = makeBard();
     bard.ac = 10; // make hittable
+    // Place within melee range (5ft)
+    f1.position = { x: 0, y: 0 };
+    bard.position = { x: 1, y: 0 };
     const log = [];
     
     runner.resolveWeaponAttack(f1, { target: bard, weapon: f1.weapon }, [f1, bard], log);
@@ -270,9 +273,11 @@ describe('resolveWeaponAttack', () => {
   it('misses when total < AC', () => {
     const f1 = makeFanatic(1);
     const bard = makeBard();
-    // Dagger +4, average 10.5 + 4 = 14.5 vs AC 14 → HIT (14.5 >= 14)
-    // Use higher AC
+    // Dagger +4, average 10.5 + 4 = 14.5 vs AC 20 → MISS
     bard.ac = 20;
+    // Place within melee range (5ft)
+    f1.position = { x: 0, y: 0 };
+    bard.position = { x: 1, y: 0 };
     const log = [];
     
     runner.resolveWeaponAttack(f1, { target: bard, weapon: f1.weapon }, [f1, bard], log);
@@ -284,6 +289,9 @@ describe('resolveWeaponAttack', () => {
     const bard = makeBard();
     bard.conditions.push('invisible');
     const f1 = makeFanatic(1);
+    // Place within melee range
+    bard.position = { x: 0, y: 0 };
+    f1.position = { x: 1, y: 0 };
     const log = [];
     
     runner.resolveWeaponAttack(bard, { target: f1, weapon: bard.weapon }, [bard, f1], log);
@@ -685,5 +693,143 @@ describe('runEncounter — positionSnapshots', () => {
     assert.ok(typeof bardSnap.maxHP === 'number');
     assert.ok(Array.isArray(bardSnap.conditions));
     assert.ok(typeof bardSnap.position === 'object');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: Incapacitated creatures get end-of-turn saves
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('runEncounter — incapacitated creatures get end-of-turn saves', () => {
+  it('paralyzed bard gets WIS save at end of each turn', () => {
+    const bard = makeBard();
+    bard.conditions.push('paralyzed');
+    bard.position = { x: 0, y: 0 };
+
+    // Fanatic is concentrating on Hold Person
+    const f1 = makeFanatic(1);
+    f1.concentrating = 'Hold Person';
+    f1.spellSaveDC = 1; // very low DC so bard breaks free easily
+    f1.position = { x: 1, y: 0 };
+
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: simpleAttackAI,
+      maxRounds: 5,
+      verbose: false,
+    });
+
+    // Bard should have broken free via end-of-turn save (DC 1, average roll is 10.5)
+    const logText = result.log.join('\n');
+    assert.ok(logText.includes('WIS save vs Hold Person'), 'Should attempt WIS save while paralyzed');
+    assert.ok(logText.includes('SUCCESS'), 'Should succeed vs DC 1');
+    assert.ok(!bard.conditions.includes('paralyzed'), 'Bard should no longer be paralyzed');
+  });
+
+  it('incapacitated creature turn is skipped but saves still happen', () => {
+    const bard = makeBard();
+    bard.conditions.push('paralyzed');
+    bard.position = { x: 0, y: 0 };
+
+    const f1 = makeFanatic(1);
+    f1.concentrating = 'Hold Person';
+    f1.spellSaveDC = 99; // impossibly high DC so bard stays paralyzed
+    f1.position = { x: 1, y: 0 };
+
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: simpleAttackAI,
+      maxRounds: 3,
+      verbose: false,
+    });
+
+    const logText = result.log.join('\n');
+    assert.ok(logText.includes('is incapacitated'), 'Should log incapacitated skip');
+    assert.ok(logText.includes('WIS save vs Hold Person'), 'Should still attempt saves');
+    assert.ok(logText.includes('FAIL'), 'Should fail vs DC 99');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: Weapon range enforcement
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('resolveWeaponAttack — range enforcement', () => {
+  it('blocks melee attack when target is out of range', () => {
+    const f1 = makeFanatic(1);
+    const bard = makeBard();
+    bard.ac = 10;
+    // Place 30ft apart (6 squares)
+    f1.position = { x: 0, y: 0 };
+    bard.position = { x: 6, y: 0 };
+    const log = [];
+
+    const hpBefore = bard.currentHP;
+    runner.resolveWeaponAttack(f1, { target: bard, weapon: f1.weapon }, [f1, bard], log);
+    assert.equal(bard.currentHP, hpBefore, 'No damage dealt — out of range');
+    assert.ok(log.some(l => l.includes("can't reach")), 'Should log range error');
+  });
+
+  it('allows melee attack when target is within 5ft', () => {
+    const f1 = makeFanatic(1);
+    const bard = makeBard();
+    bard.ac = 10;
+    f1.position = { x: 0, y: 0 };
+    bard.position = { x: 1, y: 0 }; // 5ft
+    const log = [];
+
+    runner.resolveWeaponAttack(f1, { target: bard, weapon: f1.weapon }, [f1, bard], log);
+    assert.ok(bard.currentHP < 67, 'Damage dealt at 5ft range');
+  });
+
+  it('allows ranged attack at distance using weapon range', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic(1);
+    // Give bard a ranged weapon
+    const crossbow = { name: 'Light Crossbow', attackBonus: 5, damageDice: '1d8', damageBonus: 2, range: 80, type: 'ranged' };
+    bard.position = { x: 0, y: 0 };
+    f1.position = { x: 10, y: 0 }; // 50ft
+    f1.ac = 5; // make hittable
+    const log = [];
+
+    runner.resolveWeaponAttack(bard, { target: f1, weapon: crossbow }, [bard, f1], log);
+    assert.ok(f1.currentHP < f1.maxHP, 'Ranged attack hits at 50ft with 80ft range');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: Movement uses creature speed
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('runEncounter — movement uses creature speed', () => {
+  it('creature moves more than 1 square per turn', () => {
+    const bard = makeBard();
+    bard.position = { x: 0, y: 0 };
+    bard.speed = 30; // 6 squares
+
+    const f1 = makeFanatic(1);
+    f1.position = { x: 10, y: 0 }; // 50ft away
+    f1.currentHP = 1;
+
+    // AI that always moves toward and attacks
+    function moveAndAttackAI(combatant, allCombatants) {
+      const enemies = allCombatants.filter(c => c.side !== combatant.side && mech.isAlive(c));
+      if (enemies.length === 0) return null;
+      return {
+        reasoning: 'Move and attack',
+        movement: { type: 'move_toward', target: enemies[0] },
+        action: { type: 'attack', target: enemies[0], weapon: combatant.weapon },
+      };
+    }
+
+    const result = runner.runEncounter({
+      combatants: [bard, f1],
+      getDecision: moveAndAttackAI,
+      maxRounds: 1,
+      verbose: false,
+    });
+
+    // After one round, bard should have moved 6 squares (speed 30 / 5 = 6), not just 1
+    assert.ok(bard.position.x >= 6, `Bard should move 6 squares (speed 30), actual: ${bard.position.x}`);
   });
 });

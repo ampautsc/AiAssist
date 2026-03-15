@@ -103,13 +103,14 @@ function processEndOfTurnSaves(creature, allCombatants, log) {
     const caster = allCombatants.find(c => c.concentrating === 'Hold Person')
     if (caster) {
       const dc    = caster.spellSaveDC || 10
-      const mod   = creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)
-      const roll  = dice.d20() + mod
+      const mod   = (creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)) || 0
+      const raw   = dice.d20()
+      const roll  = raw + mod
       if (roll >= dc) {
         mech.removeCondition(creature, 'paralyzed')
-        log.push(`  ${creature.name} WIS save vs Hold Person: [${roll} vs DC ${dc}] SUCCESS — no longer paralyzed.`)
+        log.push(`  ${creature.name} WIS save vs Hold Person: [d20:${raw}+${mod}=${roll} vs DC ${dc}] SUCCESS — no longer paralyzed.`)
       } else {
-        log.push(`  ${creature.name} WIS save vs Hold Person: [${roll} vs DC ${dc}] FAIL — still paralyzed.`)
+        log.push(`  ${creature.name} WIS save vs Hold Person: [d20:${raw}+${mod}=${roll} vs DC ${dc}] FAIL — still paralyzed.`)
       }
     }
   }
@@ -119,9 +120,10 @@ function processEndOfTurnSaves(creature, allCombatants, log) {
     const source = allCombatants.find(c => c.dragonFear && c.id !== creature.id)
     if (source && source.dragonFear) {
       const dc   = source.dragonFear.dc || 10
-      const mod  = creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)
-      const roll = dice.d20() + mod
-      log.push(`  ${creature.name} WIS save vs Dragon Fear: [${roll} vs DC ${dc}]`)
+      const mod  = (creature.saves ? creature.saves.wis : mech.abilityModifier(creature.wis || 10)) || 0
+      const raw  = dice.d20()
+      const roll = raw + mod
+      log.push(`  ${creature.name} WIS save vs Dragon Fear: [d20:${raw}+${mod}=${roll} vs DC ${dc}]`)
       if (roll >= dc) {
         mech.removeCondition(creature, 'frightened')
         log.push(`    → ${creature.name} no longer frightened.`)
@@ -163,6 +165,14 @@ function resolveWeaponAttack(attacker, action, allCombatants, log) {
   const target = action.target
   const weapon = action.weapon || attacker.weapon
   if (!target || !weapon) return
+
+  // Range check: melee weapons max 5ft (or reach), ranged/thrown up to listed range
+  const dist = mech.distanceBetween(attacker, target)
+  const weaponRange = weapon.range || (weapon.type === 'ranged' ? 80 : 5)
+  if (dist > weaponRange) {
+    log.push(`  ${attacker.name} can't reach ${target.name} with ${weapon.name} (distance ${dist}ft, range ${weaponRange}ft).`)
+    return
+  }
 
   const isParalyzed = mech.hasCondition(target, 'paralyzed')
   const within5ft   = mech.distanceBetween(attacker, target) <= 5
@@ -457,15 +467,19 @@ function runEncounter(options) {
     for (const entry of initiative) {
       const actor = combatants.find(c => c.id === entry.id)
       if (!actor || !mech.isAlive(actor)) continue
-      if (mech.isIncapacitated(actor)) {
-        log.push(`  ${actor.name} is incapacitated — skipping turn.`)
-        continue
-      }
 
       resetTurnState(actor)
       processStartOfTurn(actor, combatants, log)
 
       if (!mech.isAlive(actor)) continue
+
+      // Incapacitated creatures skip their action but STILL get end-of-turn saves
+      // (D&D 5e: Hold Person allows a WIS save at the end of each of the target's turns)
+      if (mech.isIncapacitated(actor)) {
+        log.push(`  ${actor.name} is incapacitated — skipping turn.`)
+        processEndOfTurnSaves(actor, combatants, log)
+        continue
+      }
 
       log.push(`\n  --- ${actor.name}'s turn ---`)
 
@@ -480,11 +494,21 @@ function runEncounter(options) {
       if (decision) {
         // Resolve movement
         if (decision.movement && decision.movement.type === 'move_toward' && decision.movement.target) {
-          const target = decision.movement.target
-          const dx = Math.sign((target.position?.x || 0) - (actor.position?.x || 0))
-          const dy = Math.sign((target.position?.y || 0) - (actor.position?.y || 0))
-          if (actor.position) {
-            actor.position = { x: actor.position.x + dx, y: actor.position.y + dy }
+          const mvTarget = decision.movement.target
+          const ax = actor.position?.x || 0
+          const ay = actor.position?.y || 0
+          const tx = mvTarget.position?.x || 0
+          const ty = mvTarget.position?.y || 0
+          // Move up to creature speed (in grid squares = speed / 5)
+          const maxSquares = Math.max(1, Math.floor((actor.speed || 30) / 5))
+          const dx = tx - ax
+          const dy = ty - ay
+          const dist = Math.max(Math.abs(dx), Math.abs(dy))
+          const steps = Math.min(maxSquares, dist)
+          if (steps > 0 && actor.position) {
+            const sx = Math.sign(dx)
+            const sy = Math.sign(dy)
+            actor.position = { x: ax + sx * steps, y: ay + sy * steps }
           }
         }
 

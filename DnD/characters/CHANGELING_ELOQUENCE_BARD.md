@@ -75,7 +75,8 @@
 ## Racial Features — Changeling
 
 ### Shapechanger (The Core Fantasy)
-- **Action** to change appearance: physical features, height (±6"), weight, voice, coloring, hair, sex
+- **Action** to change appearance: physical features, weight, voice, coloring, hair, sex
+- Can adjust size between **Medium and Small** (your choice each time)
 - Reverts on death
 - **NOT magical** — immune to Dispel Magic, Detect Magic, Antimagic Field
 - Can replicate specific individuals (Deception check if scrutinized)

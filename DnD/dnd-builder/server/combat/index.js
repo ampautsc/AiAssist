@@ -19,6 +19,7 @@ const creatures = require('./data/creatures');
 const buildConverter = require('./data/buildConverter');
 const tactics = require('./ai/tactics');
 const scenarioHarness = require('./scenarioHarness');
+const scenarioHarnessV2 = require('./scenarioHarnessV2');
 
 module.exports = {
   dice,
@@ -30,4 +31,5 @@ module.exports = {
   buildConverter,
   tactics,
   scenarioHarness,
+  scenarioHarnessV2,
 };

@@ -1,0 +1,1663 @@
+[
+  {
+    "name": "Dragonborn",
+    "source": "FTD",
+    "creature_type": "Humanoid",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [
+      "the"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Draconic Ancestry",
+      "Blue\tLightning\t5 by 30 ft",
+      "Brass\tFire\t5 by 30 ft",
+      "Bronze\tLightning\t5 by 30 ft",
+      "Copper\tAcid\t5 by 30 ft",
+      "Gold\tFire\t15 ft",
+      "Green\tPoison\t15 ft",
+      "Red\tFire\t15 ft",
+      "Silver\tCold\t15 ft",
+      "White\tCold\t15 ft",
+      "Breath Weapon",
+      "Damage Resistance",
+      "Darkvision",
+      "Forceful Presence",
+      "Darkvision",
+      "Vengeful Assault",
+      "Chromatic Ancestry",
+      "Draconic Resistance",
+      "Chromatic Warding",
+      "Metallic Ancestry",
+      "Draconic Resistance",
+      "Metallic Breath Weapon",
+      "Enervating Breath",
+      "Repulsion Breath",
+      "Gem Ancestry",
+      "Draconic Resistance",
+      "Psionic Mind",
+      "Gem Flight",
+      "Chromatic Ancestry",
+      "Draconic Resistance",
+      "Chromatic Warding",
+      "Metallic Ancestry",
+      "Draconic Resistance",
+      "Metallic Breath Weapon",
+      "Gem Ancestry",
+      "Draconic Resistance",
+      "Psionic Mind",
+      "Gem Flight"
+    ],
+    "key_features": [
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Dwarf",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Dwarven Resilience",
+      "Dwarven Combat Training",
+      "Tool Proficiency",
+      "Stonecunning",
+      "Dwarven Toughness",
+      "Dwarven Armor Training",
+      "Warder's Intuition",
+      "Wards and Seals",
+      "Spells of the Mark",
+      "Darkvision",
+      "Dwarven Resilience",
+      "Dwarven Toughness",
+      "Artisan's Expertise"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Elf",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 120,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [
+      {
+        "spell": "Faerie Fire",
+        "level": 1
+      },
+      {
+        "spell": "Darkness",
+        "level": 1
+      },
+      {
+        "spell": "Sleep",
+        "level": 1
+      },
+      {
+        "spell": "Invisibility",
+        "level": 1
+      }
+    ],
+    "has_flight": true,
+    "flight_restriction": "no medium or heavy armor",
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Fey Ancestry",
+      "Trance",
+      "Keen Senses",
+      "Superior Darkvision",
+      "Sunlight Sensitivity",
+      "Drow Magic",
+      "Drow Weapon Training",
+      "Cantrip",
+      "Elf Weapon Training",
+      "Extra Language",
+      "Elf Weapon Training",
+      "Fleet of Foot",
+      "Mask of the Wild",
+      "Incisive Sense",
+      "Blessing of the Moonweaver",
+      "Cunning Intuition",
+      "Shape Shadows",
+      "Spells of the Mark",
+      "Astral Fire",
+      "Darkvision",
+      "Fey Ancestry",
+      "Keen Senses",
+      "Starlight Step",
+      "Astral Trance",
+      "Elf Weapon Training",
+      "Fleet of Foot",
+      "Mask of the Wild",
+      "Elf Weapon Training",
+      "Cantrip",
+      "Extra Language",
+      "Darkvision",
+      "Fey Ancestry",
+      "Trance",
+      "Keen Senses",
+      "Skill Versatility",
+      "Elf Weapon Training",
+      "Fleet of Foot",
+      "Mask of the Wild",
+      "Superior Darkvision",
+      "Sunlight Sensitivity",
+      "Mul Daya Magic",
+      "Elf Weapon Training",
+      "The avariel are winged elves",
+      "Flight",
+      "Grugach Weapon Training",
+      "Cantrip"
+    ],
+    "key_features": [
+      "Charm Resistance"
+    ]
+  },
+  {
+    "name": "Gnome",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Gnome Cunning",
+      "Natural Illusionist",
+      "Speak with Small Beasts",
+      "Artificer's Lore",
+      "Tinker",
+      "Clockwork Toy",
+      "Fire Starter",
+      "Music Box",
+      "Gifted Scribe",
+      "Scribe's Insight",
+      "Spells of the Mark"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Half-Elf",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "lightning"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [
+      {
+        "spell": "Faerie Fire",
+        "level": 1
+      },
+      {
+        "spell": "Darkness",
+        "level": 1
+      }
+    ],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Fey Ancestry",
+      "Deductive Intuition",
+      "Magical Detection",
+      "Spells of the Mark",
+      "Windwright's Intuition",
+      "Storm's Boon",
+      "Headwinds",
+      "Spells of the Mark"
+    ],
+    "key_features": [
+      "Charm Resistance"
+    ]
+  },
+  {
+    "name": "Half-Orc",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Menacing",
+      "Relentless Endurance",
+      "Savage Attacks",
+      "Darkvision",
+      "Hunter's Intuition",
+      "Finder's Magic",
+      "Spells of the Mark"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Halfling",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [
+      "poison"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [
+      {
+        "spell": "Entangle",
+        "level": 1
+      },
+      {
+        "spell": "Spike Growth",
+        "level": 1
+      },
+      {
+        "spell": "Lesser Restoration",
+        "level": 1
+      }
+    ],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Lucky",
+      "Brave",
+      "Nimble",
+      "Naturally Stealthy",
+      "Stout Resilience",
+      "Silent Speech",
+      "Children of the Woods",
+      "Timberwalk",
+      "Ever Hospitable",
+      "Innkeeper's Magic",
+      "Spells of the Mark",
+      "Medical Intuition",
+      "Healing Touch",
+      "Spells of the Mark"
+    ],
+    "key_features": [
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Human",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Skills",
+      "Feat",
+      "Darkvision",
+      "Hunter's Intuition",
+      "Finder's Magic",
+      "Spells of the Mark",
+      "Wild Intuition",
+      "Primal Connection",
+      "The Bigger They Are",
+      "Spells of the Mark",
+      "Artisan's Intuition",
+      "Spells of the Mark",
+      "Magical Passage",
+      "Spells of the Mark",
+      "Sentinel's Intuition",
+      "Guardian's Shield",
+      "Spells of the Mark",
+      "Natural Athlete",
+      "Keldon Resilience",
+      "Icehaven Born",
+      "Provincial Origin",
+      "Forest Folk",
+      "Fleet of Foot",
+      "Spring Attack",
+      "Breadth of Knowledge",
+      "Daunting",
+      "Tough"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Tiefling",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "fire"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [
+      {
+        "spell": "Hellish Rebuke",
+        "level": 1
+      },
+      {
+        "spell": "Darkness",
+        "level": 1
+      },
+      {
+        "spell": "Ray of Sickness",
+        "level": 1
+      },
+      {
+        "spell": "Crown of Madness",
+        "level": 1
+      },
+      {
+        "spell": "Disguise Self",
+        "level": 1
+      },
+      {
+        "spell": "Detect Thoughts",
+        "level": 1
+      },
+      {
+        "spell": "Charm Person",
+        "level": 1
+      },
+      {
+        "spell": "Suggestion",
+        "level": 1
+      },
+      {
+        "spell": "Invisibility",
+        "level": 1
+      },
+      {
+        "spell": "Armor of Agathys",
+        "level": 1
+      },
+      {
+        "spell": "Tenser's Floating Disk",
+        "level": 1
+      },
+      {
+        "spell": "Arcane Lock",
+        "level": 1
+      },
+      {
+        "spell": "Burning Hands",
+        "level": 1
+      },
+      {
+        "spell": "Flame Blade",
+        "level": 1
+      },
+      {
+        "spell": "Searing Smite",
+        "level": 1
+      },
+      {
+        "spell": "Branding Smite",
+        "level": 1
+      },
+      {
+        "spell": "Enthrall",
+        "level": 1
+      }
+    ],
+    "has_flight": true,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Hellish Resistance",
+      "Infernal Legacy",
+      "Legacy of Maladomini",
+      "Legacy of Dis",
+      "Legacy of Phlegethos",
+      "Legacy of Malbolge",
+      "Legacy of Stygia",
+      "Legacy of Minauros",
+      "Legacy of Cania",
+      "Legacy of Avernus",
+      "Appearance",
+      "Feral",
+      "Devil's Tongue",
+      "Hellfire",
+      "Winged",
+      "Abyssal Arcana",
+      "Abyssal Fortitude"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Custom Lineage",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Feat",
+      "Variable Trait",
+      "Darkvision with a range of 60 feet"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Aarakocra",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Aasimar",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Changeling",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Deep Gnome",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Duergar",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 120,
+    "speed": 30,
+    "resistances": [
+      "poison"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [
+      {
+        "spell": "Enlarge/Reduce spell on yourself",
+        "level": 1
+      },
+      {
+        "spell": "Invisibility spell on yourself",
+        "level": 1
+      }
+    ],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Duergar Magic",
+      "Dwarven Resilience",
+      "Psionic Fortitude",
+      "Duergar value toil above all else",
+      "Superior Darkvision",
+      "Dwarven Resilience",
+      "Duergar Resilience",
+      "Dwarven Combat Training",
+      "Tool Proficiency",
+      "Stonecunning",
+      "Duergar Magic",
+      "Sunlight Sensitivity"
+    ],
+    "key_features": [
+      "Charm Resistance"
+    ]
+  },
+  {
+    "name": "Eladrin",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Fairy",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Firbolg",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Genasi (Air)",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Genasi (Earth)",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Genasi (Fire)",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Genasi (Water)",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Githyanki",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Githzerai",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Goliath",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Harengon",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Kenku",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Locathah",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": 12,
+    "traits": [
+      "Natural Armor",
+      "Observant and Athletic",
+      "Leviathan Will",
+      "Limited Amphibiousness"
+    ],
+    "key_features": [
+      "Charm Resistance"
+    ]
+  },
+  {
+    "name": "Owlin",
+    "source": "SCC",
+    "creature_type": "Humanoid",
+    "darkvision": 120,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": true,
+    "flight_restriction": "no medium or heavy armor",
+    "natural_armor_ac": null,
+    "traits": [
+      "Your owlin character might be nocturnal",
+      "Darkvision",
+      "Flight",
+      "Silent Feathers"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Satyr",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Sea Elf",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Shadar-Kai",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Tabaxi",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Tortle",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": 17,
+    "traits": [
+      "Claws",
+      "Hold Breath",
+      "Natural Armor",
+      "Nature's Intuition",
+      "Shell Defense",
+      "Claws",
+      "Hold Breath",
+      "Natural Armor",
+      "Shell Defense",
+      "Survival Instinct"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Triton",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Verdan",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Verdan owe their existence to chaos",
+      "Black Blood Healing",
+      "Limited Telepathy",
+      "Persuasive",
+      "Telepathic Insight"
+    ],
+    "key_features": [
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Bugbear",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Centaur",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Goblin",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Grung",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Grung society is a caste system",
+      "Arboreal Alertness",
+      "Amphibious",
+      "Poison Immunity",
+      "Poisonous Skin",
+      "Standing Leap",
+      "Water Dependency"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Hobgoblin",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Kobold",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Lizardfolk",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Minotaur",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Horns",
+      "Goring Rush",
+      "Hammering Horns",
+      "Labyrinthine Recall",
+      "Horns",
+      "Goring Rush",
+      "Hammering Horns",
+      "Imposing Presence",
+      "Horns",
+      "Goring Rush",
+      "Hammering Horns",
+      "Imposing Presence",
+      "Natural Weapon",
+      "Menacing",
+      "Relentless Endurance",
+      "Savage Attacks"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Orc",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Shifter",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Yuan-Ti",
+    "source": "MPMM",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [],
+    "key_features": []
+  },
+  {
+    "name": "Kender",
+    "source": "DSotDQ",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Fearless",
+      "Kender Aptitude",
+      "Taunt"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Kalashtar",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "psychic"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Dual Mind",
+      "Mental Discipline",
+      "Mind Link",
+      "Severed from Dreams",
+      "Dual Mind",
+      "Mental Discipline",
+      "Mind Link",
+      "Psychic Glamour",
+      "Severed from Dreams"
+    ],
+    "key_features": [
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Warforged",
+    "source": "ERLW",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "poison"
+    ],
+    "condition_immunities": [
+      "disease"
+    ],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Constructed Resilience",
+      "You are immune to disease",
+      "Sentry's Rest",
+      "Integrated Protection",
+      "Specialized Design",
+      "Warforged Resilience",
+      "You are immune to disease",
+      "Sentry's Rest",
+      "Integrated Protection",
+      "Specialized Design",
+      "Integrated Tool",
+      "Iron Fists",
+      "Powerful Build",
+      "Swift",
+      "Light Step"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Aetherborn",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "necrotic"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Born of Aether",
+      "Menacing"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Aven",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": true,
+    "flight_restriction": "no medium or heavy armor",
+    "natural_armor_ac": null,
+    "traits": [
+      "Features\nAbility Score Increase",
+      "Kefnet's Blessing",
+      "Hawkeyed"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Khenra",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 35,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Khenra Weapon Training",
+      "Khenra Twins"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Kor",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Kor Climbing",
+      "Lucky",
+      "Brave"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Merfolk",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Amphibious",
+      "Subrace",
+      "Mask of the Wild",
+      "Cantrip",
+      "Lore of the Waters",
+      "Cantrip",
+      "Amphibious",
+      "Creeds",
+      "Wind Creed Manipulation",
+      "Cantrip",
+      "Water Creed Navigation",
+      "Cantrip",
+      "Creed of the Trickster",
+      "Cantrip"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Naga",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Speed Burst",
+      "Natural Weapons",
+      "Poison Immunity",
+      "Poison Affinity"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Siren",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 25,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": true,
+    "flight_restriction": "no medium or heavy armor",
+    "natural_armor_ac": null,
+    "traits": [
+      "Flight"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Vampire",
+    "source": "unknown",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "necrotic"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Vampires are associated with necromancy",
+      "Darkvision",
+      "Vampiric Resistance",
+      "Bloodthirst",
+      "Feast of Blood",
+      "Darkvision",
+      "Vampiric Resistance",
+      "Blood Thirst"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Dhampir",
+    "source": "VRG",
+    "creature_type": "Humanoid",
+    "darkvision": 60,
+    "speed": 35,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Dhampir Traits\nAbility Score Increase",
+      "Ancestral Legacy",
+      "Darkvision",
+      "Deathless Nature",
+      "Spider Climb",
+      "Vampiric Bite",
+      "Dhampir Traits\nAbility Score Increase",
+      "Darkvision",
+      "Spider Climb",
+      "Vampiric Bite"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Hexblood",
+    "source": "VRG",
+    "creature_type": "Fey",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Hexblood Traits\nAbility Score Increase",
+      "Ancestral Legacy",
+      "Darkvision",
+      "Eerie Token",
+      "Telepathic Message",
+      "Remote Viewing",
+      "Hex Magic",
+      "Hexblood Traits\nAbility Score Increase",
+      "Darkvision",
+      "Fey Resilience",
+      "Hex Magic",
+      "Magic Token"
+    ],
+    "key_features": [
+      "Charm Resistance",
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Reborn",
+    "source": "VRG",
+    "creature_type": "Humanoid",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [
+      "poison"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Reborn Traits\nAbility Score Increase",
+      "Ancestral Legacy",
+      "Deathless Nature",
+      "Knowledge from a Past Life",
+      "Reborn Traits\nAbility Score Increase",
+      "Darkvision",
+      "Deathless Nature",
+      "Knowledge from a Past Life"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Loxodon",
+    "source": "GGR",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Powerful Build",
+      "Loxodon Serenity",
+      "Natural Armour",
+      "Trunk",
+      "Keen Smell"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Simic Hybrid",
+    "source": "GGR",
+    "creature_type": "Humanoid",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Animal Enhancements"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Vedalken",
+    "source": "GGR",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Vedalken Dispassion",
+      "Tireless Precision",
+      "Partially Amphibious",
+      "Vedalken Cunning",
+      "Aether Lore"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Astral Elf",
+    "source": "AAG",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Astral Fire",
+      "Darkvision",
+      "Fey Ancestry",
+      "Keen Senses",
+      "Starlight Step",
+      "Astral Trance"
+    ],
+    "key_features": [
+      "Charm Resistance"
+    ]
+  },
+  {
+    "name": "Autognome",
+    "source": "AAG",
+    "creature_type": "Construct",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [
+      "poison"
+    ],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Autognome Traits\nAbility Score Increase",
+      "Armored Casing",
+      "Built for Success",
+      "Healing Machine",
+      "Mechanical Nature",
+      "Sentry's Rest",
+      "Specialized Design"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Giff",
+    "source": "AAG",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Giff Traits\nAbility Score Increase",
+      "Astral Spark",
+      "Firearms Mastery",
+      "Hippo Build"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Hadozee",
+    "source": "AAG",
+    "creature_type": "Humanoid",
+    "darkvision": 0,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Hadozee Traits\nAbility Score Increase",
+      "Dexterous Feet",
+      "Glide",
+      "Hadozee Dodge"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Plasmoid",
+    "source": "AAG",
+    "creature_type": "Ooze",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Plasmoid Traits\nAbility Score Increase",
+      "Amorphous",
+      "Darkvision",
+      "Hold Breath",
+      "Natural Resilience",
+      "Shape Self"
+    ],
+    "key_features": []
+  },
+  {
+    "name": "Thri-kreen",
+    "source": "AAG",
+    "creature_type": "Monstrosity",
+    "darkvision": 60,
+    "speed": 30,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Chameleon Carapace",
+      "Darkvision",
+      "Secondary Arms",
+      "Sleepless"
+    ],
+    "key_features": [
+      "Telepathy"
+    ]
+  },
+  {
+    "name": "Leonin",
+    "source": "MOT",
+    "creature_type": "Humanoid",
+    "darkvision": 60,
+    "speed": 35,
+    "resistances": [],
+    "condition_immunities": [],
+    "innate_spells": [],
+    "has_flight": false,
+    "flight_restriction": null,
+    "natural_armor_ac": null,
+    "traits": [
+      "Darkvision",
+      "Claws",
+      "Hunter's Instincts",
+      "Daunting Roar"
+    ],
+    "key_features": []
+  }
+]
