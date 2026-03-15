@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import BuildsPage from './pages/BuildsPage'
 import SpeciesPage from './pages/SpeciesPage'
 import SpeciesDetail from './pages/SpeciesDetail'
@@ -9,22 +9,12 @@ import SpellsPage from './pages/SpellsPage'
 import CharacterSheet from './pages/CharacterSheet'
 import ScenariosPage from './pages/ScenariosPage'
 import CombatLogPage from './pages/CombatLogPage'
+import CombatViewer from './pages/CombatViewer'
+import EncounterViewer from './pages/EncounterViewer'
 
 export default function App() {
   return (
     <>
-      <header className="app-header">
-        <h1>⚔️ Lore Bard Builder</h1>
-        <nav>
-          <NavLink to="/" end>Builds</NavLink>
-          <NavLink to="/species">Species</NavLink>
-          <NavLink to="/spells">📜 Spells</NavLink>
-          <NavLink to="/scenarios">📊 Scenarios</NavLink>
-          <NavLink to="/reference">📋 Reference</NavLink>
-          <NavLink to="/compare">Compare</NavLink>
-          <NavLink to="/arena">⚔️ Arena</NavLink>
-        </nav>
-      </header>
       <Routes>
         <Route path="/" element={<BuildsPage />} />
         <Route path="/species" element={<SpeciesPage />} />
@@ -38,6 +28,8 @@ export default function App() {
         <Route path="/combat-logs" element={<CombatLogPage />} />
         <Route path="/combat-logs/:buildId" element={<CombatLogPage />} />
         <Route path="/combat-logs/:buildId/:scenarioId" element={<CombatLogPage />} />
+        <Route path="/combat-viewer" element={<CombatViewer />} />
+        <Route path="/encounter-viewer" element={<EncounterViewer />} />
       </Routes>
     </>
   )

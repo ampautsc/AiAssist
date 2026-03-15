@@ -12,7 +12,7 @@ Here is the evaluation of the species universe for "The Redeemer", focusing on h
 
 ### Satyr (Mythic Odysseys of Theros / MotM)
 *   **The Big Sell:** Magic Resistance & Fey Typing.
-*   **Pros:** You have Advantage on saving throws against ALL spells. Furthermore, you are classified as a **Fey**, not a Humanoid. This means spells that specifically target humanoids (*Charm Person, Hold Person, Dominate Person*) automatically fail against you. You also get free proficiency in Persuasion and Performance, and faster movement (35 ft).
+*   **Pros:** You have Advantage on saving throws against spells (note: MotM narrowed this to spells only, not all magical effects). Furthermore, you are classified as a **Fey**, not a Humanoid. This means spells that specifically target humanoids (*Charm Person, Hold Person, Dominate Person*) automatically fail against you. You also get free proficiency in Persuasion and Performance, and faster movement (35 ft). Note: Satyrs do NOT have darkvision.
 *   **Grifter Synergy:** You lose shapeshifting, but you become effectively immune to enemy spellcasters trying to control or lock you down. You are the ultimate anti-mage grifter.
 
 ### Yuan-Ti (Volo's Guide / MotM)

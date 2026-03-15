@@ -14,6 +14,9 @@ const LevelProgression = require('../models/LevelProgression');
 const Condition = require('../models/Condition');
 const { computeBuildStats } = require('../utils/buildCalculator');
 
+const COMBAT_LOG_DIR = path.resolve(__dirname, '../data/combat-logs');
+const COMBAT_PORTRAIT_DIR = path.resolve(__dirname, '../data/combat-portraits');
+
 // Helper: populate a build query and enrich with computed stats
 function populateBuild(query) {
   return query
@@ -40,6 +43,41 @@ function enrichBuild(build) {
     feats: computed.feats,
     overallScore: computed.overallScore,
   };
+}
+
+function safeId(id) {
+  return id.replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+function loadCombatLog(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(raw);
+}
+
+function listCombatLogs() {
+  if (!fs.existsSync(COMBAT_LOG_DIR)) return [];
+  const files = fs.readdirSync(COMBAT_LOG_DIR).filter((file) => file.endsWith('.json'));
+  const logs = [];
+  for (const file of files) {
+    try {
+      const log = loadCombatLog(path.join(COMBAT_LOG_DIR, file));
+      const rounds = log.turns?.reduce((max, turn) => Math.max(max, turn.round ?? 0), 0) ?? 0;
+      logs.push({
+        id: log.id ?? path.basename(file, '.json'),
+        title: log.title ?? path.basename(file, '.json'),
+        createdAt: log.createdAt ?? null,
+        rounds,
+        actorCount: log.actors?.length ?? 0,
+      });
+    } catch (err) {
+      console.warn('[API] Failed to read combat log:', file, err.message);
+    }
+  }
+  return logs.sort((a, b) => {
+    const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bt - at;
+  });
 }
 
 // --- SPECIES ---
@@ -218,6 +256,58 @@ router.get('/conditions', async (req, res) => {
     const conditions = await Condition.find(filter).sort({ name: 1 });
     res.json(conditions);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- COMBAT LOGS (Replay Only) ---
+router.get('/combat/logs', (req, res) => {
+  res.json(listCombatLogs());
+});
+
+router.get('/combat/logs/:id', (req, res) => {
+  const cleaned = safeId(req.params.id);
+  if (!cleaned || cleaned !== req.params.id) {
+    return res.status(400).json({ error: 'Invalid log id' });
+  }
+
+  const filePath = path.join(COMBAT_LOG_DIR, `${cleaned}.json`);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Combat log not found' });
+  }
+
+  try {
+    return res.json(loadCombatLog(filePath));
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/combat/portrait/:id', (req, res) => {
+  const cleaned = safeId(req.params.id);
+  if (!cleaned || cleaned !== req.params.id) {
+    return res.status(400).json({ error: 'Invalid portrait id' });
+  }
+
+  const extensions = ['.png', '.jpg', '.jpeg', '.webp'];
+  for (const ext of extensions) {
+    const filePath = path.join(COMBAT_PORTRAIT_DIR, `${cleaned}${ext}`);
+    if (fs.existsSync(filePath)) return res.sendFile(filePath);
+  }
+
+  const name = String(req.query.name ?? cleaned).trim();
+  const letters = name.replace(/[^a-zA-Z0-9 ]/g, '').trim().split(/\s+/).filter(Boolean);
+  const initials = (letters[0]?.[0] ?? '?') + (letters[1]?.[0] ?? '');
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">` +
+    `<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1">` +
+    `<stop offset="0%" stop-color="#1c1410"/>` +
+    `<stop offset="100%" stop-color="#2a2116"/>` +
+    `</linearGradient></defs>` +
+    `<polygon points="100,6 188,53 188,147 100,194 12,147 12,53" fill="url(#g)" stroke="#c08b2a" stroke-width="4"/>` +
+    `<text x="100" y="118" text-anchor="middle" font-family="Cinzel, serif" font-size="64" fill="#f2d7a0">${initials.toUpperCase()}</text>` +
+    `</svg>`;
+
+  res.set('Content-Type', 'image/svg+xml');
+  return res.send(svg);
 });
 
 // --- SCENARIOS (Pre-computed Simulation Results — thin read from DB) ---

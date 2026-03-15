@@ -26,6 +26,7 @@ const LORE_BARD_KNOWN = [
   'Healing Word', 'Faerie Fire', 'Dissonant Whispers',
   'Shatter', 'Invisibility', 'Silence',
   'Greater Invisibility', 'Dimension Door',
+  'Sleep', 'Silvery Barbs', 'Polymorph',
 ];
 const LORE_BARD_SLOTS = { 1: 4, 2: 3, 3: 3, 4: 2 };
 const BARD_HIT_DIE = 8;
@@ -172,6 +173,10 @@ function buildToCreature(build, overrides = {}) {
     immuneCharmed: false,
     instrumentCharmDisadvantage,
 
+    // Damage resistances/immunities from species
+    damageResistances: [...(species.resistances || [])],
+    damageImmunities: [...(species.damageImmunities || [])],
+
     // Spellcasting
     spellSaveDC: stats.spellDc,
     spellAttackBonus: profBonus + mods.cha + itemSpellAttackBonus,
@@ -252,12 +257,13 @@ function buildToCreature(build, overrides = {}) {
   }
 
   // ── Dragon Fear ───────────────────────────────────────────────────
-  // Dragon Fear feat: replace breath weapon with a terrifying roar (1/short or long rest).
+  // Dragon Fear feat: replace breath weapon with a terrifying roar.
+  // Shares the same PB-per-long-rest pool as Breath Weapon (Fizban's rules).
   // DC = 8 + profBonus + CHA mod. 30ft cone WIS save or frightened for 1 minute.
   if (hasDragonFear && isDragonborn) {
     creature.dragonFear = {
-      uses: 1,
-      max: 1,
+      uses: profBonus,
+      max: profBonus,
       dc: 8 + profBonus + mods.cha,
       save: 'wis',
       range: 30,

@@ -92,6 +92,39 @@ const TOOLS: Tool[] = [
       required: ["image_url"],
     },
   },
+  {
+    name: "generate_token",
+    description: "Generate a D&D combat token image using gpt-image-1 (OpenAI Responses API). Supports an optional reference image for style consistency across a batch. Returns base64 PNG. Preferred over generate_image for token art.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        prompt: {
+          type: "string",
+          description: "Detailed text prompt for the token image",
+        },
+        reference_image_url: {
+          type: "string",
+          description: "Optional: URL or base64 data URL of a reference image to anchor style. Use for batch consistency.",
+        },
+        input_fidelity: {
+          type: "string",
+          enum: ["low", "high"],
+          description: "How closely to follow the reference image style. Default: high",
+        },
+        quality: {
+          type: "string",
+          enum: ["low", "medium", "high"],
+          description: "Output image quality. Default: high",
+        },
+        size: {
+          type: "string",
+          enum: ["1024x1024", "1536x1024", "1024x1536"],
+          description: "Output image size. Default: 1024x1024",
+        },
+      },
+      required: ["prompt"],
+    },
+  },
 ];
 
 // Create server instance
@@ -273,6 +306,89 @@ Provide your analysis in the following JSON format:
             {
               type: "text",
               text: description,
+            },
+          ],
+        };
+      }
+
+      case "generate_token": {
+        const {
+          prompt,
+          reference_image_url,
+          input_fidelity,
+          quality: tokenQuality,
+          size: tokenSize,
+        } = args as {
+          prompt: string;
+          reference_image_url?: string;
+          input_fidelity?: "low" | "high";
+          quality?: "low" | "medium" | "high";
+          size?: "1024x1024" | "1536x1024" | "1024x1536";
+        };
+
+        if (!prompt) {
+          throw new Error("Prompt is required");
+        }
+
+        // Build content array — text prompt + optional reference image
+        const contentItems: Array<Record<string, unknown>> = [
+          { type: "input_text", text: prompt },
+        ];
+        if (reference_image_url) {
+          contentItems.push({ type: "input_image", image_url: reference_image_url });
+        }
+
+        // Build image_generation tool spec
+        const imageGenTool: Record<string, unknown> = {
+          type: "image_generation",
+          quality: tokenQuality || "high",
+          size: tokenSize || "1024x1024",
+        };
+        if (reference_image_url) {
+          imageGenTool.input_fidelity = input_fidelity || "high";
+        }
+
+        const response = await (openai as unknown as {
+          responses: {
+            create: (params: unknown) => Promise<{ output: Array<{ type: string; result?: string }> }>;
+          };
+        }).responses.create({
+          model: "gpt-image-1",
+          input: [
+            {
+              role: "user",
+              content: contentItems,
+            },
+          ],
+          tools: [imageGenTool],
+        });
+
+        // Find image generation output
+        const imageOutput = response.output?.find(
+          (item) => item.type === "image_generation_call"
+        );
+
+        if (!imageOutput || !imageOutput.result) {
+          throw new Error("No image returned from gpt-image-1");
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  success: true,
+                  base64_png: imageOutput.result,
+                  model: "gpt-image-1",
+                  quality: tokenQuality || "high",
+                  size: tokenSize || "1024x1024",
+                  has_reference: !!reference_image_url,
+                  original_prompt: prompt,
+                },
+                null,
+                2
+              ),
             },
           ],
         };

@@ -223,16 +223,27 @@ function processSpecies(raw) {
 const MANUAL_FIXES = {
   'fairy': {
     creatureType: 'Fey',
+    hasFlight: true,
+    flightRestriction: 'no medium or heavy armor',
     innateSpells: [
       { spell: 'Druidcraft', levelRequired: 1, frequency: 'at will', spellcastingAbility: 'INT/WIS/CHA' },
       { spell: 'Faerie Fire', levelRequired: 3, frequency: '1/long rest', spellcastingAbility: 'INT/WIS/CHA' },
       { spell: 'Enlarge/Reduce', levelRequired: 5, frequency: '1/long rest', spellcastingAbility: 'INT/WIS/CHA' }
+    ],
+    traitListAdd: [
+      { name: 'Flight', description: 'You have a flying speed equal to your walking speed. To use this speed, you can\'t be wearing medium or heavy armor.' },
+      { name: 'Fairy Magic', description: 'You know the Druidcraft cantrip. Starting at 3rd level, you can cast Faerie Fire with this trait. Starting at 5th level, you can cast Enlarge/Reduce with this trait. Once you cast Faerie Fire or Enlarge/Reduce with this trait, you can\'t cast that spell with it again until you finish a long rest. You can also cast either of those spells using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for these spells.' }
     ]
   },
   'satyr': {
     creatureType: 'Fey',
-    darkvision: 60,
+    darkvision: 0,
+    speed: { walk: 35 },
     resistances: [],
+    traitListRemove: ['Fey'],
+    naturalWeapons: [
+      { name: 'Ram', damage: '1d6 + STR bludgeoning', description: 'Unarmed strike with horns.' }
+    ],
     traitListAdd: [
       { name: 'Magic Resistance', description: 'You have advantage on saving throws against spells.' },
       { name: 'Mirthful Leaps', description: 'Whenever you make a long or high jump, you can roll a d8 and add the number to the number of feet you cover, even when making a standing jump. This extra distance costs movement as normal.' },
@@ -244,7 +255,8 @@ const MANUAL_FIXES = {
     creatureType: 'Humanoid',
     darkvision: 60,
     resistances: ['poison'],
-    conditionImmunities: ['poisoned'],
+    conditionImmunities: [],
+    traitListRemove: ['Innate Spellcasting', 'Poison Immunity'],
     innateSpells: [
       { spell: 'Poison Spray', levelRequired: 1, frequency: 'at will', spellcastingAbility: 'INT/WIS/CHA' },
       { spell: 'Animal Friendship', levelRequired: 3, frequency: 'PB/long rest', spellcastingAbility: 'INT/WIS/CHA', notes: 'snakes only' },
@@ -272,8 +284,8 @@ const MANUAL_FIXES = {
   'firbolg': {
     creatureType: 'Humanoid',
     innateSpells: [
-      { spell: 'Detect Magic', levelRequired: 1, frequency: 'PB/long rest', spellcastingAbility: 'INT/WIS/CHA' },
-      { spell: 'Disguise Self', levelRequired: 1, frequency: 'PB/long rest', spellcastingAbility: 'INT/WIS/CHA' }
+      { spell: 'Detect Magic', levelRequired: 1, frequency: '1/long rest', spellcastingAbility: 'INT/WIS/CHA' },
+      { spell: 'Disguise Self', levelRequired: 1, frequency: '1/long rest', spellcastingAbility: 'INT/WIS/CHA' }
     ],
     traitListAdd: [
       { name: 'Hidden Step', description: 'As a bonus action, you can magically turn invisible until the start of your next turn or until you attack, deal damage, or force someone to make a saving throw. You can use this trait a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.' },
@@ -306,8 +318,10 @@ const MANUAL_FIXES = {
   'goblin': {
     creatureType: 'Humanoid',
     darkvision: 60,
+    speed: { walk: 30 },
     resistances: [],
     damageImmunities: [],
+    traitListRemove: ['Speak with Small Beasts', 'Agile Climber', 'Grit', 'Tribe'],
     traitListAdd: [
       { name: 'Fey Ancestry', description: 'You have advantage on saving throws you make to avoid or end the charmed condition on yourself.' },
       { name: 'Fury of the Small', description: 'When you damage a creature with an attack or a spell and the creature\'s size is larger than yours, you can cause the attack or spell to deal extra damage to the creature. The extra damage equals your proficiency bonus. You can use this trait a number of times equal to your proficiency bonus, regaining all expended uses when you finish a long rest.' },
@@ -336,6 +350,7 @@ const MANUAL_FIXES = {
     darkvision: 60,
     hasFlight: false, // Celestial Revelation (Radiant Soul) gives 1 min flight 1/long rest — NOT permanent
     resistances: ['necrotic', 'radiant'],
+    traitListRemove: ['Necrotic Shroud', 'Radiant Consumption', 'Radiant Soul'],
     innateSpells: [
       { spell: 'Light', levelRequired: 1, frequency: 'at will', spellcastingAbility: 'CHA' }
     ],
@@ -343,19 +358,20 @@ const MANUAL_FIXES = {
       { name: 'Celestial Resistance', description: 'You have resistance to necrotic damage and radiant damage.' },
       { name: 'Healing Hands', description: 'As an action, you can touch a creature and roll a number of d4s equal to your proficiency bonus. The creature regains hit points equal to the total rolled. Once you use this trait, you can\'t use it again until you finish a long rest.' },
       { name: 'Light Bearer', description: 'You know the Light cantrip. Charisma is your spellcasting ability for it.' },
-      { name: 'Celestial Revelation', description: 'When you reach 3rd level, choose one revelation: Necrotic Shroud, Radiant Consumption, or Radiant Soul. You can transform as a bonus action (1/long rest or spell slot), gaining benefits for 1 minute.' }
+      { name: 'Celestial Revelation', description: 'When you reach 3rd level, choose one of the following revelation options. You can use a bonus action to unleash the celestial energy within yourself, gaining the benefits of that revelation. Your transformation lasts for 1 minute or until you end it as a bonus action. Once you transform, you can\'t do so again until you finish a long rest. Necrotic Shroud: creatures other than allies within 10 ft that can see you must succeed on a CHA save (DC 8 + prof + CHA mod) or be frightened until end of your next turn; once per turn deal extra necrotic damage equal to your proficiency bonus. Radiant Consumption: shed bright light 10 ft / dim 10 ft; at end of each turn, each creature within 10 ft takes radiant damage equal to your proficiency bonus; once per turn deal extra radiant damage equal to your proficiency bonus. Radiant Soul: gain flying speed equal to walking speed; once per turn deal extra radiant damage equal to your proficiency bonus.' }
     ]
   },
   'changeling': {
-    creatureType: 'Humanoid',
+    creatureType: 'Fey',
+    traitListRemove: ['Change Appearance', 'Unsettling Visage', 'Divergent Persona'],
     traitListAdd: [
-      { name: 'Shapechanger', description: 'As an action, you can change your appearance and your voice. You determine the specifics of the changes. You can\'t adjust your body size or change into a different creature type. You can also alter your height, weight, facial features, sound of your voice, hair length, coloration, and distinguishing characteristics.' },
-      { name: 'Changeling Instincts', description: 'You gain proficiency with two of the following skills of your choice: Deception, Insight, Intimidation, Performance, or Persuasion.' }
+      { name: 'Shapechanger', description: 'As an action, you can change your appearance and your voice. You determine the specifics of the changes. You can\'t duplicate the appearance of a creature you\'ve never seen, and you revert to your natural form if you die. You can make yourself appear as a member of another race, though none of your game statistics change. You can also adjust your height and weight between Medium and Small size categories.' },
+      { name: 'Changeling Instincts', description: 'You gain proficiency with two of the following skills of your choice: Deception, Insight, Intimidation, or Persuasion.' }
     ],
-    skillChoices: { count: 2, from: ['Deception', 'Insight', 'Intimidation', 'Performance', 'Persuasion'] }
+    skillChoices: { count: 2, from: ['Deception', 'Insight', 'Intimidation', 'Persuasion'] }
   },
   'owlin': {
-    source: 'SJ',
+    source: 'SCC',
     sourceFull: 'Strixhaven: A Curriculum of Chaos',
     creatureType: 'Humanoid',
     darkvision: 120,
@@ -383,12 +399,12 @@ const MANUAL_FIXES = {
   'warforged': {
     source: 'ERLW',
     sourceFull: 'Eberron: Rising from the Last War',
-    creatureType: 'Construct',
+    creatureType: 'Humanoid',
     conditionImmunities: ['disease'],
     traitListAdd: [
       { name: 'Constructed Resilience', description: 'You have advantage on saving throws against being poisoned, and you have resistance to poison damage. You don\'t need to eat, drink, or breathe. You are immune to disease. You don\'t need to sleep, and magic can\'t put you to sleep.' },
       { name: 'Sentry\'s Rest', description: 'When you take a long rest, you must spend at least six hours in an inactive, motionless state, rather than sleeping. In this state, you appear inert, but it doesn\'t render you unconscious, and you can see and hear as normal.' },
-      { name: 'Integrated Protection', description: 'Your body has built-in defensive layers, which can be enhanced with armor: AC = 11 + your Dexterity modifier + your proficiency bonus. You can don only armor you\'re proficient with, and it takes 1 hour to don or doff armor.' },
+      { name: 'Integrated Protection', description: 'You gain a +1 bonus to Armor Class. You can don only armor you are proficient with, and it must be incorporated into your body over the course of 1 hour, during which you remain in contact with the armor. To doff armor, you must spend 1 hour removing it. You can rest while donning or doffing armor in this way. While you live, the armor incorporated into your body can\'t be removed against your will.' },
       { name: 'Specialized Design', description: 'You gain one skill proficiency and one tool proficiency of your choice.' }
     ],
     resistances: ['poison']
@@ -412,6 +428,7 @@ const MANUAL_FIXES = {
     creatureType: 'Humanoid',
     darkvision: 60,
     traitListAdd: [
+      { name: 'Ancestral Legacy', description: 'If you replace a race with this lineage, you can keep the following elements of that race: any skill proficiencies you gained from it and any climbing, flying, or swimming speed you gained from it. If you don\'t keep any of those elements or you choose this lineage at character creation, you gain proficiency in two skills of your choice.' },
       { name: 'Vampiric Bite', description: 'Your fanged bite is a natural weapon that deals 1d4 + Constitution modifier piercing damage. You gain a bonus equal to the piercing damage to your next ability check or attack roll within the same turn (once per turn). When you use your bite against a willing creature or one grappled/incapacitated/restrained, you can empower yourself for 1 minute: climbing speed equal to walking speed, and bonus to Constitution ability checks and saves equal to Constitution modifier (minimum +1). PB times per long rest.' },
       { name: 'Spider Climb', description: 'You have a climbing speed equal to your walking speed. In addition, at 3rd level, you can move up, down, and across vertical surfaces and upside down along ceilings, while leaving your hands free.' },
       { name: 'Deathless Nature', description: 'You don\'t need to breathe.' }
@@ -425,13 +442,16 @@ const MANUAL_FIXES = {
       { spell: 'Hex', levelRequired: 1, frequency: '1/long rest', spellcastingAbility: 'INT/WIS/CHA' }
     ],
     traitListAdd: [
-      { name: 'Eerie Token', description: 'You can harmlessly remove a lock of your hair, a ## tooth, or a fingernail and imbue it with magic. While the token is imbued, you can telepathically speak to and hear from it within 10 miles. You can also cast it as a one-use focus for spells.' },
+      { name: 'Ancestral Legacy', description: 'If you replace a race with this lineage, you can keep the following elements of that race: any skill proficiencies you gained from it and any climbing, flying, or swimming speed you gained from it. If you don\'t keep any of those elements or you choose this lineage at character creation, you gain proficiency in two skills of your choice.' },
+      { name: 'Eerie Token', description: 'You can harmlessly remove a lock of your hair, a tooth, or a fingernail and imbue it with magic. While the token is imbued, you can telepathically speak to and hear from it within 10 miles. You can also cast it as a one-use focus for spells.' },
       { name: 'Hex Magic', description: 'You can cast Disguise Self and Hex once each per long rest. Intelligence, Wisdom, or Charisma is your spellcasting ability.' }
     ]
   },
   'reborn': {
     creatureType: 'Humanoid',
+    darkvision: 60,
     traitListAdd: [
+      { name: 'Ancestral Legacy', description: 'If you replace a race with this lineage, you can keep the following elements of that race: any skill proficiencies you gained from it and any climbing, flying, or swimming speed you gained from it. If you don\'t keep any of those elements or you choose this lineage at character creation, you gain proficiency in two skills of your choice.' },
       { name: 'Deathless Nature', description: 'You have advantage on saving throws against disease and being poisoned, and you have resistance to poison damage. You don\'t need to eat, drink, or breathe. You don\'t need to sleep and are immune to magic that would put you to sleep. During a long rest, you enter a trancelike state for 4 hours.' },
       { name: 'Knowledge from a Past Life', description: 'When you make an ability check that uses a skill, you can roll a d6 and add the number rolled to the check. You can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.' }
     ],
@@ -474,6 +494,202 @@ const MANUAL_FIXES = {
     // Simic Hybrid Carapace is +1 AC bonus (5th level enhancement), NOT a natural armor
     // base AC of 5. The scraper incorrectly parsed it as naturalArmorAC.
     naturalArmorAC: null
+  },
+
+  // ── MotM SPECIES — Trait contamination cleanup ────────────────────────
+  // Many MotM species had traits from older sources (VGtM, MToF, ERLW, GGtR,
+  // SCAG) contaminating their data because the scraper combined all source
+  // sections into a single entry.
+
+  'centaur': {
+    // MotM Centaur: Fey type, speed 40, Charge, Equine Build, Hooves, Natural Affinity.
+    // GGtR contamination: 'Fey' (creature-type-as-trait), 'Survivor'.
+    creatureType: 'Fey',
+    speed: { walk: 40 },
+    traitListRemove: ['Fey', 'Survivor'],
+    naturalWeapons: [
+      { name: 'Hooves', damage: '1d6 + STR bludgeoning', description: 'Unarmed strike with hooves.' }
+    ]
+  },
+  'lizardfolk': {
+    // MotM Lizardfolk: Bite, Hold Breath, Hungry Jaws, Natural Armor (AC 13+DEX),
+    // Nature's Intuition. No darkvision. VGtM contamination: Cunning Artisan, Hunter's Lore.
+    creatureType: 'Humanoid',
+    naturalArmorAC: 13,
+    traitListRemove: ['Cunning Artisan', "Hunter's Lore"],
+    naturalWeapons: [
+      { name: 'Bite', damage: '1d6 + STR slashing', description: 'Unarmed strike with fanged maw.' }
+    ]
+  },
+  'shifter': {
+    // MotM Shifter: Bestial Instincts, DV 60, Shifting (PB/long rest, choose subtype).
+    // ERLW contamination: 'Keen Senses' (Perception prof, not in MotM).
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    traitListRemove: ['Keen Senses']
+  },
+  'kobold': {
+    // MotM Kobold: DV 60, Draconic Cry (PB/long rest), Kobold Legacy (choose one).
+    // VGtM contamination: 'Grovel, Cower, and Beg', 'Pack Tactics'.
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    traitListRemove: ['Grovel, Cower, and Beg', 'Pack Tactics']
+  },
+  'kenku': {
+    // MotM Kenku: Expert Duplication, Kenku Recall (PB/long rest), Mimicry.
+    // VGtM contamination: 'Expert Forgery', 'Kenku Training'.
+    creatureType: 'Humanoid',
+    traitListRemove: ['Expert Forgery', 'Kenku Training']
+  },
+  'hobgoblin': {
+    // MotM Hobgoblin: DV 60, Fey Ancestry, Fey Gift (Help as BA, PB/long rest),
+    // Fortune from the Many (PB/long rest). VGtM contamination: 'Martial Training'.
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    traitListRemove: ['Martial Training']
+  },
+  'githyanki': {
+    // MotM Githyanki: Astral Knowledge, Githyanki Psionics (Mage Hand, Jump, Misty Step),
+    // Psychic Resilience (resist psychic). MToF contamination: Decadent Mastery,
+    // Martial Prodigy (armor/weapon profs), Gith Tables, Fidelity.
+    creatureType: 'Humanoid',
+    resistances: ['psychic'],
+    traitListRemove: ['Decadent Mastery', 'Martial Prodigy', 'Gith Tables', 'Fidelity']
+  },
+  'githzerai': {
+    // MotM Githzerai: Githzerai Psionics (Mage Hand, Shield, Detect Thoughts),
+    // Mental Discipline (adv vs charmed/frightened), Psychic Resilience.
+    // MToF contamination: Gith Tables, Faith, Courage, Duty (flavor headings).
+    creatureType: 'Humanoid',
+    resistances: ['psychic'],
+    traitListRemove: ['Gith Tables', 'Faith', 'Courage', 'Duty']
+  },
+  'sea-elf': {
+    // MotM Sea Elf: Child of the Sea (swim=walk, breathe air+water), Fey Ancestry,
+    // Friend of the Sea, Keen Senses, Trance. MToF contamination: 'Sea Elf Training'.
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    resistances: [],
+    traitListRemove: ['Sea Elf Training']
+  },
+  'deep-gnome': {
+    // MotM Deep Gnome: DV 120 (Superior), Gift of the Svirfneblin (Nondetection at will
+    // + 1/long rest spell), Gnomish Magic Resistance (adv INT/WIS/CHA saves vs spells),
+    // Svirfneblin Camouflage (adv Stealth in rocky terrain).
+    // SCAG/MToF contamination: 'Gnome Cunning' (duplicate of Gnomish Magic Resistance),
+    // 'Stone Camouflage' (duplicate of Svirfneblin Camouflage).
+    creatureType: 'Humanoid',
+    darkvision: 120,
+    traitListRemove: ['Gnome Cunning', 'Stone Camouflage']
+  },
+  'duergar': {
+    // MotM Duergar: DV 120, Duergar Magic (Enlarge/Reduce, Invisibility), Dwarven
+    // Resilience (adv poison saves + resist poison), Psionic Fortitude (adv vs
+    // charmed/stunned). SCAG contamination: Duergar Resilience (overlaps Psionic
+    // Fortitude), Dwarven Combat Training, Tool Proficiency, Stonecunning.
+    creatureType: 'Humanoid',
+    darkvision: 120,
+    resistances: ['poison'],
+    traitListRemove: ['Duergar Resilience', 'Dwarven Combat Training', 'Tool Proficiency', 'Stonecunning']
+  },
+  'goliath': {
+    // MotM Goliath: Little Giant (Powerful Build + Athletics prof), Mountain Born
+    // (cold resistance + altitude acclimation), Stone's Endurance (1d12+CON reduce,
+    // PB/long rest). VGtM contamination: 'Natural Athlete' and 'Powerful Build'
+    // (both folded into Little Giant in MotM).
+    creatureType: 'Humanoid',
+    resistances: ['cold'],
+    traitListRemove: ['Natural Athlete', 'Powerful Build']
+  },
+  'tabaxi': {
+    // MotM Tabaxi: DV 60, Cat's Claws (1d6+STR, climb=walk speed), Cat's Talent
+    // (Perception + Stealth prof), Feline Agility. VGtM had climb 20 and 1d4 claws;
+    // MotM upgraded climb to = walking speed (30) and claws to 1d6.
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    speed: { walk: 30, climb: 30 },
+    naturalWeapons: [
+      { name: 'Claws', damage: '1d6 + STR slashing', description: 'Unarmed strike with claws.' }
+    ]
+  },
+  'triton': {
+    // MotM Triton: DV 60, Amphibious, Control Air and Water (innate spells),
+    // Emissary of the Sea, Guardian of the Depths (cold resist + deep water).
+    // VGtM contamination: 'Guardians of the Depths' (plural, different from MotM singular).
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    resistances: ['cold'],
+    traitListRemove: ['Guardians of the Depths']
+  },
+
+  // ── NON-MotM SPECIES — Data fixes ────────────────────────────────────
+  'autognome': {
+    // Spelljammer: Construct type, AC 13+DEX, resist poison, immune disease.
+    // Scraper contamination: 'Ram' (from another species).
+    source: 'SJ',
+    sourceFull: 'Spelljammer: Adventures in Space',
+    creatureType: 'Construct',
+    naturalArmorAC: 13,
+    resistances: ['poison'],
+    conditionImmunities: ['disease'],
+    traitListRemove: ['Ram'],
+    traitListAdd: [
+      { name: 'Armored Casing', description: 'You are encased in a thin metal or some other durable material. While you aren\'t wearing armor, your base Armor Class is 13 + your Dexterity modifier.' },
+      { name: 'Built for Success', description: 'You can add a d4 to one attack roll, ability check, or saving throw you make, and you can do so after seeing the d20 roll but before the effects of the roll are resolved. You can use this trait a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.' },
+      { name: 'Healing Machine', description: 'If the Mending spell is cast on you, you can spend a Hit Die, roll it, and regain a number of hit points equal to the roll plus your Constitution modifier (minimum of 1 hit point). In addition, you benefit from Cure Wounds, Healing Word, Mass Cure Wounds, Mass Healing Word, and Spare the Dying.' },
+      { name: 'Mechanical Nature', description: 'You have resistance to poison damage and immunity to disease, and you have advantage on saving throws against being paralyzed or poisoned. You don\'t need to eat, drink, or breathe.' },
+      { name: 'Sentry\'s Rest', description: 'When you take a long rest, you spend at least 6 hours in an inactive, motionless state, instead of sleeping. In this state, you appear inert, but you remain conscious.' },
+      { name: 'Specialized Design', description: 'You gain proficiency with two tools of your choice, selected from the Player\'s Handbook.' }
+    ]
+  },
+  'giff': {
+    // Spelljammer: Humanoid, swim=walk, Astral Spark, Firearms Mastery, Hippo Build.
+    // Scraper failed to extract any traits — adding them manually.
+    source: 'SJ',
+    sourceFull: 'Spelljammer: Adventures in Space',
+    creatureType: 'Humanoid',
+    speed: { walk: 30, swim: 30 },
+    traitListAdd: [
+      { name: 'Astral Spark', description: 'When you hit a target with a simple or martial weapon, you can cause the target to take extra force damage equal to your proficiency bonus. You can use this trait a number of times equal to your proficiency bonus, no more than once per turn, and you regain all expended uses when you finish a long rest.' },
+      { name: 'Firearms Mastery', description: 'You have proficiency with all firearms and ignore the loading property of any firearm. Attacking at long range with a firearm doesn\'t impose disadvantage on your attack roll.' },
+      { name: 'Hippo Build', description: 'You have advantage on Strength-based ability checks and Strength saving throws. In addition, you count as one size larger when determining your carrying capacity and the weight you can push, drag, or lift.' }
+    ]
+  },
+  'leonin': {
+    // Mythic Odysseys of Theros: DV 60, speed 35, Claws, Hunter's Instincts, Daunting Roar.
+    source: 'MOoT',
+    sourceFull: 'Mythic Odysseys of Theros',
+    creatureType: 'Humanoid',
+    darkvision: 60,
+    speed: { walk: 35 },
+    naturalWeapons: [
+      { name: 'Claws', damage: '1d4 + STR slashing', description: 'Unarmed strike with claws.' }
+    ]
+  },
+  'loxodon': {
+    // Guildmasters' Guide to Ravnica: Natural Armor 12+CON.
+    source: 'GGtR',
+    sourceFull: "Guildmasters' Guide to Ravnica",
+    creatureType: 'Humanoid',
+    naturalArmorAC: 12
+  },
+  'plasmoid': {
+    // Spelljammer: Ooze type, DV 60, Amorphous, Hold Breath, Natural Resilience
+    // (resist poison + adv poison saves), Shape Self.
+    source: 'SJ',
+    sourceFull: 'Spelljammer: Adventures in Space',
+    creatureType: 'Ooze',
+    darkvision: 60,
+    resistances: ['poison']
+  },
+  'thri-kreen': {
+    // Spelljammer: Monstrosity type, DV 60, Chameleon Carapace (AC 13+DEX),
+    // Secondary Arms, Sleepless, Thri-kreen Telepathy.
+    source: 'SJ',
+    sourceFull: 'Spelljammer: Adventures in Space',
+    creatureType: 'Monstrosity',
+    darkvision: 60,
+    naturalArmorAC: 13
   }
 };
 

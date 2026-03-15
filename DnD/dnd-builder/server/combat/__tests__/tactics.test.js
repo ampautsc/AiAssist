@@ -238,25 +238,59 @@ describe('evalOpeningAoEDisable', () => {
 });
 
 describe('evalConcentrationAllDisabled', () => {
-  it('triggers when concentrating and all enemies disabled', () => {
+  it('prefers Dissonant Whispers over VM for higher damage', () => {
     const bard = makeBard();
     bard.concentrating = 'Hypnotic Pattern';
     const f1 = makeFanatic();
     f1.conditions.push('incapacitated', 'charmed_hp');
+    f1.currentHP = 30;
     const f2 = makeFanatic();
     f2.conditions.push('incapacitated', 'charmed_hp');
+    f2.currentHP = 10; // weakest
     const ctx = makeContext(bard, [f1, f2]);
 
     const result = tactics.evalConcentrationAllDisabled(ctx);
     assert.ok(result);
-    assert.equal(result.action.type, 'dodge');
-    assert.ok(result.reasoning.includes('disabled'));
+    assert.equal(result.action.spell, 'Dissonant Whispers');
+    assert.equal(result.action.target.id, f2.id); // targets the weakest
+    assert.ok(result.reasoning.includes('DW'));
+  });
+
+  it('falls back to VM when all spell slots are exhausted', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    bard.spellSlots = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    const f1 = makeFanatic();
+    f1.conditions.push('incapacitated', 'charmed_hp');
+    f1.currentHP = 10;
+    const ctx = makeContext(bard, [f1]);
+
+    const result = tactics.evalConcentrationAllDisabled(ctx);
+    assert.ok(result);
+    assert.equal(result.action.spell, 'Vicious Mockery');
+    assert.ok(result.reasoning.includes('VM'));
   });
 
   it('does NOT trigger when active enemies remain', () => {
     const bard = makeBard();
     bard.concentrating = 'Hypnotic Pattern';
     const ctx = makeContext(bard, [makeFanatic()]);
+    assert.equal(tactics.evalConcentrationAllDisabled(ctx), null);
+  });
+
+  it('does NOT trigger when not concentrating', () => {
+    const bard = makeBard();
+    const f1 = makeFanatic();
+    f1.conditions.push('incapacitated', 'charmed_hp');
+    const ctx = makeContext(bard, [f1]);
+    assert.equal(tactics.evalConcentrationAllDisabled(ctx), null);
+  });
+
+  it('returns null when no helpless enemies (all dead)', () => {
+    const bard = makeBard();
+    bard.concentrating = 'Hypnotic Pattern';
+    // No enemies at all
+    const ctx = makeContext(bard, []);
     assert.equal(tactics.evalConcentrationAllDisabled(ctx), null);
   });
 });
@@ -421,6 +455,30 @@ describe('evalCastHoldPerson', () => {
     bard.concentrating = 'Hex';
     const ctx = makeContext(bard, [makeFanatic()]);
     assert.equal(tactics.evalCastHoldPerson(ctx), null);
+  });
+
+  it('does NOT trigger against non-humanoid enemies', () => {
+    const bard = makeBard();
+    const zombie = createCreature('zombie', {
+      id: `zombie-${++testId}`,
+      position: { x: 2, y: 0 },
+    });
+    const ctx = makeContext(bard, [zombie]);
+    assert.equal(tactics.evalCastHoldPerson(ctx), null, 'Hold Person should not target undead');
+  });
+
+  it('selects humanoid target when mixed with non-humanoids', () => {
+    const bard = makeBard();
+    const zombie = createCreature('zombie', {
+      id: `zombie-${++testId}`,
+      position: { x: 2, y: 0 },
+    });
+    const fanatic = makeFanatic();
+    const ctx = makeContext(bard, [zombie, fanatic]);
+    const result = tactics.evalCastHoldPerson(ctx);
+    assert.ok(result, 'Should target the humanoid fanatic');
+    assert.equal(result.action.spell, 'Hold Person');
+    assert.equal(result.action.target.id, fanatic.id, 'Should target the humanoid, not the zombie');
   });
 });
 
@@ -859,14 +917,15 @@ describe('makeDecision', () => {
     assert.equal(decision.action.spell, 'Greater Invisibility');
   });
 
-  it('runs lore_bard — concentrating with all disabled → dodge', () => {
+  it('runs lore_bard — concentrating with all disabled → DW weakest', () => {
     const bard = makeBard();
     bard.concentrating = 'Hypnotic Pattern';
     const f1 = makeFanatic();
     f1.conditions.push('incapacitated', 'charmed_hp');
     const decision = tactics.makeDecision('lore_bard', bard, [bard, f1], 3);
 
-    assert.equal(decision.action.type, 'dodge');
+    assert.equal(decision.action.spell, 'Dissonant Whispers');
+    assert.equal(decision.action.target.id, f1.id);
   });
 
   it('runs lore_bard — merges self-heal bonus action', () => {
@@ -1180,9 +1239,10 @@ describe('evalDragonFear', () => {
     assert.ok(result.action.aoeCenter, 'should return aoeCenter for engine-resolved targeting');
   });
 
-  it('does not trigger with 0 dragonFear uses', () => {
+  it('does not trigger with 0 dragonFear uses (shared breath pool exhausted)', () => {
     const bard = makeBard({ position: { x: 0, y: 0 } });
     bard.dragonFear.uses = 0;
+    bard.breathWeapon.uses = 0;  // shared PB pool
     const f1 = makeFanatic({ position: { x: 3, y: 0 } });
     const f2 = makeFanatic({ position: { x: 4, y: 0 } });
     const ctx = makeContext(bard, [f1, f2]);
@@ -1647,3 +1707,107 @@ describe('evalAttackHelpless', () => {
       `Should target active enemy first, not helpless. Got: ${decision.reasoning}`);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG FIX: evalOffensiveDissonantWhispers — works with multiple enemies
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('evalOffensiveDissonantWhispers', () => {
+  it('triggers when there is one active enemy', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const ctx = makeContext(bard, [f1])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.ok(result, 'Should suggest DW with 1 enemy')
+    assert.equal(result.action.spell, 'Dissonant Whispers')
+  })
+
+  it('triggers when there are multiple active enemies', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const f2 = makeFanatic({ position: { x: 7, y: 0 } })
+    const ctx = makeContext(bard, [f1, f2])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.ok(result, 'Should suggest DW with 2+ enemies')
+    assert.equal(result.action.spell, 'Dissonant Whispers')
+  })
+
+  it('does NOT trigger when concentrating', () => {
+    const bard = makeBard()
+    bard.concentrating = 'Hypnotic Pattern'
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const ctx = makeContext(bard, [f1])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.equal(result, null, 'Should not trigger when concentrating')
+  })
+
+  it('does NOT trigger with zero enemies', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    const ctx = makeContext(bard, [])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.equal(result, null, 'Should not trigger with no enemies')
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPELL UPCASTING — findLowestAvailableSlot + evaluator slot selection
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('findLowestAvailableSlot', () => {
+  it('returns minLevel when that slot is available', () => {
+    assert.equal(tactics.findLowestAvailableSlot({ 1: 2, 2: 1, 3: 1 }, 1), 1)
+  })
+
+  it('returns next available slot when minLevel is exhausted', () => {
+    assert.equal(tactics.findLowestAvailableSlot({ 1: 0, 2: 0, 3: 1 }, 1), 3)
+  })
+
+  it('returns null when all slots are exhausted', () => {
+    assert.equal(tactics.findLowestAvailableSlot({ 1: 0, 2: 0, 3: 0 }, 1), null)
+  })
+
+  it('returns null when spellSlots is null', () => {
+    assert.equal(tactics.findLowestAvailableSlot(null, 1), null)
+  })
+})
+
+describe('evalOffensiveDissonantWhispers upcasting', () => {
+  it('upcasts DW when level 1 slots are gone but level 2 available', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    bard.spellSlots = { 1: 0, 2: 1, 3: 1, 4: 1 }
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const ctx = makeContext(bard, [f1])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.ok(result, 'Should still suggest DW')
+    assert.equal(result.action.level, 2, 'Should upcast to level 2')
+  })
+
+  it('uses level 1 when available (lowest slot first)', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    bard.spellSlots = { 1: 1, 2: 1, 3: 1, 4: 1 }
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const ctx = makeContext(bard, [f1])
+    const result = tactics.evalOffensiveDissonantWhispers(ctx)
+    assert.ok(result, 'Should suggest DW')
+    assert.equal(result.action.level, 1, 'Should use level 1 (lowest)')
+  })
+})
+
+describe('evalOffensiveShatter upcasting', () => {
+  it('upcasts Shatter when level 2 slots are gone but level 3 available', () => {
+    const bard = makeBard()
+    bard.concentrating = null
+    bard.spellSlots = { 1: 0, 2: 0, 3: 1, 4: 1 }
+    const f1 = makeFanatic({ position: { x: 6, y: 0 } })
+    const f2 = makeFanatic({ position: { x: 7, y: 0 } })
+    const ctx = makeContext(bard, [f1, f2])
+    const result = tactics.evalOffensiveShatter(ctx)
+    assert.ok(result, 'Should still suggest Shatter')
+    assert.equal(result.action.level, 3, 'Should upcast to level 3')
+  })
+})

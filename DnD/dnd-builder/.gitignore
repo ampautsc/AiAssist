@@ -1,0 +1,15 @@
+# LLM model files — large binary downloads, not committed to source control
+# Run: node scripts/download-model.js to download locally
+models/*.gguf
+models/*.bin
+models/*.safetensors
+
+# node_modules (redundant safeguard)
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.local

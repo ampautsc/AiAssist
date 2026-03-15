@@ -223,6 +223,26 @@ const SPELLS = {
     sustainedEffect: true,    // lasts multiple rounds, bonus action each turn
   },
 
+  'Shatter': {
+    name: 'Shatter',
+    level: 2,
+    school: 'evocation',
+    castingTime: 'action',
+    range: 60,
+    duration: 0,
+    concentration: false,
+    targeting: { type: 'area', shape: 'sphere', radius: 10 },
+    save: { ability: 'con', negatesAll: false },     // half damage on success
+    attack: null,
+    damage: { dice: '3d8', type: 'thunder' },
+    effects: [],
+    selfEffects: [],
+    onConcentrationEnd: [],
+    counterSpellable: true,
+    tags: ['damage', 'aoe'],
+    notes: 'CON save. 3d8 thunder (half on success). 10ft radius sphere.',
+  },
+
   // ═══════════════════════════════════════════════
   // 3RD LEVEL
   // ═══════════════════════════════════════════════
@@ -700,7 +720,261 @@ const SPELLS = {
     tags: ['damage', 'aoe', 'control'],
     notes: 'CON save. 2d8 thunder (half on success). Pushed 10ft on fail.',
   },
+
+  // ═══════════════════════════════════════════════
+  // 1ST LEVEL — BARD SPELLS
+  // ═══════════════════════════════════════════════
+
+  'Sleep': {
+    name: 'Sleep',
+    level: 1,
+    school: 'enchantment',
+    castingTime: 'action',
+    range: 90,
+    duration: 10,    // 1 minute
+    concentration: false,
+    targeting: { type: 'area', shape: 'sphere', radius: 20 },
+    save: null,       // no save — HP-based mechanic
+    attack: null,
+    damage: null,
+    effects: ['unconscious'],
+    selfEffects: [],
+    onConcentrationEnd: [],
+    counterSpellable: true,
+    tags: ['control', 'aoe', 'disable'],
+    notes: 'Roll 5d8 HP pool (7d8 at 3rd). Creatures with lowest HP first fall unconscious. No save. Undead/elves immune.',
+    special: ['hp_pool', 'lowest_hp_first', 'immune_undead', 'immune_elf'],
+    hpPool: { base: '5d8', perLevel: '2d8' },  // 5d8 at 1st, +2d8 per slot above
+  },
+
+  'Faerie Fire': {
+    name: 'Faerie Fire',
+    level: 1,
+    school: 'evocation',
+    castingTime: 'action',
+    range: 60,
+    duration: 10,    // 1 minute
+    concentration: true,
+    targeting: { type: 'area', shape: 'cube', size: 20 },
+    save: { ability: 'dex', negatesAll: true },
+    attack: null,
+    damage: null,
+    effects: ['faerie_fire'],   // grants advantage on attacks against affected
+    selfEffects: [],
+    onConcentrationEnd: ['remove_faerie_fire'],
+    counterSpellable: true,
+    tags: ['control', 'aoe', 'debuff'],
+    notes: 'DEX save or outlined in light. Attacks against affected have advantage. Invisible creatures become visible.',
+    special: ['reveals_invisible'],
+  },
+
+  'Silvery Barbs': {
+    name: 'Silvery Barbs',
+    level: 1,
+    school: 'enchantment',
+    castingTime: 'reaction',
+    range: 60,
+    duration: 0,
+    concentration: false,
+    targeting: { type: 'single' },
+    save: null,
+    attack: null,
+    damage: null,
+    effects: [],
+    selfEffects: [],
+    onConcentrationEnd: [],
+    counterSpellable: false,
+    tags: ['reaction', 'debuff'],
+    notes: 'Force a creature to reroll a d20. Grant advantage to an ally on next roll.',
+    special: ['reaction_spell', 'force_reroll'],
+  },
+
+  // ═══════════════════════════════════════════════
+  // 4TH LEVEL — BARD SPELLS
+  // ═══════════════════════════════════════════════
+
+  'Polymorph': {
+    name: 'Polymorph',
+    level: 4,
+    school: 'transmutation',
+    castingTime: 'action',
+    range: 60,
+    duration: 600,    // 1 hour = 600 rounds (effectively permanent until broken in combat)
+    concentration: true,
+    targeting: { type: 'single' },
+    save: { ability: 'wis', negatesAll: true },    // enemy targets get a WIS save
+    attack: null,
+    damage: null,
+    effects: ['polymorphed'],
+    selfEffects: [],
+    onConcentrationEnd: ['remove_polymorph'],
+    counterSpellable: true,
+    tags: ['control', 'buff', 'transmutation'],
+    notes: 'Transform a creature into a beast. On enemy: WIS save or become a sheep (1 HP). On self: no save, become T-Rex/Giant Ape/Giant Eagle.',
+    special: ['enemy_nerf', 'self_buff', 'temp_hp_beast'],
+    beastForms: {
+      enemy: { name: 'Sheep', cr: 0, maxHP: 1, ac: 10, speed: 20, str: 2, dex: 10, con: 6, weapons: [] },
+      self: [
+        // ── CR 8 ──
+        { name: 'T-Rex', cr: 8, maxHP: 136, ac: 13, speed: 50, str: 25, dex: 10, con: 19, multiattack: 2,
+          multiattackWeapons: ['Bite', 'Tail'],
+          weapons: [
+            { name: 'Bite', attackBonus: 10, damageDice: '4d12', damageBonus: 7, type: 'melee', range: 10 },
+            { name: 'Tail', attackBonus: 10, damageDice: '3d8', damageBonus: 7, type: 'melee', range: 10 },
+          ] },
+        // ── CR 7 ──
+        { name: 'Giant Ape', cr: 7, maxHP: 157, ac: 12, speed: 40, str: 23, dex: 14, con: 18, multiattack: 2,
+          multiattackWeapons: ['Fist', 'Fist'],
+          weapons: [
+            { name: 'Fist', attackBonus: 9, damageDice: '3d10', damageBonus: 6, type: 'melee', range: 10 },
+            { name: 'Rock', attackBonus: 9, damageDice: '7d6', damageBonus: 6, type: 'ranged', range: 50 },
+          ] },
+        // ── CR 6 ──
+        { name: 'Mammoth', cr: 6, maxHP: 126, ac: 13, speed: 40, str: 24, dex: 9, con: 21,
+          weapons: [
+            { name: 'Gore', attackBonus: 10, damageDice: '4d8', damageBonus: 7, type: 'melee', range: 10 },
+            { name: 'Stomp', attackBonus: 10, damageDice: '4d10', damageBonus: 7, type: 'melee', range: 5 },
+          ] },
+        // ── CR 5 ──
+        { name: 'Giant Crocodile', cr: 5, maxHP: 85, ac: 14, speed: 30, str: 21, dex: 9, con: 17, multiattack: 2,
+          weapons: [
+            { name: 'Bite', attackBonus: 8, damageDice: '3d10', damageBonus: 5, type: 'melee', range: 5 },
+            { name: 'Tail', attackBonus: 8, damageDice: '2d8', damageBonus: 5, type: 'melee', range: 10 },
+          ] },
+        { name: 'Triceratops', cr: 5, maxHP: 95, ac: 13, speed: 50, str: 22, dex: 9, con: 17,
+          weapons: [
+            { name: 'Gore', attackBonus: 9, damageDice: '4d8', damageBonus: 6, type: 'melee', range: 5 },
+            { name: 'Stomp', attackBonus: 9, damageDice: '3d10', damageBonus: 6, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Shark', cr: 5, maxHP: 126, ac: 13, speed: 0, str: 23, dex: 11, con: 21,
+          weapons: [
+            { name: 'Bite', attackBonus: 9, damageDice: '3d10', damageBonus: 6, type: 'melee', range: 5 },
+          ] },
+        // ── CR 4 ──
+        { name: 'Elephant', cr: 4, maxHP: 76, ac: 12, speed: 40, str: 22, dex: 9, con: 17,
+          weapons: [
+            { name: 'Gore', attackBonus: 8, damageDice: '3d8', damageBonus: 6, type: 'melee', range: 5 },
+            { name: 'Stomp', attackBonus: 8, damageDice: '3d10', damageBonus: 6, type: 'melee', range: 5 },
+          ] },
+        // ── CR 3 ──
+        { name: 'Giant Scorpion', cr: 3, maxHP: 52, ac: 15, speed: 40, str: 15, dex: 13, con: 15, multiattack: 3,
+          weapons: [
+            { name: 'Claw', attackBonus: 4, damageDice: '1d8', damageBonus: 2, type: 'melee', range: 5 },
+            { name: 'Sting', attackBonus: 4, damageDice: '1d10', damageBonus: 2, type: 'melee', range: 5 },
+          ] },
+        { name: 'Killer Whale', cr: 3, maxHP: 90, ac: 12, speed: 0, str: 19, dex: 10, con: 13,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '5d6', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        { name: 'Ankylosaurus', cr: 3, maxHP: 68, ac: 15, speed: 30, str: 19, dex: 11, con: 15,
+          weapons: [
+            { name: 'Tail', attackBonus: 7, damageDice: '4d6', damageBonus: 4, type: 'melee', range: 10 },
+          ] },
+        // ── CR 2 ──
+        { name: 'Giant Constrictor Snake', cr: 2, maxHP: 60, ac: 12, speed: 30, str: 19, dex: 14, con: 12,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '2d6', damageBonus: 4, type: 'melee', range: 10 },
+            { name: 'Constrict', attackBonus: 6, damageDice: '2d8', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        { name: 'Rhinoceros', cr: 2, maxHP: 45, ac: 11, speed: 40, str: 21, dex: 8, con: 15,
+          weapons: [
+            { name: 'Gore', attackBonus: 7, damageDice: '2d8', damageBonus: 5, type: 'melee', range: 5 },
+          ] },
+        { name: 'Polar Bear', cr: 2, maxHP: 42, ac: 12, speed: 40, str: 20, dex: 10, con: 16, multiattack: 2,
+          weapons: [
+            { name: 'Bite', attackBonus: 7, damageDice: '1d8', damageBonus: 5, type: 'melee', range: 5 },
+            { name: 'Claws', attackBonus: 7, damageDice: '2d6', damageBonus: 5, type: 'melee', range: 5 },
+          ] },
+        { name: 'Allosaurus', cr: 2, maxHP: 51, ac: 13, speed: 60, str: 19, dex: 13, con: 17,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '2d10', damageBonus: 4, type: 'melee', range: 5 },
+            { name: 'Claw', attackBonus: 6, damageDice: '1d8', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        { name: 'Saber-Toothed Tiger', cr: 2, maxHP: 52, ac: 12, speed: 40, str: 18, dex: 14, con: 15,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '1d10', damageBonus: 5, type: 'melee', range: 5 },
+            { name: 'Claw', attackBonus: 6, damageDice: '2d6', damageBonus: 5, type: 'melee', range: 5 },
+          ] },
+        { name: 'Plesiosaurus', cr: 2, maxHP: 68, ac: 13, speed: 20, str: 18, dex: 15, con: 16,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '3d6', damageBonus: 4, type: 'melee', range: 10 },
+          ] },
+        { name: 'Giant Elk', cr: 2, maxHP: 42, ac: 14, speed: 60, str: 19, dex: 16, con: 14,
+          weapons: [
+            { name: 'Ram', attackBonus: 6, damageDice: '2d6', damageBonus: 4, type: 'melee', range: 10 },
+            { name: 'Hooves', attackBonus: 6, damageDice: '4d8', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Boar', cr: 2, maxHP: 42, ac: 12, speed: 40, str: 17, dex: 10, con: 16,
+          weapons: [
+            { name: 'Tusk', attackBonus: 5, damageDice: '2d6', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Hunter Shark', cr: 2, maxHP: 45, ac: 12, speed: 0, str: 18, dex: 13, con: 15,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '2d8', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        // ── CR 1 ──
+        { name: 'Brown Bear', cr: 1, maxHP: 34, ac: 11, speed: 40, str: 19, dex: 10, con: 16, multiattack: 2,
+          weapons: [
+            { name: 'Bite', attackBonus: 6, damageDice: '1d8', damageBonus: 4, type: 'melee', range: 5 },
+            { name: 'Claws', attackBonus: 6, damageDice: '2d6', damageBonus: 4, type: 'melee', range: 5 },
+          ] },
+        { name: 'Dire Wolf', cr: 1, maxHP: 37, ac: 14, speed: 50, str: 17, dex: 15, con: 15,
+          weapons: [
+            { name: 'Bite', attackBonus: 5, damageDice: '2d6', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Hyena', cr: 1, maxHP: 45, ac: 12, speed: 50, str: 16, dex: 14, con: 14,
+          weapons: [
+            { name: 'Bite', attackBonus: 5, damageDice: '2d6', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Lion', cr: 1, maxHP: 26, ac: 12, speed: 50, str: 17, dex: 15, con: 13,
+          weapons: [
+            { name: 'Bite', attackBonus: 5, damageDice: '1d8', damageBonus: 3, type: 'melee', range: 5 },
+            { name: 'Claw', attackBonus: 5, damageDice: '1d6', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Tiger', cr: 1, maxHP: 37, ac: 12, speed: 40, str: 17, dex: 15, con: 14,
+          weapons: [
+            { name: 'Bite', attackBonus: 5, damageDice: '1d10', damageBonus: 3, type: 'melee', range: 5 },
+            { name: 'Claw', attackBonus: 5, damageDice: '1d8', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Spider', cr: 1, maxHP: 26, ac: 14, speed: 30, str: 14, dex: 16, con: 12,
+          weapons: [
+            { name: 'Bite', attackBonus: 5, damageDice: '1d8', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Toad', cr: 1, maxHP: 39, ac: 11, speed: 20, str: 15, dex: 13, con: 13,
+          weapons: [
+            { name: 'Bite', attackBonus: 4, damageDice: '1d10', damageBonus: 2, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Vulture', cr: 1, maxHP: 22, ac: 10, speed: 10, str: 15, dex: 10, con: 15, multiattack: 2,
+          flying: true,
+          weapons: [
+            { name: 'Beak', attackBonus: 4, damageDice: '2d4', damageBonus: 2, type: 'melee', range: 5 },
+            { name: 'Talons', attackBonus: 4, damageDice: '2d6', damageBonus: 2, type: 'melee', range: 5 },
+          ] },
+        { name: 'Giant Eagle', cr: 1, maxHP: 26, ac: 13, speed: 80, str: 16, dex: 17, con: 13, multiattack: 2,
+          flying: true,
+          weapons: [
+            { name: 'Beak', attackBonus: 5, damageDice: '1d6', damageBonus: 3, type: 'melee', range: 5 },
+            { name: 'Talons', attackBonus: 5, damageDice: '2d6', damageBonus: 3, type: 'melee', range: 5 },
+          ] },
+        { name: 'Deinonychus', cr: 1, maxHP: 26, ac: 13, speed: 40, str: 15, dex: 15, con: 14, multiattack: 3,
+          weapons: [
+            { name: 'Bite', attackBonus: 4, damageDice: '1d8', damageBonus: 2, type: 'melee', range: 5 },
+            { name: 'Claw', attackBonus: 4, damageDice: '1d8', damageBonus: 2, type: 'melee', range: 5 },
+          ] },
+      ]
+    },
+  },
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Beast form portrait URL helper — derives /portraits/beasts/{slug}.svg
+// Used by both server (TurnMenu sends beastForms to client) and client (picker)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function beastPortraitUrl(name) {
+  const slug = name.replace(/\s+/g, '-').toLowerCase()
+  return `/portraits/beasts/${slug}.svg`
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Registry API
@@ -709,6 +983,19 @@ const SPELLS = {
 function getSpell(name) {
   const spell = SPELLS[name];
   if (!spell) throw new Error(`Unknown spell: ${name}`);
+
+  // Inject portraitUrl into beast forms on access (avoids duplicating URLs in data)
+  if (spell.beastForms) {
+    const withPortrait = (f) => ({ ...f, portraitUrl: beastPortraitUrl(f.name) })
+    return {
+      ...spell,
+      beastForms: {
+        enemy: spell.beastForms.enemy ? withPortrait(spell.beastForms.enemy) : undefined,
+        self: spell.beastForms.self ? spell.beastForms.self.map(withPortrait) : undefined,
+      },
+    }
+  }
+
   return spell;
 }
 

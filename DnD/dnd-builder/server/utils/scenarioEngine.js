@@ -832,6 +832,159 @@ function runCombatEngineEvaluation(builds, options = {}) {
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// COMBAT ENGINE V2 EVALUATION (Immutable Zero-Trust Engine)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Run turn-by-turn combat simulations using the immutable v2 engine.
+ *
+ * Uses engine-v2 modules (GameState, TurnMenu, ActionResolver, EncounterRunner,
+ * TacticsAdapter) for fully validated, immutable combat simulation.
+ * Produces result entries compatible with compileEvaluationResults().
+ *
+ * @param {Object[]} builds — populated build documents
+ * @param {Object} options — { simulations: number }
+ * @returns {Object[]} allResults — compatible with compileEvaluationResults()
+ */
+function runCombatEngineV2Evaluation(builds, options = {}) {
+  const { simulateScenario, SCENARIOS: ENGINE_SCENARIOS } = require('../combat/scenarioHarnessV2');
+  const { dice } = require('../combat');
+  const fs = require('fs');
+  const path = require('path');
+  const numRuns = options.simulations || 10;
+
+  console.log(`[COMBAT ENGINE V2] Starting: ${builds.length} builds × ${ENGINE_SCENARIOS.length} scenarios × ${numRuns} sims`);
+
+  // Use random dice for real simulation
+  dice.setDiceMode('random');
+
+  // Prepare combat-logs directory
+  const logDir = path.resolve(__dirname, '../../combat-logs');
+  if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+
+  const allResults = [];
+  let completed = 0;
+  const total = builds.length * ENGINE_SCENARIOS.length;
+
+  for (const build of builds) {
+    const computed = computeBuildStats(build);
+    const abilities = detectAbilities(build);
+
+    for (const scenario of ENGINE_SCENARIOS) {
+      const simResult = simulateScenario(build, scenario, {
+        numRuns,
+        logRuns: 3,
+        verbose: false,
+      });
+
+      completed++;
+      if (completed % 50 === 0 || completed === total) {
+        console.log(`[COMBAT ENGINE V2] Progress: ${completed}/${total} (${Math.round(completed / total * 100)}%)`);
+      }
+
+      // Write combat logs to disk (first N runs that have logs)
+      const sampleLogs = simResult.runs
+        .filter(r => r.log && r.log.length > 0)
+        .map((r, idx) => ({
+          runIndex: idx,
+          winner: r.winner,
+          rounds: r.rounds,
+          bardHpPct: r.bardHpPct,
+          log: r.log,
+          analytics: r.analytics,
+          positionSnapshots: r.positionSnapshots || [],
+        }));
+
+      if (sampleLogs.length > 0) {
+        const logFile = path.join(logDir, `v2_${build._id}_${scenario.id}.json`);
+        fs.writeFileSync(logFile, JSON.stringify({
+          engine: 'v2',
+          buildId: String(build._id),
+          buildName: build.name,
+          scenarioId: scenario.id,
+          scenarioName: scenario.name,
+          numRuns,
+          winRate: simResult.winRate,
+          avgRounds: simResult.avgRounds,
+          sampleLogs,
+        }, null, 0));
+      }
+
+      // Strip logs and snapshots from runs before passing to result compilation
+      for (const run of simResult.runs) {
+        delete run.log;
+        delete run.positionSnapshots;
+      }
+
+      // Map results to dashboard format (identical to v1 mapping)
+      const winRate = simResult.winRate;
+      const avgRounds = simResult.avgRounds;
+      const avgHPPct = simResult.avgBardHpPct * 100;
+      const avgFinalHP = Math.round(simResult.avgBardHpPct * bardHP(computed.conMod));
+      const victories = simResult.runs.filter(r => r.winner === 'party').length;
+      const defeats = simResult.runs.filter(r => r.winner === 'enemy').length;
+      const stalemates = simResult.runs.filter(r => r.winner === 'draw').length;
+
+      const baseScore = (victories * 100 + stalemates * 25) / numRuns;
+      const efficiencyBonus = Math.min(20,
+        (10 - avgRounds) * 1.5 +
+        (avgHPPct / 100) * 10
+      );
+      const score = Math.max(0, Math.min(100, baseScore + efficiencyBonus));
+
+      const bestRun = simResult.runs.find(r => r.winner === 'party') || simResult.runs[0];
+
+      const survived3 = simResult.runs.filter(r => r.rounds >= 3 || r.winner === 'party').length;
+      const survived5 = simResult.runs.filter(r => r.rounds >= 5 || r.winner === 'party').length;
+      const ccValue = pct(victories / numRuns + stalemates / numRuns * 0.3);
+
+      allResults.push({
+        buildId: build._id,
+        build: build.name,
+        scenarioId: scenario.id,
+        scenario: scenario.name,
+        engine: 'v2',
+        AC: computed.finalAc,
+        DC: computed.spellDc,
+        conSave: computed.conSaveBonus,
+        advCon: computed.conSaveType === 'advantage' || computed.conSaveType === 'both',
+        hp: bardHP(computed.conMod),
+        canFly: abilities.canFly,
+        flyTurn: abilities.flyTurn,
+        flyType: abilities.flyType,
+        magicRes: abilities.magicResistance,
+        hiddenStep: abilities.hiddenStep,
+        totalFoes: scenario.foes.reduce((sum, f) => sum + f.count, 0),
+        simulations: numRuns,
+        winRate: pct(winRate),
+        victories,
+        defeats,
+        stalemates,
+        avgRounds,
+        avgFinalHP,
+        avgHPPct: Math.round(avgHPPct),
+        score: Math.round(score * 100) / 100,
+        ccPct: ccValue,
+        conc3Rounds: pct(survived3 / numRuns),
+        conc5Rounds: pct(survived5 / numRuns),
+        hpAfter5: avgFinalHP,
+        counterRisk: 0,
+        roundLog: [],
+        combatSummary: bestRun.analytics || [],
+        notes: [
+          `[v2] ${victories}W/${defeats}L/${stalemates}S in ${numRuns} sims`,
+          `Win rate: ${Math.round(winRate * 100)}%`,
+          `Avg ${avgRounds.toFixed(1)} rounds`,
+        ],
+      });
+    }
+  }
+
+  return allResults;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SIMULATION-BASED EVALUATION (Monte Carlo — OLD simulator)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -969,10 +1122,17 @@ function runSimulatedEvaluation(builds, options = {}) {
 
 function runFullEvaluation(builds, options = {}) {
   const useCombatEngine = options.useCombatEngine !== false; // Default to new combat engine
+  const useCombatEngineV2 = options.useCombatEngineV2 === true; // Immutable zero-trust engine (explicit opt-in)
   const useSimulation = options.useSimulation === true;      // Old simulator (explicit opt-in)
   
+  if (useCombatEngineV2) {
+    // V2: Immutable zero-trust combat engine
+    const allResults = runCombatEngineV2Evaluation(builds, options);
+    return compileEvaluationResults(allResults, builds);
+  }
+
   if (useCombatEngine && !useSimulation) {
-    // NEW: Full turn-by-turn combat engine (modular, tested)
+    // V1: Full turn-by-turn combat engine (modular, tested)
     const allResults = runCombatEngineEvaluation(builds, options);
     return compileEvaluationResults(allResults, builds);
   }

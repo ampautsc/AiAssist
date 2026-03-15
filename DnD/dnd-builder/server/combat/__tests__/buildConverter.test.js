@@ -834,4 +834,25 @@ describe('buildToCreature — edge cases', () => {
     assert.equal(creature.race, 'Unknown');
     assert.equal(creature.speed, 30);
   });
+
+  it('passes species damage resistances to creature', () => {
+    const build = mockGemDragonbornIronConc();
+    build.species.resistances = ['necrotic', 'radiant'];
+    const creature = buildToCreature(build);
+    assert.deepEqual(creature.damageResistances, ['necrotic', 'radiant']);
+  });
+
+  it('sets empty damageResistances when species has none', () => {
+    const build = mockGemDragonbornIronConc();
+    build.species.resistances = [];
+    const creature = buildToCreature(build);
+    assert.deepEqual(creature.damageResistances, []);
+  });
+
+  it('sets damageResistances to empty array when resistances undefined', () => {
+    const build = mockGemDragonbornIronConc();
+    delete build.species.resistances;
+    const creature = buildToCreature(build);
+    assert.deepEqual(creature.damageResistances, []);
+  });
 });
