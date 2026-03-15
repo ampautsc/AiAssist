@@ -31,7 +31,7 @@ router.get('/npcs', (_req, res) => {
 router.get('/npcs/:id', (req, res) => {
   const state = worldEngine.getNpcState(req.params.id)
   if (!state) {
-    return res.status(404).json({ error: `NPC '${req.params.id}' not found` })
+    return res.status(404).json({ error: 'NPC not found' })
   }
   res.json(state)
 })
@@ -45,7 +45,11 @@ router.post('/tick', (_req, res) => {
 // POST /api/world/start
 router.post('/start', (req, res) => {
   const { tickIntervalMs } = req.body ?? {}
-  const started = worldEngine.start(tickIntervalMs)
+  const parsedMs = tickIntervalMs !== undefined ? Number(tickIntervalMs) : undefined
+  if (parsedMs !== undefined && (isNaN(parsedMs) || parsedMs < 0)) {
+    return res.status(400).json({ error: 'tickIntervalMs must be a non-negative number' })
+  }
+  const started = worldEngine.start(parsedMs)
   if (!started) {
     return res.status(409).json({ error: 'World engine is already running' })
   }
@@ -67,7 +71,15 @@ router.post('/set-time', (req, res) => {
   if (hour === undefined && day === undefined) {
     return res.status(400).json({ error: 'Provide at least one of: hour (0-23), day (≥1)' })
   }
-  const time = worldEngine.setTime({ hour, day })
+  const parsedHour = hour !== undefined ? Number(hour) : undefined
+  const parsedDay  = day  !== undefined ? Number(day)  : undefined
+  if (parsedHour !== undefined && (isNaN(parsedHour) || parsedHour < 0 || parsedHour > 23)) {
+    return res.status(400).json({ error: 'hour must be a number between 0 and 23' })
+  }
+  if (parsedDay !== undefined && (isNaN(parsedDay) || parsedDay < 1)) {
+    return res.status(400).json({ error: 'day must be a number ≥ 1' })
+  }
+  const time = worldEngine.setTime({ hour: parsedHour, day: parsedDay })
   res.json({ time })
 })
 
