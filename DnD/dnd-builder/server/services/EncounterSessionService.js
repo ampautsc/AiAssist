@@ -22,6 +22,7 @@ const crypto = require('crypto')
 const { buildFromPersonality } = require('./CharacterContextBuilder')
 const { generateResponse }     = require('./CharacterResponseService')
 const { TRIGGER_EVENT, EMOTIONAL_STATE } = require('../llm/CharacterContextPackage')
+const worldEngine              = require('./WorldEngine')
 
 // ── Personality loading (same as characterResponses route) ────────────────────
 
@@ -170,10 +171,14 @@ async function createEncounter(params) {
     })
   }
 
+  const engineTime = worldEngine.time
+
   const wc = {
     location:  worldContext.location  || 'a quiet room',
-    timeOfDay: worldContext.timeOfDay || 'afternoon',
+    timeOfDay: worldContext.timeOfDay || engineTime.timeOfDay,
     tone:      worldContext.tone      || 'conversational',
+    // Enrich with world engine data when available
+    worldTime: `${engineTime.formattedTime} on ${engineTime.dayName}, ${engineTime.season}`,
   }
 
   const id = _generateId()
@@ -296,6 +301,12 @@ async function sendMessage(encounterId, params) {
     const personality = session.personalities[templateKey]
     if (!personality) continue
 
+    // Get NPC world state from world engine for richer context
+    const npcWorldState = worldEngine.getNpcState(templateKey)
+    const worldActivityNote = npcWorldState
+      ? `${personality.name} was ${npcWorldState.activity} at ${npcWorldState.location} when approached`
+      : null
+
     try {
       // Build context package using the standard builder
       const pkg = buildFromPersonality({
@@ -312,12 +323,15 @@ async function sendMessage(encounterId, params) {
 
       // Inject nearby entities override (conversation history is passed via options,
       // not as embedded text, to keep the LLM prompt clean for small models)
+      const recentEvents = [`${session.playerName} says: "${text.trim()}"`]
+      if (worldActivityNote) recentEvents.unshift(worldActivityNote)
+
       const enhancedPkg = {
         ...pkg,
         situationalContext: {
           ...pkg.situationalContext,
           nearbyEntities,
-          recentEvents: [`${session.playerName} says: "${text.trim()}"`],
+          recentEvents,
         },
       }
 

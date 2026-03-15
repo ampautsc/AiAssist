@@ -23,6 +23,7 @@ const apiRouter                = require('./routes/api')
 const combatSessionsRouter     = require('./routes/combat-sessions')
 const characterResponsesRouter = require('./routes/characterResponses')
 const encountersRouter         = require('./routes/encounters')
+const worldRouter              = require('./routes/world')
 
 // ── App setup ─────────────────────────────────────────────────────────────────
 const app    = express()
@@ -38,6 +39,7 @@ app.use('/api/parties',    partiesRouter)
 app.use('/api/combat',     combatSessionsRouter)
 app.use('/api/npc',        characterResponsesRouter)
 app.use('/api/encounters', encountersRouter)
+app.use('/api/world',      worldRouter)
 
 // Basic health check
 app.get('/api/health', (_req, res) => res.json({ ok: true, ts: new Date().toISOString() }))

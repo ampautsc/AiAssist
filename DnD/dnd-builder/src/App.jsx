@@ -11,6 +11,7 @@ import ScenariosPage from './pages/ScenariosPage'
 import CombatLogPage from './pages/CombatLogPage'
 import CombatViewer from './pages/CombatViewer'
 import EncounterViewer from './pages/EncounterViewer'
+import WorldPage from './pages/WorldPage'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/combat-logs/:buildId/:scenarioId" element={<CombatLogPage />} />
         <Route path="/combat-viewer" element={<CombatViewer />} />
         <Route path="/encounter-viewer" element={<EncounterViewer />} />
+        <Route path="/world" element={<WorldPage />} />
       </Routes>
     </>
   )
