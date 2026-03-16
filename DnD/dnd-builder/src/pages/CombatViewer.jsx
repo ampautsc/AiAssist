@@ -20,7 +20,7 @@ import DiceArena from "../components/DiceArena"
 import { useBattleMap } from "../combat/useBattleMap.js"
 import { useCombatSession } from "../combat/useCombatSession.js"
 import { useDiceAnimation } from "../combat/useDiceAnimation.js"
-import { hexDistance, hexesInRange, hexesInCone, snapConeDirection, scatterPositions } from "../combat/hexUtils.js"
+import { hexDistance, hexesInRange, hexesInCone, scatterPositions } from "../combat/hexUtils.js"
 import { TERRAIN_TYPES } from "../combat/battleMapSchema.js"
 import { MOCK_HUD_DATA } from "../combat/hudMockData.js"
 import { ENCOUNTERS, CREATURE_DISPLAY, getEncounterById } from "../combat/encounters.js"
@@ -528,14 +528,8 @@ export default function CombatViewer() {
       // ── AoE placement ─────────────────────────────────────────
       case 'aoe': {
         if (!pendingAction) return
-        // Place AoE centered on clicked hex (snap cones to primary direction)
-        const aoeShape = pendingAction.aoeShape || pendingAction.shape
-        const isCone = aoeShape === 'cone'
-        const casterPos = combatants.find(c => c.id === pendingAction.casterId)?.position
-        const finalCenter = (isCone && casterPos)
-          ? snapConeDirection(casterPos, { q, r })
-          : { q, r }
-        resolveAction(pendingAction.optionId, { aoeCenter: finalCenter })
+        // Place AoE centered on clicked hex
+        resolveAction(pendingAction.optionId, { aoeCenter: { q, r } })
         return
       }
 

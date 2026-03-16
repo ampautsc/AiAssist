@@ -56,49 +56,15 @@ function _hexToXY(dq, dr) {
   }
 }
 
-// cos(arctan(0.5)) — D&D 5e cone half-angle ≈ 26.57°, matching DMG grid templates
-const _CONE_COS = 2 / Math.sqrt(5)  // ≈ 0.8944
-
-/** The six primary pointy-top hex-neighbour directions (axial offsets). */
-const _PRIMARY_DIRS = [
-  { q: 1, r: 0 },   // E
-  { q: 1, r: -1 },  // NE
-  { q: 0, r: -1 },  // NW
-  { q: -1, r: 0 },  // W
-  { q: -1, r: 1 },  // SW
-  { q: 0, r: 1 },   // SE
-]
-
 /**
- * Snap an aim direction to the nearest primary hex direction.
- * Guarantees the cone always covers the widest (1-2-3) fan pattern.
- * @param {{q:number,r:number}} casterHex
- * @param {{q:number,r:number}} aimHex
- * @returns {{q:number,r:number}} snapped aim hex (one of the 6 adjacent hexes from caster)
- */
-export function snapConeDirection(casterHex, aimHex) {
-  const dq = aimHex.q - casterHex.q
-  const dr = aimHex.r - casterHex.r
-  const aim = _hexToXY(dq, dr)
-  const aimLen = Math.sqrt(aim.x ** 2 + aim.y ** 2)
-  if (aimLen < 1e-9) return { q: casterHex.q + 1, r: casterHex.r } // default E
-
-  let bestDot = -Infinity
-  let bestDir = _PRIMARY_DIRS[0]
-  for (const dir of _PRIMARY_DIRS) {
-    const d = _hexToXY(dir.q, dir.r)
-    const dot = aim.x * d.x + aim.y * d.y
-    if (dot > bestDot) { bestDot = dot; bestDir = dir }
-  }
-  return { q: casterHex.q + bestDir.q, r: casterHex.r + bestDir.r }
-}
-
-/**
- * Returns a Set of "q,r" keys inside a 15-ft (or arbitrary-length) cone
- * originating at the caster and aimed toward aimHex.
+ * Returns a Set of "q,r" keys inside a cone originating at the caster
+ * and aimed toward aimHex.
  *
- * Uses the same dot-product / half-angle logic as the server's aoeGeometry.js
- * so the highlight exactly matches what the server will hit.
+ * Algorithm: D&D 5e cone rule — "width at distance d = d hexes."
+ *   1. Gather all hex cells within range and a 30° half-angle (wide gather).
+ *   2. At each distance d, keep the d cells most aligned with the aim.
+ * This produces a consistent 1+2+3 = 6 hex pattern for a 15-ft cone,
+ * always includes the aimed hex's direction, and fans out properly.
  *
  * @param {{q:number, r:number}} casterHex  — origin of the cone
  * @param {{q:number, r:number}} aimHex     — any hex in the aim direction
@@ -111,24 +77,21 @@ export function hexesInCone(casterHex, aimHex, lengthFeet, mapRadius) {
   const cq = casterHex.q ?? 0
   const cr = casterHex.r ?? 0
 
-  // Aim direction vector (offset from caster)
   const aimDq = (aimHex.q ?? 0) - cq
   const aimDr = (aimHex.r ?? 0) - cr
-  // Snap to nearest primary direction so the cone always gives the widest fan
-  let bestDot = -Infinity
-  let snappedDq = aimDq, snappedDr = aimDr
-  const rawAim = _hexToXY(aimDq, aimDr)
-  const rawLen = Math.sqrt(rawAim.x * rawAim.x + rawAim.y * rawAim.y)
-  if (rawLen < 1e-9) return result
-  for (const dir of _PRIMARY_DIRS) {
-    const d = _hexToXY(dir.q, dir.r)
-    const dot = rawAim.x * d.x + rawAim.y * d.y
-    if (dot > bestDot) { bestDot = dot; snappedDq = dir.q; snappedDr = dir.r }
-  }
-  const aim = _hexToXY(snappedDq, snappedDr)
+  const aim = _hexToXY(aimDq, aimDr)
   const aimLen = Math.sqrt(aim.x * aim.x + aim.y * aim.y)
+  if (aimLen < 1e-9) return result
 
   const lengthHexes = Math.ceil(lengthFeet / 5)
+
+  // Gather candidates within a 30° half-angle (cos 30° ≈ 0.866).
+  // Hex neighbours are spaced 60° apart, so 30° guarantees at least one
+  // candidate at every distance tier regardless of aim direction.
+  const GATHER_COS = _SQRT3 / 2 - 1e-9 // cos(30°) with float epsilon
+
+  // Collect candidates grouped by hex distance
+  const byDist = new Map()
 
   for (let dq = -lengthHexes; dq <= lengthHexes; dq++) {
     const r1 = Math.max(-lengthHexes, -dq - lengthHexes)
@@ -136,26 +99,36 @@ export function hexesInCone(casterHex, aimHex, lengthFeet, mapRadius) {
     for (let dr = r1; dr <= r2; dr++) {
       if (dq === 0 && dr === 0) continue
 
-      // Hex-distance check (3 hexes = 15 ft)
       const hd = Math.max(Math.abs(dq), Math.abs(dr), Math.abs(-dq - dr))
       if (hd > lengthHexes) continue
 
-      // Map boundary clip
       const q = cq + dq
       const r = cr + dr
       if (Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) > mapRadius) continue
 
-      // Direction check — must be within the D&D cone half-angle
       const cand = _hexToXY(dq, dr)
       const candLen = Math.sqrt(cand.x * cand.x + cand.y * cand.y)
       if (candLen < 1e-9) continue
 
       const cosA = (aim.x * cand.x + aim.y * cand.y) / (aimLen * candLen)
-      if (cosA >= _CONE_COS - 1e-9) {
-        result.add(`${q},${r}`)
+      if (cosA >= GATHER_COS) {
+        if (!byDist.has(hd)) byDist.set(hd, [])
+        byDist.get(hd).push({ q, r, cos: cosA })
       }
     }
   }
+
+  // D&D 5e cone rule: width at distance d = d hexes.
+  // Keep the d candidates most aligned with the aim direction at each tier.
+  for (let d = 1; d <= lengthHexes; d++) {
+    const tier = byDist.get(d) || []
+    tier.sort((a, b) => b.cos - a.cos) // highest cos (closest to aim) first
+    const keep = tier.slice(0, d)
+    for (const c of keep) {
+      result.add(`${c.q},${c.r}`)
+    }
+  }
+
   return result
 }
 
