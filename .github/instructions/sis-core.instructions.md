@@ -186,3 +186,4 @@ Load these files with `read_file` when a task matches the listed tags.
 - `skills/learning/continuous-learning-protocol.md` — #learning #reflection #protocol
 - `skills/documentation/effective-documentation.md` — #docs #writing #templates
 - `skills/communication/clear-communication.md` — #communication #explanations #reports
+- `skills/code/cjs-to-esm-migration.md` — #cjs #esm #migration #module #conversion #javascript #monorepo
