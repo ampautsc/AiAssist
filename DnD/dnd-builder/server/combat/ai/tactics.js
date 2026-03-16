@@ -9,7 +9,19 @@
 'use strict'
 
 const mech = require('../engine/mechanics')
-const { computeOptimalCenter, getEffectiveRadius, isInAoE, canAoEReachFlying } = require('../engine/aoeGeometry')
+const { computeOptimalCenter, computeOptimalConeDirection, getEffectiveRadius, isInAoE, canAoEReachFlying } = require('../engine/aoeGeometry')
+
+/**
+ * Find the lowest available spell slot at or above minLevel.
+ * Returns the slot level integer, or null if none available.
+ */
+function findLowestAvailableSlot(spellSlots, minLevel) {
+  if (!spellSlots) return null
+  for (let lvl = minLevel; lvl <= 9; lvl++) {
+    if (spellSlots[lvl] > 0) return lvl
+  }
+  return null
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BATTLEFIELD ASSESSMENT
@@ -28,6 +40,7 @@ function assessBattlefield(creature, allCombatants, round) {
   const allies  = alive.filter(c => c.side === creature.side  && c.id !== creature.id)
 
   const activeEnemies = enemies.filter(e => !mech.isIncapacitated(e))
+  const helplessEnemies = enemies.filter(e => mech.isIncapacitated(e))
   const enemiesInMelee = activeEnemies.filter(e => mech.distanceBetween(creature, e) <= 5)
   const charmedAllies  = allies.filter(a => mech.hasCondition(a, 'charmed_hp'))
 
@@ -43,6 +56,7 @@ function assessBattlefield(creature, allCombatants, round) {
     enemies,
     allies,
     activeEnemies,
+    helplessEnemies,
     enemiesInMelee,
     charmedAllies,
     hpPct,
@@ -88,6 +102,18 @@ function selectClosestCharmedAlly(me, charmedAllies) {
  */
 function planAoEPlacement(caster, enemies, castRange, targeting) {
   if (!enemies || enemies.length === 0) return null
+
+  // ── Self-origin cones: use directional cone optimization ──────────────
+  if (targeting?.shape === 'cone' && castRange === 0) {
+    const coneLength = targeting.length || 0
+    // Filter out flying enemies the cone can't reach
+    const reachesFlying = canAoEReachFlying(targeting)
+    const reachableEnemies = reachesFlying
+      ? enemies
+      : enemies.filter(e => !e.flying)
+    if (reachableEnemies.length === 0) return null
+    return computeOptimalConeDirection(caster, reachableEnemies, coneLength)
+  }
   
   const aoeRadius = getEffectiveRadius(targeting)
 
@@ -104,7 +130,7 @@ function planAoEPlacement(caster, enemies, castRange, targeting) {
   // Estimate how many enemies fall within the AoE from this center
   const estimatedCount = reachableEnemies.filter(e => {
     const pos = e.position || { x: 0, y: 0 }
-    return isInAoE(pos, center, targeting, { flying: !!e.flying })
+    return isInAoE(pos, center, targeting, { flying: !!e.flying, casterPosition: caster?.position })
   }).length
   
   return { center, estimatedCount }
@@ -143,12 +169,31 @@ function evalOpeningAoEDisable(ctx) {
 }
 
 function evalConcentrationAllDisabled(ctx) {
-  const { me, activeEnemies } = ctx
+  const { me, activeEnemies, helplessEnemies } = ctx
   if (!me.concentrating) return null
   if (activeEnemies.length > 0) return null
+  if (helplessEnemies.length === 0) return null
+
+  // All enemies disabled — focus fire on weakest to kill them while charmed.
+  // Damage breaks charm on THAT creature only — others stay incapacitated.
+  // Prefer Dissonant Whispers (3d6) over Vicious Mockery (2d4) for more damage.
+  // Do NOT use Shatter — AoE would break charm on multiple targets at once.
+  const target = selectWeakest(helplessEnemies)
+  const known = me.spellsKnown || []
+
+  if (known.includes('Dissonant Whispers')) {
+    const slotLevel = findLowestAvailableSlot(me.spellSlots, 1)
+    if (slotLevel) {
+      return {
+        action: { spell: 'Dissonant Whispers', level: slotLevel, target },
+        reasoning: 'All enemies disabled — attacking weakest with DW for max damage while concentrating',
+      }
+    }
+  }
+
   return {
-    action: { type: 'dodge' },
-    reasoning: 'All enemies are disabled — maintaining concentration and taking dodge',
+    action: { spell: 'Vicious Mockery', target },
+    reasoning: 'All enemies disabled — attacking weakest with VM while maintaining concentration',
   }
 }
 
@@ -197,6 +242,91 @@ function evalConcentrationRangedViciousMockery(ctx) {
   }
 }
 
+/**
+ * While concentrating, cast Shatter (AoE 3d8 damage) on clustered active enemies.
+ * Shatter is NOT concentration, so it doesn't break our existing CC spell.
+ * Only used if we can hit 2+ active enemies and have a 2nd-level slot.
+ */
+function evalConcentrationShatter(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (activeEnemies.length < 2) return null
+  const known = me.spellsKnown || []
+  if (!known.includes('Shatter')) return null
+  const slotLevel = findLowestAvailableSlot(me.spellSlots, 2)
+  if (!slotLevel) return null
+
+  // Shatter: 60ft range, 10ft radius sphere
+  const targeting = { shape: 'sphere', radius: 10 }
+  const plan = planAoEPlacement(me, activeEnemies, 60, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
+
+  return {
+    action: { spell: 'Shatter', level: slotLevel, aoeCenter: plan.center },
+    reasoning: `Concentrating — casting Shatter to damage ${plan.estimatedCount} active enemies`,
+  }
+}
+
+/**
+ * While concentrating, cast Dissonant Whispers (3d6 single target) to deal damage
+ * without breaking concentration. Prioritized over Vicious Mockery (2d4) as it does
+ * roughly double the damage. Uses 1st-level slots.
+ */
+function evalConcentrationDissonantWhispers(ctx) {
+  const { me, activeEnemies } = ctx
+  if (!me.concentrating) return null
+  if (activeEnemies.length === 0) return null
+  const known = me.spellsKnown || []
+  if (!known.includes('Dissonant Whispers')) return null
+  const slotLevel = findLowestAvailableSlot(me.spellSlots, 1)
+  if (!slotLevel) return null
+
+  return {
+    action: { spell: 'Dissonant Whispers', level: slotLevel, target: selectHighestThreat(activeEnemies) },
+    reasoning: 'Concentrating — casting Dissonant Whispers for damage without breaking CC',
+  }
+}
+
+/**
+ * Not concentrating, cast Shatter on 2+ active enemies for direct AoE damage.
+ */
+function evalOffensiveShatter(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (activeEnemies.length < 2) return null
+  const known = me.spellsKnown || []
+  if (!known.includes('Shatter')) return null
+  const slotLevel = findLowestAvailableSlot(me.spellSlots, 2)
+  if (!slotLevel) return null
+
+  const targeting = { shape: 'sphere', radius: 10 }
+  const plan = planAoEPlacement(me, activeEnemies, 60, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
+
+  return {
+    action: { spell: 'Shatter', level: slotLevel, aoeCenter: plan.center },
+    reasoning: `Not concentrating — casting Shatter to damage ${plan.estimatedCount} enemies`,
+  }
+}
+
+/**
+ * Not concentrating with only 1 active enemy, cast Dissonant Whispers for damage.
+ */
+function evalOffensiveDissonantWhispers(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (activeEnemies.length === 0) return null
+  const known = me.spellsKnown || []
+  if (!known.includes('Dissonant Whispers')) return null
+  const slotLevel = findLowestAvailableSlot(me.spellSlots, 1)
+  if (!slotLevel) return null
+
+  return {
+    action: { spell: 'Dissonant Whispers', level: slotLevel, target: activeEnemies[0] },
+    reasoning: 'Not concentrating, single enemy — casting Dissonant Whispers for damage',
+  }
+}
+
 function evalConcentrationSelfHeal(ctx) {
   const { me, hpPct } = ctx
   if (!me.concentrating) return null
@@ -206,6 +336,25 @@ function evalConcentrationSelfHeal(ctx) {
     bonusAction: { type: 'cast_healing_word', spell: 'Healing Word' },
     _bonusActionOnly: true,
     reasoning: 'Concentrating but HP low — using bonus action Healing Word',
+  }
+}
+
+/**
+ * Proactive Healing Word on any turn when HP is below 70%.
+ * Fires regardless of concentration state. Merges with any main action
+ * that doesn't already have a bonus action (via _bonusActionOnly).
+ */
+function evalProactiveHealingWord(ctx) {
+  const { me, hpPct } = ctx
+  if (hpPct >= 0.7) return null
+  if (me.polymorphedAs) return null  // Can't cast spells in beast form
+  if (!(me.spellsKnown || []).includes('Healing Word')) return null
+  if (!me.spellSlots || !(me.spellSlots[1] > 0)) return null
+  return {
+    action: null,
+    bonusAction: { type: 'cast_healing_word', spell: 'Healing Word' },
+    _bonusActionOnly: true,
+    reasoning: 'HP below 70% — using bonus action Healing Word for sustain',
   }
 }
 
@@ -228,10 +377,32 @@ function evalCastHoldPerson(ctx) {
   const { me, activeEnemies } = ctx
   if (me.concentrating) return null
   if (!me.spellSlots || !(me.spellSlots[2] > 0)) return null
-  if (activeEnemies.length === 0) return null
+  // Hold Person only works on humanoids (D&D 5e PHB p.251)
+  const humanoidEnemies = activeEnemies.filter(e => !e.type || e.type === 'humanoid')
+  if (humanoidEnemies.length === 0) return null
   return {
-    action: { spell: 'Hold Person', level: 2, target: selectHighestThreat(activeEnemies) },
-    reasoning: 'Casting Hold Person on highest threat',
+    action: { spell: 'Hold Person', level: 2, target: selectHighestThreat(humanoidEnemies) },
+    reasoning: 'Casting Hold Person on highest-threat humanoid',
+  }
+}
+
+function evalFallbackCrossbow(ctx) {
+  const { me, activeEnemies } = ctx
+  if (activeEnemies.length === 0) return null
+
+  // Prefer crossbow over VM when not concentrating (raw damage > minor debuff)
+  if (me.concentrating) return null
+
+  const crossbow = (me.weapons || []).find(w => w.type === 'ranged')
+  if (!crossbow) return null
+
+  const target = selectHighestThreat(activeEnemies)
+  const dist = mech.distanceBetween(me, target)
+  if (dist > (crossbow.range || 30)) return null
+
+  return {
+    action: { type: 'attack', target, weapon: crossbow },
+    reasoning: 'Fallback — crossbow attack (no concentration to protect)',
   }
 }
 
@@ -262,6 +433,34 @@ function evalDodge(_ctx) {
     action: { type: 'dodge' },
     reasoning: 'No better option — taking dodge action',
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPLESS TARGET — Attack incapacitated enemies instead of doing nothing
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * When all active enemies are gone but helpless (incapacitated) enemies remain,
+ * attack them. In D&D 5e, even paralyzed creatures can be attacked — auto-crit
+ * if within 5 ft. This prevents infinite stalemates where enemies dodge helplessly.
+ */
+function evalAttackHelpless(ctx) {
+  const { me, activeEnemies, helplessEnemies } = ctx
+  if (activeEnemies.length > 0) return null       // prefer active targets
+  if (helplessEnemies.length === 0) return null
+
+  const target = helplessEnemies[0]
+  const dist   = mech.distanceBetween(me, target)
+
+  // Move toward and melee attack
+  const result = me.multiattack > 0
+    ? { action: { type: 'multiattack', target }, reasoning: 'Attacking helpless enemy' }
+    : { action: { type: 'attack', weapon: me.weapon, target }, reasoning: 'Attacking helpless enemy' }
+
+  if (dist > 5) {
+    result.movement = { type: 'move_toward', target }
+  }
+  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -398,6 +597,212 @@ function evalRangedCantripWithApproach(ctx) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// NEW SPELL EVALUATORS — Sleep, Faerie Fire, Polymorph, Greater Invisibility
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sleep upcast at 3rd level: roll 7d8 = avg 31.5 HP worth of creatures.
+ * Best in round 1 against groups of low-HP enemies (cult fanatics: 33 HP max).
+ * Non-concentration, so it can stack with Hypnotic Pattern on subsequent rounds.
+ * Not used if enemies are undead or have too many HP.
+ */
+function evalOpeningSleep(ctx) {
+  const { me, round, activeEnemies } = ctx
+  if (round > 2) return null         // diminishing returns as enemies take damage
+  if (me.concentrating) return null  // prefer to not waste a round when concentrating
+  // Need a slot (1st level at minimum, but 3rd level is much better)
+  const slotLevel = me.spellSlots?.[3] > 0 ? 3
+    : me.spellSlots?.[2] > 0 ? 2
+    : me.spellSlots?.[1] > 0 ? 1
+    : 0
+  if (!slotLevel) return null
+  if (!(me.spellsKnown || []).includes('Sleep')) return null
+
+  // Average HP pool: 5d8 + 2d8 per level above 1st
+  const diceCount = 5 + 2 * (slotLevel - 1)
+  const avgPool = diceCount * 4.5  // avg d8
+
+  // Count enemies with HP below pool — sleep hits lowest-HP creatures first
+  const sortedEnemies = [...activeEnemies]
+    .filter(e => e.type !== 'undead' && !e.immuneSleep)
+    .sort((a, b) => a.currentHP - b.currentHP)
+
+  let hpUsed = 0
+  let sleptCount = 0
+  for (const e of sortedEnemies) {
+    if (hpUsed + e.currentHP <= avgPool) {
+      hpUsed += e.currentHP
+      sleptCount++
+    } else break
+  }
+
+  if (sleptCount === 0) return null
+
+  // Place AoE to maximize targets caught
+  const targeting = { shape: 'sphere', radius: 20 }
+  const plan = planAoEPlacement(me, activeEnemies, 90, targeting)
+  if (!plan || plan.estimatedCount === 0) return null
+
+  return {
+    action: { spell: 'Sleep', level: slotLevel, aoeCenter: plan.center },
+    reasoning: `Casting Sleep (${slotLevel}${['st','nd','rd'][slotLevel-1]||'th'} level) — expected to incapacitate ~${sleptCount} enemies`,
+  }
+}
+
+/**
+ * Faerie Fire: DEX save or advantage on all attacks against affected.
+ * Used when not concentrating and ≥2 enemies can be caught in 20ft cube.
+ * Concentration spell; lower priority than Hypnotic Pattern but uses 1st level slot.
+ */
+function evalOffensiveFaerieFire(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[1] > 0)) return null
+  if (!(me.spellsKnown || []).includes('Faerie Fire')) return null
+  if (activeEnemies.length < 2) return null
+
+  const targeting = { shape: 'cube', size: 20 }
+  const plan = planAoEPlacement(me, activeEnemies, 60, targeting)
+  if (!plan || plan.estimatedCount < 2) return null
+
+  return {
+    action: { spell: 'Faerie Fire', level: 1, aoeCenter: plan.center },
+    reasoning: `Casting Faerie Fire — expected to illuminate ${plan.estimatedCount} enemies (advantage on attacks)`,
+  }
+}
+
+/**
+ * Polymorph enemy into a sheep: WIS save or become a harmless 1 HP creature.
+ * Used against tough non-humanoid enemies (can't Hold Person them).
+ * Costs a 4th-level slot + concentration. High priority against dangerous bosses.
+ */
+function evalEnemyPolymorph(ctx) {
+  const { me, activeEnemies } = ctx
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[4] > 0)) return null
+  if (!(me.spellsKnown || []).includes('Polymorph')) return null
+
+  // Enemy polymorph is best when there are MULTIPLE enemies — neutralize one, fight the others.
+  // Against a single tough enemy, self-polymorph (Giant Ape) is usually better.
+  if (activeEnemies.length < 2) return null
+
+  // Look for a high-threat enemy that's not humanoid (for humanoids, Hold Person is better)
+  // or any enemy with lots of HP remaining
+  const highThreat = activeEnemies
+    .filter(e => e.currentHP > 30 && (!e.type || e.type !== 'humanoid' || activeEnemies.length === 1))
+    .sort((a, b) => b.currentHP - a.currentHP)
+  if (highThreat.length === 0) return null
+
+  const target = highThreat[0]
+  return {
+    action: { spell: 'Polymorph', level: 4, target, polymorphMode: 'enemy' },
+    reasoning: `Casting Polymorph on ${target.name} — turning into a harmless sheep`,
+  }
+}
+
+/**
+ * Self-Polymorph into T-Rex when there are enemies in melee range
+ * and the bard is low on spell slots or needs a big HP buffer.
+ * T-Rex: 136 HP, 4d12+7 bite / 3d8+7 tail multiattack.
+ * Costs concentration + 4th level slot.
+ */
+function evalSelfPolymorph(ctx) {
+  const { me, hpPct, activeEnemies, enemiesInMelee } = ctx
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[4] > 0)) return null
+  if (!(me.spellsKnown || []).includes('Polymorph')) return null
+  if (activeEnemies.length === 0) return null
+
+  // Self-polymorph into Giant Ape/T-Rex: huge HP buffer + good melee damage.
+  // Trigger conditions (any of these):
+  //   1. Facing a single tough enemy (HP > 50) — Giant Ape is better than cantrip damage
+  //   2. HP below 60% at any time
+  //   3. In melee with 2+ enemies
+  //   4. Facing ≥4 enemies — Giant Ape absorbs attacks + kills mobs via multiattack
+  //   5. Facing ≥3 enemies with combined HP > 200 — too tough for spell-based attrition
+  const facingToughSoloEnemy = activeEnemies.length <= 2 && activeEnemies.some(e => e.currentHP > 50)
+  const facingManyEnemies = activeEnemies.length >= 4
+  const combinedEnemyHP = activeEnemies.reduce((sum, e) => sum + e.currentHP, 0)
+  const facingToughGroup = activeEnemies.length >= 3 && combinedEnemyHP > 200
+  const shouldPolymorph = facingToughSoloEnemy || facingManyEnemies || facingToughGroup || hpPct < 0.6 || enemiesInMelee.length >= 2
+  if (!shouldPolymorph) return null
+
+  return {
+    action: { spell: 'Polymorph', level: 4, target: me, polymorphMode: 'self' },
+    reasoning: 'Casting Polymorph on self — transforming into beast form for massive HP buffer and melee damage',
+  }
+}
+
+/**
+ * Beast form melee attack — when polymorphed, attack with beast weapons.
+ * Includes movement toward target if not already in melee range.
+ * Giant Ape: multiattack 2 × Fist (3d10+6 = 22.5 avg × 2 = 45 DPR).
+ * T-Rex: multiattack 2 × Bite (4d12+7 = 33 avg) + Tail (3d8+7 = 20.5 avg) = 53.5 DPR.
+ */
+function evalBeastFormMelee(ctx) {
+  const { me, activeEnemies, enemiesInMelee } = ctx
+  if (!me.polymorphedAs) return null
+  if (activeEnemies.length === 0) return null
+
+  // In melee: use multiattack or single attack
+  // When facing many enemies, kill weakest first to reduce action economy pressure
+  if (enemiesInMelee.length > 0) {
+    const target = activeEnemies.length >= 3 ? selectWeakest(enemiesInMelee) : selectHighestThreat(enemiesInMelee)
+    if (me.multiattack > 0) {
+      return {
+        action: { type: 'multiattack', target },
+        reasoning: `${me.polymorphedAs} multiattack in melee`,
+      }
+    }
+    return {
+      action: { type: 'attack', weapon: me.weapon || me.weapons?.[0], target },
+      reasoning: `${me.polymorphedAs} attacks in melee`,
+    }
+  }
+
+  // Not in melee: move toward nearest enemy and attack
+  // When facing many enemies, prioritize weakest to reduce action economy
+  const target = activeEnemies.length >= 3 ? selectWeakest(activeEnemies) : selectHighestThreat(activeEnemies)
+  const action = me.multiattack > 0
+    ? { type: 'multiattack', target }
+    : { type: 'attack', weapon: me.weapon || me.weapons?.[0], target }
+  return {
+    action,
+    movement: { type: 'move_toward', target },
+    reasoning: `${me.polymorphedAs} charges toward ${target.name}`,
+  }
+}
+
+/**
+ * Greater Invisibility used proactively (not just survival at <25% HP).
+ * Used when no concentration is active and facing ranged enemies or multiple threats.
+ * Advantage on attacks, enemies have disadvantage on attacks against bard.
+ */
+function evalProactiveGreaterInvisibility(ctx) {
+  const { me, hpPct, activeEnemies, isInvisible } = ctx
+  if (isInvisible) return null
+  if (me.concentrating) return null
+  if (!me.spellSlots || !(me.spellSlots[4] > 0)) return null
+  if (activeEnemies.length < 2) return null   // not worth the slot against 1 enemy
+
+  // Use proactively when moderate HP (25%-60%) or facing ≥3 enemies
+  if (hpPct >= 0.60 && activeEnemies.length < 3) return null
+  if (hpPct >= 0.25 && hpPct < 0.60) {
+    // Moderate HP — worth using for defense
+  } else if (activeEnemies.length >= 3) {
+    // Lots of enemies — advantage on attacks + disadvantage on theirs is huge
+  } else {
+    return null  // covered by evalSurvivalInvisibility at <25%
+  }
+
+  return {
+    action: { spell: 'Greater Invisibility', level: 4 },
+    reasoning: 'Casting Greater Invisibility proactively — advantage on attacks, disadvantage on enemy attacks',
+    bonusAction: me.gemFlight && me.gemFlight.uses > 0 ? { type: 'gem_flight' } : null,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REACTION EVALUATORS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -422,6 +827,21 @@ function evalCounterspell(creature, event) {
   if (!creature.spellSlots || !(creature.spellSlots[3] > 0)) return null
   if (creature.reactedThisRound) return null
   return { type: 'counterspell', slotLevel: 3 }
+}
+
+/**
+ * Silvery Barbs reaction evaluator.
+ * Costs a 1st-level slot. Forces the attacker to reroll a successful hit.
+ * Like Cutting Words but slot-based, no BI required, stronger (full reroll).
+ * Lower priority than Cutting Words (uses up spell slots).
+ */
+function evalSilveryBarbs(creature, event) {
+  if (event.type !== 'enemy_attack_roll') return null
+  const { roll, targetAC } = event
+  if (roll < targetAC) return null                    // already misses
+  if (!creature.spellSlots || !(creature.spellSlots[1] > 0)) return null
+  if (creature.reactedThisRound) return null
+  return { type: 'silvery_barbs', slotLevel: 1 }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -459,7 +879,9 @@ function evalDragonMultiattack(ctx) {
 
 function evalDragonFear(ctx) {
   const { me, activeEnemies } = ctx
-  if (!me.dragonFear || !(me.dragonFear.uses > 0)) return null
+  // Dragon Fear shares the PB pool with Breath Weapon
+  if (!me.dragonFear) return null
+  if (!me.breathWeapon || !(me.breathWeapon.uses > 0)) return null
   // Dragon Fear: self-origin cone (30ft default)
   const targeting = me.dragonFear.targeting || { shape: 'cone', length: me.dragonFear.range || 30 }
   const plan = planAoEPlacement(me, activeEnemies, 0, targeting)
@@ -599,17 +1021,29 @@ function evalLegendaryResistance(creature, event) {
 
 const PROFILES = {
   lore_bard: [
-    evalSurvivalInvisibility,
-    evalOpeningAoEDisable,
-    evalDragonFear,
+    evalBeastFormMelee,                  // Beast form: attack with multiattack (highest priority in beast form)
+    evalSurvivalInvisibility,            // <25% HP: emergency Greater Invisibility
+    evalOpeningAoEDisable,               // Round 1: Hypnotic Pattern
+    evalOpeningSleep,                    // Round 1-2: Sleep upcast (non-concentration)
+    evalDragonFear,                      // PB-gated Dragon Fear (shared pool)
     evalConcentrationAllDisabled,
     evalConcentrationMeleeViciousMockery,
     evalConcentrationFinishWithCrossbow,
     evalConcentrationBreathWeapon,
-    evalConcentrationRangedViciousMockery,
+    evalConcentrationShatter,              // AoE damage while concentrating (non-concentration spell)
+    evalConcentrationDissonantWhispers,    // single-target damage while concentrating
+    evalConcentrationRangedViciousMockery, // fallback when out of spell slots
     evalConcentrationSelfHeal,
+    evalProactiveHealingWord,              // Bonus HW at <70% HP regardless of concentration
+    evalSelfPolymorph,                   // Self-polymorph into beast form (now triggers for 4+ enemies, tough groups)
+    evalEnemyPolymorph,                  // Polymorph tough enemy into sheep when multiple foes (concentration)
+    evalProactiveGreaterInvisibility,    // Greater Invisibility proactively (25-60% HP or ≥3 foes)
     evalRecastHypnoticPattern,
     evalCastHoldPerson,
+    evalOffensiveFaerieFire,             // Faerie Fire when no concentration (1st-level slot)
+    evalOffensiveShatter,                  // AoE damage when not concentrating
+    evalOffensiveDissonantWhispers,        // single-target damage when not concentrating
+    evalFallbackCrossbow,                  // crossbow when not concentrating (better than VM)
     evalFallbackCantrip,
     evalDodge,
   ],
@@ -621,29 +1055,40 @@ const PROFILES = {
     evalMeleeAttack,
     evalInflictWounds,
     evalRangedCantripWithApproach,
+    evalAttackHelpless,
     evalDodge,
   ],
-  generic_melee:    [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
-  generic_ranged:   [evalRangedCantripWithApproach, evalMeleeAttack, evalDodge],
-  dragon:           [evalDragonBreathWeapon, evalDragonMultiattack, evalDodge],
-  giant_bruiser:    [evalGiantRockThrow, evalGiantMelee, evalDodge],
-  mage_caster:      [evalMageMistyStep, evalMageFireball, evalMageFireBolt, evalDodge],
-  archmage_caster:  [evalMageMistyStep, evalArchmageConeOfCold, evalMageFireball, evalMageFireBolt, evalDodge],
-  lich_caster:      [evalLichPowerWordStun, evalLichFingerOfDeath, evalLichCloudkill, evalMageFireball, evalMageFireBolt, evalDodge],
-  undead_melee:     [evalMeleeAttack, evalRangedCantripWithApproach, evalDodge],
+  generic_melee:    [evalMeleeAttack, evalAttackHelpless, evalRangedCantripWithApproach, evalDodge],
+  generic_ranged:   [evalRangedCantripWithApproach, evalAttackHelpless, evalMeleeAttack, evalDodge],
+  dragon:           [evalDragonBreathWeapon, evalDragonMultiattack, evalAttackHelpless, evalDodge],
+  giant_bruiser:    [evalGiantRockThrow, evalGiantMelee, evalAttackHelpless, evalDodge],
+  mage_caster:      [evalMageMistyStep, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  archmage_caster:  [evalMageMistyStep, evalArchmageConeOfCold, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  lich_caster:      [evalLichPowerWordStun, evalLichFingerOfDeath, evalLichCloudkill, evalMageFireball, evalMageFireBolt, evalAttackHelpless, evalDodge],
+  undead_melee:     [evalMeleeAttack, evalAttackHelpless, evalRangedCantripWithApproach, evalDodge],
+}
+
+/**
+ * Opportunity Attack reaction: fire when an enemy voluntarily leaves melee reach.
+ * Any creature with a weapon will take the attack if it has not yet reacted.
+ */
+function evalOpportunityAttack(creature, event) {
+  if (event.type !== 'enemy_leaving_melee') return null
+  if (!creature.weapons?.length) return null
+  return { type: 'opportunity_attack' }
 }
 
 const REACTION_PROFILES = {
-  lore_bard:       [evalCuttingWords, evalCounterspell],
-  cult_fanatic:    [],
-  generic_melee:   [],
+  lore_bard:       [evalCuttingWords, evalCounterspell, evalSilveryBarbs],
+  cult_fanatic:    [evalOpportunityAttack],
+  generic_melee:   [evalOpportunityAttack],
   generic_ranged:  [],
-  dragon:          [],
-  giant_bruiser:   [],
+  dragon:          [evalOpportunityAttack],
+  giant_bruiser:   [evalOpportunityAttack],
   mage_caster:     [],
   archmage_caster: [],
   lich_caster:     [evalLegendaryResistance],
-  undead_melee:    [],
+  undead_melee:    [evalOpportunityAttack],
 }
 
 function getProfile(key) {
@@ -805,6 +1250,7 @@ module.exports = {
   evalRecastHypnoticPattern,
   evalCastHoldPerson,
   evalFallbackCantrip,
+  evalFallbackCrossbow,
   evalDodge,
   // Enemy evaluators
   evalEnemyInvisibleFallback,
@@ -814,9 +1260,26 @@ module.exports = {
   evalMeleeAttack,
   evalInflictWounds,
   evalRangedCantripWithApproach,
+  evalAttackHelpless,
+  // Damage evaluators
+  evalOffensiveShatter,
+  evalOffensiveDissonantWhispers,
+  evalConcentrationShatter,
+  evalConcentrationDissonantWhispers,
+  // Utility
+  findLowestAvailableSlot,
+  // New spell evaluators
+  evalOpeningSleep,
+  evalOffensiveFaerieFire,
+  evalEnemyPolymorph,
+  evalSelfPolymorph,
+  evalBeastFormMelee,
+  evalProactiveHealingWord,
+  evalProactiveGreaterInvisibility,
   // Reaction evaluators
   evalCuttingWords,
   evalCounterspell,
+  evalSilveryBarbs,
   // Monster evaluators
   evalDragonBreathWeapon,
   evalDragonFear,

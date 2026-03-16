@@ -13,7 +13,7 @@
 'use strict'
 
 const express = require('express')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 const router = express.Router()
 
@@ -113,7 +113,7 @@ router.post('/', (req, res) => {
 
   const now = new Date().toISOString()
   const character = {
-    id:               uuidv4(),
+    id:               randomUUID(),
     ownerId:          body.ownerId ?? null,
     name:             String(body.name).slice(0, 80),
     race:             String(body.race),

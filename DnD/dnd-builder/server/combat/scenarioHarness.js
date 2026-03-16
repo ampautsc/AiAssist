@@ -216,7 +216,7 @@ function simulateScenario(build, scenario, options = {}) {
     const isWin = result.winner === 'party';
     if (isWin) wins++;
     totalRounds += result.rounds;
-    totalBardHpPct += isWin ? bardHpPct : 0;
+    totalBardHpPct += bardHpPct;
 
     const runEntry = {
       winner: result.winner,
@@ -240,8 +240,8 @@ function simulateScenario(build, scenario, options = {}) {
     numRuns,
     winRate: Math.round((wins / numRuns) * 1000) / 1000,
     avgRounds: Math.round((totalRounds / numRuns) * 10) / 10,
-    avgBardHpPct: wins > 0
-      ? Math.round((totalBardHpPct / wins) * 1000) / 1000
+    avgBardHpPct: numRuns > 0
+      ? Math.round((totalBardHpPct / numRuns) * 1000) / 1000
       : 0,
     runs,
   };

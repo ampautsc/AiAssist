@@ -7,7 +7,8 @@
  * request time.
  *
  * Usage:
- *   node server/run-simulation.js                   # new combat engine (default)
+ *   node server/run-simulation.js                   # v1 combat engine (default)
+ *   node server/run-simulation.js --v2              # v2 immutable zero-trust engine
  *   node server/run-simulation.js --sims 10         # 10 sims/encounter
  *   node server/run-simulation.js --legacy          # math-based only (fast, no simulation)
  *   node server/run-simulation.js --old-sim         # old Monte Carlo simulator
@@ -30,13 +31,14 @@ const args = process.argv.slice(2);
 const simIndex = args.indexOf('--sims');
 const simulations = simIndex !== -1 ? parseInt(args[simIndex + 1], 10) : 100;
 const useLegacy = args.includes('--legacy');
+const useV2 = args.includes('--v2');
 
 async function runSimulation() {
   const startTime = Date.now();
   console.log('═══════════════════════════════════════════════════');
   console.log('  Combat Simulation Job');
   console.log('═══════════════════════════════════════════════════');
-  console.log(`  Mode:        ${useLegacy ? 'LEGACY (math-based)' : 'COMBAT ENGINE (turn-by-turn)'}`);
+  console.log(`  Mode:        ${useLegacy ? 'LEGACY (math-based)' : useV2 ? 'COMBAT ENGINE V2 (immutable zero-trust)' : 'COMBAT ENGINE (turn-by-turn)'}`);
   console.log(`  Simulations: ${useLegacy ? 'N/A' : simulations + ' per build/scenario'}`);
   console.log(`  Started:     ${new Date().toLocaleString()}`);
   console.log('');
@@ -82,8 +84,9 @@ async function runSimulation() {
     // Default: new combat engine.  --legacy: math-based only. --old-sim: previous Monte Carlo.
     const useOldSim = args.includes('--old-sim');
     const options = {
-      useCombatEngine: !useLegacy && !useOldSim,  // New turn-by-turn engine (default)
-      useSimulation: useOldSim,                     // Old Monte Carlo (explicit opt-in)
+      useCombatEngine: !useLegacy && !useOldSim && !useV2,  // V1 turn-by-turn engine (default)
+      useCombatEngineV2: useV2,                               // V2 immutable zero-trust engine
+      useSimulation: useOldSim,                               // Old Monte Carlo (explicit opt-in)
       simulations,
     };
     const results = runFullEvaluation(builds, options);

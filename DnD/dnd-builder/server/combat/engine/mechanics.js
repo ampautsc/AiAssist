@@ -291,7 +291,7 @@ function _rollD20WithAdv(hasAdv, hasDisadv) {
 function makeSavingThrow(mod, dc, hasAdv = false, hasDisadv = false) {
   const { result, type } = _rollD20WithAdv(hasAdv, hasDisadv)
   const total = result + mod
-  return { result, total, success: total >= dc, type }
+  return { result, saveBonus: mod, total, success: total >= dc, type }
 }
 
 /**

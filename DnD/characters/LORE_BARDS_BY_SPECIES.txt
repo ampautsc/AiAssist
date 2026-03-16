@@ -59,13 +59,13 @@ can't be Counterspelled, work inside Silence, and don't break concentration.
 +---------------------+-----------------------------------------------------------+-------------+
 | Goblin              | Nimble Escape: Disengage or Hide as bonus action.         | Bonus Act   |
 |                     |   EVERY TURN. No resource cost. Unlimited.                |             |
-|                     | Fury of the Small: +Prof bonus damage once/short rest.    | Free        |
+|                     | Fury of the Small: +Prof bonus damage PB/long rest.      | Free        |
 +---------------------+-----------------------------------------------------------+-------------+
 | Goliath             | Stone's Endurance: reduce damage by 1d12+CON as reaction. | Reaction    |
 |                     |   PB/long rest. Stacks with high AC.                      |             |
 +---------------------+-----------------------------------------------------------+-------------+
 | Harengon            | Hare Trigger: add Prof bonus to initiative rolls.         | Passive     |
-|                     | Rabbit Hop: BA jump PBd12 ft, no opportunity attacks.     | Bonus Act   |
+|                     | Rabbit Hop: BA jump 5×PB ft, no opportunity attacks.      | Bonus Act   |
 |                     |   PB/long rest. Free escape from melee.                   |             |
 +---------------------+-----------------------------------------------------------+-------------+
 | Aasimar             | Celestial Revelation (Lv3): 1min transformation.          | Action      |
@@ -197,7 +197,7 @@ TIER 1 - Has a powerful non-spell ability AND strong defenses
 | Satyr               | 19  | DC 15  | Magic Resistance + Fey typing. Advantage on ALL      |
 |                     |     |        | spell saves. Immune to Hold Person etc. 35ft speed.  |
 +---------------------+-----+--------+------------------------------------------------------+
-| Yuan-Ti             | 19  | DC 15  | Magic Resistance + Poison Immunity. Innate Suggestion|
+| Yuan-Ti             | 19  | DC 15  | Magic Resistance + Poison Resistance. Innate Suggestion|
 |                     |     |        | (CHA-based, free cast). Extremely hard to kill.      |
 +---------------------+-----+--------+------------------------------------------------------+
 | Custom Lineage      | 19  | DC 16  | 3 feats by Lv8 = armor + conc + Fey Touched (Misty  |
@@ -274,7 +274,7 @@ TIER 3 - Functional, one unique trick, but outclassed above
 | Owlin               | 14  | DC 17  | Permanent flight (like Fairy) + Darkvision + Stealth.|
 |                     |     |        | Slightly worse than Fairy - no innate spells.        |
 +---------------------+-----+--------+------------------------------------------------------+
-| Warforged           | 18  | DC 17  | Integrated Protection = AC 16+Prof (18 at Lv8).     |
+| Warforged           | 18  | DC 17  | Integrated Protection = +1 AC on top of worn armor.  |
 |                     |     |        | Poison resist, disease immune. Solid but passive.    |
 +---------------------+-----+--------+------------------------------------------------------+
 | Half-Elf            | 19  | DC 15  | +2 CHA, two +1s, two extra skills. No non-spell     |
@@ -658,7 +658,7 @@ YUAN-TI - "The Snake Who Whispers Surrender"
   AC: 19 (half plate + shield)  |  CHA: 17  |  DC: 15  |  CON: Adv (WC)
   Items: Instrument of the Bards, Amulet of Proof Against Detection
   ---
-  How it works: AC 19, Adv CON, Magic Resistance, Poison Immunity. Amulet
+  How it works: AC 19, Adv CON, Magic Resistance, Poison Resistance. Amulet
   means you can't be scryed or detected by divination — the perfect spy.
   Innate Suggestion 1/day. You are a walking fortress that nobody can find.
   RISK: DC 15 is low. Snake appearance limits social access.

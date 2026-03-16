@@ -119,6 +119,7 @@ function createCreature(key, overrides = {}) {
     // Identity
     type:     t.type,
     cr:       t.cr,
+    ...(t.characterLevel != null ? { characterLevel: t.characterLevel } : {}),
     // Abilities
     str: abilities.str, dex: abilities.dex, con: abilities.con, int: abilities.int, wis: abilities.wis, cha: abilities.cha,
     strMod, dexMod, conMod, intMod, wisMod, chaMod,
@@ -211,6 +212,7 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
   side:     'party',
   type:     'humanoid',
   cr:       4,   // approximate effective CR
+  characterLevel: 8,
   abilities: { str: 8, dex: 14, con: 16, int: 8, wis: 12, cha: 18 },
   profBonus: 3,
   // L1: 8+3=11, L2-8: 5+3=8 each × 7 = 56+11 = 67 (rounded to avg 5 per die)
@@ -238,7 +240,7 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
         'Hypnotic Pattern', 'Hold Person', 'Counterspell',
         'Healing Word', 'Faerie Fire', 'Dissonant Whispers',
         'Shatter', 'Invisibility', 'Silence',
-        'Greater Invisibility', 'Dimension Door',
+        'Greater Invisibility', 'Polymorph', 'Dimension Door',
       ],
       cantrips: ['Vicious Mockery', 'Minor Illusion'],
     },

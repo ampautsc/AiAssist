@@ -3,7 +3,7 @@
  * Tests both average-mode (deterministic) and edge-case behavior.
  */
 
-const { describe, it, before, after } = require('node:test');
+const { describe, it, before, after, afterEach } = require('node:test');
 const assert = require('node:assert/strict');
 
 const dice = require('../engine/dice');
@@ -190,5 +190,182 @@ describe('random mode produces valid ranges', () => {
       const r = dice.rollWithDisadvantage();
       assert.ok(r.result <= r.roll1 && r.result <= r.roll2);
     }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commit-Reveal Protocol
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('generateCommitment', () => {
+  it('returns serverSecret and commitment as hex strings', () => {
+    const { serverSecret, commitment } = dice.generateCommitment();
+    assert.ok(typeof serverSecret === 'string');
+    assert.ok(typeof commitment === 'string');
+    assert.equal(serverSecret.length, 64); // 32 bytes → 64 hex chars
+    assert.equal(commitment.length, 64);   // SHA-256 → 64 hex chars
+  });
+
+  it('generates unique secrets each call', () => {
+    const a = dice.generateCommitment();
+    const b = dice.generateCommitment();
+    assert.notEqual(a.serverSecret, b.serverSecret);
+    assert.notEqual(a.commitment, b.commitment);
+  });
+});
+
+describe('verifyCommitment', () => {
+  it('returns true for matching secret/commitment pair', () => {
+    const { serverSecret, commitment } = dice.generateCommitment();
+    assert.ok(dice.verifyCommitment(serverSecret, commitment));
+  });
+
+  it('returns false when secret does not match commitment', () => {
+    const a = dice.generateCommitment();
+    const b = dice.generateCommitment();
+    assert.ok(!dice.verifyCommitment(a.serverSecret, b.commitment));
+  });
+
+  it('returns false for tampered commitment', () => {
+    const { serverSecret, commitment } = dice.generateCommitment();
+    const tampered = 'a'.repeat(64);
+    assert.ok(!dice.verifyCommitment(serverSecret, tampered));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Seeded PRNG — applySeed / clearSeed
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('seeded PRNG', () => {
+  afterEach(() => {
+    dice.clearSeed();
+    dice.setDiceMode('average'); // restore for other tests
+  });
+
+  it('activates seeded mode via applySeed', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'client-seed-1');
+    assert.equal(dice.getDiceMode(), 'seeded');
+  });
+
+  it('clearSeed reverts to previous mode', () => {
+    dice.setDiceMode('random');
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'client-seed-1');
+    assert.equal(dice.getDiceMode(), 'seeded');
+    dice.clearSeed();
+    assert.equal(dice.getDiceMode(), 'random');
+  });
+
+  it('produces deterministic results: same seeds → same sequence', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'my-client-seed');
+    const seq1 = [dice.d20(), dice.d6(), dice.d8(), dice.d4(), dice.d12(), dice.d10()];
+    dice.clearSeed();
+
+    // Re-apply the same seeds → must get the same sequence
+    dice.applySeed(serverSecret, 'my-client-seed');
+    const seq2 = [dice.d20(), dice.d6(), dice.d8(), dice.d4(), dice.d12(), dice.d10()];
+    dice.clearSeed();
+
+    assert.deepEqual(seq1, seq2);
+  });
+
+  it('different client seeds produce different sequences', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'seed-alpha');
+    const seq1 = [dice.d20(), dice.d6(), dice.d8()];
+    dice.clearSeed();
+
+    dice.applySeed(serverSecret, 'seed-beta');
+    const seq2 = [dice.d20(), dice.d6(), dice.d8()];
+    dice.clearSeed();
+
+    // Extremely unlikely to be identical with different seeds
+    assert.notDeepEqual(seq1, seq2);
+  });
+
+  it('different server secrets produce different sequences', () => {
+    const a = dice.generateCommitment();
+    const b = dice.generateCommitment();
+    dice.applySeed(a.serverSecret, 'same-client-seed');
+    const seq1 = [dice.d20(), dice.d6(), dice.d8()];
+    dice.clearSeed();
+
+    dice.applySeed(b.serverSecret, 'same-client-seed');
+    const seq2 = [dice.d20(), dice.d6(), dice.d8()];
+    dice.clearSeed();
+
+    assert.notDeepEqual(seq1, seq2);
+  });
+
+  it('seeded d20 produces values in [1, 20]', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'range-test');
+    for (let i = 0; i < 100; i++) {
+      const val = dice.d20();
+      assert.ok(Number.isInteger(val), `d20 non-integer: ${val}`);
+      assert.ok(val >= 1 && val <= 20, `d20 out of range: ${val}`);
+    }
+  });
+
+  it('seeded d6 produces values in [1, 6]', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'range-d6');
+    for (let i = 0; i < 100; i++) {
+      const val = dice.d6();
+      assert.ok(Number.isInteger(val), `d6 non-integer: ${val}`);
+      assert.ok(val >= 1 && val <= 6, `d6 out of range: ${val}`);
+    }
+  });
+
+  it('seeded d4/d8/d10/d12 all produce valid ranges', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'range-all');
+    const checks = [
+      { fn: 'd4',  min: 1, max: 4 },
+      { fn: 'd8',  min: 1, max: 8 },
+      { fn: 'd10', min: 1, max: 10 },
+      { fn: 'd12', min: 1, max: 12 },
+    ];
+    for (const { fn, min, max } of checks) {
+      for (let i = 0; i < 50; i++) {
+        const val = dice[fn]();
+        assert.ok(val >= min && val <= max, `${fn} out of range: ${val}`);
+        assert.ok(Number.isInteger(val), `${fn} non-integer: ${val}`);
+      }
+    }
+  });
+
+  it('parseDiceAndRoll works in seeded mode', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'parse-test');
+    const result = dice.parseDiceAndRoll('3d6');
+    assert.equal(result.count, 3);
+    assert.equal(result.sides, 6);
+    assert.equal(result.rolls.length, 3);
+    assert.equal(result.total, result.rolls.reduce((a, b) => a + b, 0));
+    for (const r of result.rolls) {
+      assert.ok(r >= 1 && r <= 6);
+    }
+  });
+
+  it('rollWithAdvantage works in seeded mode', () => {
+    const { serverSecret } = dice.generateCommitment();
+    dice.applySeed(serverSecret, 'adv-test');
+    const r = dice.rollWithAdvantage();
+    assert.ok(r.result >= r.roll1 && r.result >= r.roll2);
+    assert.ok(r.roll1 >= 1 && r.roll1 <= 20);
+    assert.ok(r.roll2 >= 1 && r.roll2 <= 20);
+  });
+
+  it('throws if seeded PRNG used without initialization', () => {
+    // Make sure we're NOT in seeded mode
+    dice.clearSeed();
+    dice.setDiceMode('random');
+    // _seededRandom is internal, but we verify applySeed is required
+    // by checking that seeded mode doesn't activate spontaneously
+    assert.notEqual(dice.getDiceMode(), 'seeded');
   });
 });

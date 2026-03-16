@@ -68,6 +68,7 @@ describe('makeSavingThrow', () => {
   it('normal save — no advantage or disadvantage', () => {
     const result = mech.makeSavingThrow(5, 14);
     assert.equal(result.result, 10.5);
+    assert.equal(result.saveBonus, 5);
     assert.equal(result.total, 15.5);
     assert.equal(result.success, true);
     assert.equal(result.type, 'normal');
@@ -76,7 +77,15 @@ describe('makeSavingThrow', () => {
   it('save fails when total < DC', () => {
     const result = mech.makeSavingThrow(0, 14);
     assert.equal(result.total, 10.5);
+    assert.equal(result.saveBonus, 0);
     assert.equal(result.success, false);
+  });
+
+  it('returns saveBonus in result — prevents +undefined in logs', () => {
+    const result = mech.makeSavingThrow(-1, 10);
+    assert.equal(result.saveBonus, -1);
+    assert.equal(typeof result.saveBonus, 'number');
+    assert.equal(result.total, 10.5 + (-1));
   });
 
   it('advantage save returns type "advantage"', () => {

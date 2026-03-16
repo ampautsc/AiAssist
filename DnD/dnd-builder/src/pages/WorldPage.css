@@ -1,0 +1,403 @@
+/* WorldPage — Live world clock and NPC activity viewer.
+ *
+ * Dark fantasy theme matching EncounterViewer.
+ * Uses CSS custom properties from index.css.
+ */
+
+/* ── Root layout ─────────────────────────────────────────────────────────── */
+
+.world-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+  overflow: hidden;
+  transition: background 2s ease;
+}
+
+.world-loading,
+.world-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.world-error { color: var(--accent-red); }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.world-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: rgba(10, 10, 26, 0.85);
+  border-bottom: 2px solid var(--accent-gold);
+  flex-shrink: 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.world-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.world-clock svg { display: block; }
+
+.world-time-info { line-height: 1.4; }
+
+.world-time-main {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  color: var(--accent-gold);
+  letter-spacing: 0.05em;
+}
+
+.world-time-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.world-time-season {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.world-header-center { text-align: center; }
+
+.world-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  color: var(--accent-gold);
+  margin: 0;
+}
+
+.world-npc-counts {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ── Controls ────────────────────────────────────────────────────────────── */
+
+.world-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.world-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.world-control-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.world-hour-slider {
+  width: 130px;
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+}
+
+.world-speed-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.world-speed-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.world-btn-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.world-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.world-btn-start {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+.world-btn-start:hover { background: rgba(74, 222, 128, 0.3); }
+
+.world-btn-stop {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+.world-btn-stop:hover { background: rgba(248, 113, 113, 0.3); }
+
+.world-btn-tick {
+  background: rgba(212, 168, 75, 0.15);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+.world-btn-tick:hover { background: rgba(212, 168, 75, 0.3); }
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+
+.world-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 10, 26, 0.7);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.world-filter-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.world-filter-tab {
+  padding: 0.3rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: capitalize;
+}
+
+.world-filter-tab:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+.world-filter-tab.active {
+  background: rgba(212, 168, 75, 0.2);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.world-search {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  width: 260px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.world-search:focus { border-color: var(--accent-gold); }
+.world-search::placeholder { color: var(--text-muted); }
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+.world-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.world-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* ── NPC grid ────────────────────────────────────────────────────────────── */
+
+.world-npc-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-auto-rows: min-content;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.world-empty {
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.95rem;
+}
+
+/* ── NPC card ────────────────────────────────────────────────────────────── */
+
+.world-npc-card {
+  background: var(--bg-card);
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.world-npc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.world-npc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.world-npc-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.world-npc-badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  color: #ddd;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.world-npc-activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.world-npc-icon { flex-shrink: 0; font-size: 0.9rem; }
+
+.world-npc-action {
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.world-npc-location {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+.world-npc-mood {
+  font-size: 0.72rem;
+  font-style: italic;
+  text-transform: capitalize;
+}
+
+/* ── Event log ───────────────────────────────────────────────────────────── */
+
+.world-event-log {
+  width: 280px;
+  flex-shrink: 0;
+  background: rgba(10, 10, 26, 0.7);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0.75rem;
+  gap: 0.5rem;
+}
+
+.world-log-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.world-log-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.world-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.world-log-time {
+  font-size: 0.7rem;
+  color: var(--accent-gold);
+  font-family: monospace;
+}
+
+.world-log-msg {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .world-event-log {
+    display: none;
+  }
+
+  .world-npc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .world-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .world-header-center { display: none; }
+
+  .world-npc-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}

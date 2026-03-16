@@ -79,7 +79,7 @@ function getSaveDC(caster, spellDef) {
  */
 function resolveSpellSave(target, saveDef, dc, spellDef) {
   const ability = saveDef.ability;
-  const saveBonus = target.saves[ability] || 0;
+  const saveBonus = (target.saves && target.saves[ability]) || 0;
   
   // Check for auto-fail conditions
   // Paralyzed/stunned/unconscious auto-fail STR and DEX saves
