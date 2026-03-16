@@ -59,6 +59,40 @@ function _hexToXY(dq, dr) {
 // cos(arctan(0.5)) — D&D 5e cone half-angle ≈ 26.57°, matching DMG grid templates
 const _CONE_COS = 2 / Math.sqrt(5)  // ≈ 0.8944
 
+/** The six primary pointy-top hex-neighbour directions (axial offsets). */
+const _PRIMARY_DIRS = [
+  { q: 1, r: 0 },   // E
+  { q: 1, r: -1 },  // NE
+  { q: 0, r: -1 },  // NW
+  { q: -1, r: 0 },  // W
+  { q: -1, r: 1 },  // SW
+  { q: 0, r: 1 },   // SE
+]
+
+/**
+ * Snap an aim direction to the nearest primary hex direction.
+ * Guarantees the cone always covers the widest (1-2-3) fan pattern.
+ * @param {{q:number,r:number}} casterHex
+ * @param {{q:number,r:number}} aimHex
+ * @returns {{q:number,r:number}} snapped aim hex (one of the 6 adjacent hexes from caster)
+ */
+export function snapConeDirection(casterHex, aimHex) {
+  const dq = aimHex.q - casterHex.q
+  const dr = aimHex.r - casterHex.r
+  const aim = _hexToXY(dq, dr)
+  const aimLen = Math.sqrt(aim.x ** 2 + aim.y ** 2)
+  if (aimLen < 1e-9) return { q: casterHex.q + 1, r: casterHex.r } // default E
+
+  let bestDot = -Infinity
+  let bestDir = _PRIMARY_DIRS[0]
+  for (const dir of _PRIMARY_DIRS) {
+    const d = _hexToXY(dir.q, dir.r)
+    const dot = aim.x * d.x + aim.y * d.y
+    if (dot > bestDot) { bestDot = dot; bestDir = dir }
+  }
+  return { q: casterHex.q + bestDir.q, r: casterHex.r + bestDir.r }
+}
+
 /**
  * Returns a Set of "q,r" keys inside a 15-ft (or arbitrary-length) cone
  * originating at the caster and aimed toward aimHex.
@@ -78,9 +112,21 @@ export function hexesInCone(casterHex, aimHex, lengthFeet, mapRadius) {
   const cr = casterHex.r ?? 0
 
   // Aim direction vector (offset from caster)
-  const aim = _hexToXY((aimHex.q ?? 0) - cq, (aimHex.r ?? 0) - cr)
+  const aimDq = (aimHex.q ?? 0) - cq
+  const aimDr = (aimHex.r ?? 0) - cr
+  // Snap to nearest primary direction so the cone always gives the widest fan
+  let bestDot = -Infinity
+  let snappedDq = aimDq, snappedDr = aimDr
+  const rawAim = _hexToXY(aimDq, aimDr)
+  const rawLen = Math.sqrt(rawAim.x * rawAim.x + rawAim.y * rawAim.y)
+  if (rawLen < 1e-9) return result
+  for (const dir of _PRIMARY_DIRS) {
+    const d = _hexToXY(dir.q, dir.r)
+    const dot = rawAim.x * d.x + rawAim.y * d.y
+    if (dot > bestDot) { bestDot = dot; snappedDq = dir.q; snappedDr = dir.r }
+  }
+  const aim = _hexToXY(snappedDq, snappedDr)
   const aimLen = Math.sqrt(aim.x * aim.x + aim.y * aim.y)
-  if (aimLen < 1e-9) return result          // cursor on caster hex — nothing
 
   const lengthHexes = Math.ceil(lengthFeet / 5)
 

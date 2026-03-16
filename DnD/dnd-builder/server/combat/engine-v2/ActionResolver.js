@@ -378,7 +378,7 @@ function resolveAttack(state, attackerId, option) {
     return { state: finalizeMultiattackAction(newState, attackerId).withLogEntries(logs), result: { type: 'attack', hit: true, damage: dmg.total, damageRolls: dmg.rolls, damageDice: weapon.damageDice, crit: isCrit, roll: atkResult.total, natural: atkResult.natural, targetAC: target.ac, targetId: option.targetId, attackerId } }
   } else {
     logs.push(`${attacker.name} attacks ${target.name} with ${weapon.name}: ` +
-      `[d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] MISS!`)
+      `[d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] ${atkResult.natural === 1 ? 'CRITICAL FAILURE!' : 'MISS!'}`)
 
     return { state: finalizeMultiattackAction(newState, attackerId).withLogEntries(logs), result: { type: 'attack', hit: false, damage: 0, damageRolls: [], damageDice: weapon.damageDice, crit: false, roll: atkResult.total, natural: atkResult.natural, targetAC: target.ac, targetId: option.targetId, attackerId } }
   }
@@ -536,7 +536,7 @@ function resolveMultiattack(state, attackerId, option) {
       attacks.push({ hit: true, damage: dmg.total, damageRolls: dmg.rolls, damageDice: weapon.damageDice, weaponName: weapon.name, crit: isCrit, roll: atkResult.total, natural: atkResult.natural, targetAC: target.ac, targetId, attackerId })
     } else {
       logs.push(`  ${curAttacker.name} attack ${i + 1}: ` +
-        `(${weapon.name}) [d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] MISS!`)
+        `(${weapon.name}) [d20:${atkResult.natural}+${weapon.attackBonus}=${atkResult.total} vs AC ${target.ac}] ${atkResult.natural === 1 ? 'CRITICAL FAILURE!' : 'MISS!'}`)
       attacks.push({ hit: false, damage: 0, damageRolls: [], damageDice: weapon.damageDice, weaponName: weapon.name, crit: false, roll: atkResult.total, natural: atkResult.natural, targetAC: target.ac, targetId, attackerId })
     }
 
@@ -756,7 +756,7 @@ function resolveSingleTargetSpell(state, casterId, spellDef, slotLevel, targetId
       // Apply on-hit effects (Chill Touch: no_healing, Ray of Frost: speed_reduced_10, etc.)
       currentState = applySpellEffects(currentState, targetId, spellDef, logs)
     } else {
-      logs.push(`  → Attack roll: [d20:${atkResult.natural}+${caster.spellAttackBonus}=${atkResult.total} vs AC ${target.ac}] MISS!`)
+      logs.push(`  → Attack roll: [d20:${atkResult.natural}+${caster.spellAttackBonus}=${atkResult.total} vs AC ${target.ac}] ${atkResult.natural === 1 ? 'CRITICAL FAILURE!' : 'MISS!'}`)
     }
     return { state: currentState, logs, result: spellAttackResult }
   }

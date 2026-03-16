@@ -233,7 +233,7 @@ function _continueAttack(context, diceResult) {
     if (!hits) {
       // Miss — action complete
       const logs = [`${attacker.name} attacks ${target.name} with ${weapon.name}: ` +
-        `[d20:${natural}+${weapon.attackBonus || 0}=${total} vs AC ${target.ac}] MISS!`]
+        `[d20:${natural}+${weapon.attackBonus || 0}=${total} vs AC ${target.ac}] ${natural === 1 ? 'CRITICAL FAILURE!' : 'MISS!'}`]
 
       newState = _finalizeMultiattackAction(newState, attackerId)
 
