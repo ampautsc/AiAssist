@@ -22,6 +22,8 @@ const crypto = require('crypto')
 const { buildFromPersonality } = require('./CharacterContextBuilder')
 const { generateResponse }     = require('./CharacterResponseService')
 const { TRIGGER_EVENT, EMOTIONAL_STATE } = require('../llm/CharacterContextPackage')
+const EncounterMemory          = require('./EncounterMemoryService')
+const InfoExtraction           = require('./InfoExtractionService')
 const worldEngine              = require('./WorldEngine')
 
 // ── Personality loading (same as characterResponses route) ────────────────────
@@ -117,6 +119,19 @@ function _messageId() {
   return `msg_${crypto.randomBytes(4).toString('hex')}`
 }
 
+/**
+ * Enrich NPC list with current revealedInfo from encounter memory.
+ * @param {string} sessionId
+ * @param {EncounterNpc[]} npcs
+ * @returns {EncounterNpc[]}
+ */
+function _enrichNpcsWithRevealedInfo(sessionId, npcs) {
+  return npcs.map(npc => ({
+    ...npc,
+    revealedInfo: EncounterMemory.getRevealedInfo(sessionId, npc.templateKey),
+  }))
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -195,9 +210,24 @@ async function createEncounter(params) {
 
   _sessions.set(id, session)
 
+  // Generate initial appearance for each NPC and seed revealedInfo.
+  // We await this so the creation response already includes appearance descriptions.
+  const appearancePromises = npcs.map(async (npc) => {
+    try {
+      const appearance = await InfoExtraction.generateAppearance(personalities[npc.templateKey])
+      EncounterMemory.getMemory(id, npc.templateKey)
+      EncounterMemory.initRevealedInfo(id, npc.templateKey, { appearance })
+    } catch (err) {
+      console.warn(`[EncounterSession] Appearance generation failed for ${npc.name}: ${err.message}`)
+      // Ensure memory slot exists even on failure
+      EncounterMemory.getMemory(id, npc.templateKey)
+    }
+  })
+  await Promise.all(appearancePromises)
+
   return {
     encounterId: id,
-    npcs:        session.npcs,
+    npcs:        _enrichNpcsWithRevealedInfo(id, npcs),
     messages:    session.messages,
     worldContext: session.worldContext,
     status:      session.status,
@@ -219,7 +249,7 @@ function getEncounter(encounterId) {
   }
   return {
     encounterId: session.id,
-    npcs:        session.npcs,
+    npcs:        _enrichNpcsWithRevealedInfo(encounterId, session.npcs),
     messages:    session.messages,
     worldContext: session.worldContext,
     status:      session.status,
@@ -340,6 +370,7 @@ async function sendMessage(encounterId, params) {
         personality,
         entityId:    'player',
         chatHistory,
+        playerMessage: text.trim(),
       })
 
       const npcMessage = {
@@ -369,7 +400,7 @@ async function sendMessage(encounterId, params) {
     }
   }
 
-  return { playerMessage, npcResponses }
+  return { playerMessage, npcResponses, npcs: _enrichNpcsWithRevealedInfo(encounterId, session.npcs) }
 }
 
 /**

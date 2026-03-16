@@ -107,13 +107,40 @@ export function confirmRolls(sessionId, clientSeed) {
 }
 
 /**
- * Submit a combat action choice.
+ * Submit a combat action choice (legacy synchronous).
  * @param {string} sessionId
  * @param {{ optionId, targetId?, aoeCenter?, position? }} choice
  * @returns {Promise<{ result, rolls, logs, newState, nextMenu, victory }>}
  */
 export function submitChoice(sessionId, choice) {
   return request('POST', `/sessions/${sessionId}/actions`, choice)
+}
+
+/**
+ * Submit an action with STEPPED dice resolution.
+ * Returns either { done: true, result } or { done: false, pendingDice, ownerIsAi }.
+ * If pendingDice is returned, call provideDice() with seeds from user clicks.
+ *
+ * @param {string} sessionId
+ * @param {{ optionId, targetId?, aoeCenter?, position? }} choice
+ * @returns {Promise<StepResponse>}
+ */
+export function submitActionStepped(sessionId, choice) {
+  return request('POST', `/sessions/${sessionId}/actions?stepped=true`, choice)
+}
+
+/**
+ * Provide dice results for a pending dice request (stepped resolution).
+ *
+ * @param {string} sessionId
+ * @param {Object} diceData - One of:
+ *   { seeds: [number, ...] }  — Player: one seed per die from click event timestamps
+ *   { auto: true }            — AI: server auto-rolls
+ *   { rolls: [number, ...] }  — Testing: direct die values
+ * @returns {Promise<StepResponse>} — { done, result?, pendingDice?, diceRequests }
+ */
+export function provideDice(sessionId, diceData) {
+  return request('POST', `/sessions/${sessionId}/provide-dice`, diceData)
 }
 
 /**

@@ -47,6 +47,72 @@ export function hexesInRange(origin, maxHexes, mapRadius) {
   return result
 }
 
+// Pointy-top hex → Cartesian (scale-independent, HEX_SIZE cancels in angle math)
+const _SQRT3 = Math.sqrt(3)
+function _hexToXY(dq, dr) {
+  return {
+    x: _SQRT3 * dq + _SQRT3 / 2 * dr,
+    y: 1.5 * dr,
+  }
+}
+
+// cos(arctan(0.5)) — D&D 5e cone half-angle ≈ 26.57°, matching DMG grid templates
+const _CONE_COS = 2 / Math.sqrt(5)  // ≈ 0.8944
+
+/**
+ * Returns a Set of "q,r" keys inside a 15-ft (or arbitrary-length) cone
+ * originating at the caster and aimed toward aimHex.
+ *
+ * Uses the same dot-product / half-angle logic as the server's aoeGeometry.js
+ * so the highlight exactly matches what the server will hit.
+ *
+ * @param {{q:number, r:number}} casterHex  — origin of the cone
+ * @param {{q:number, r:number}} aimHex     — any hex in the aim direction
+ * @param {number} lengthFeet               — cone length in feet (e.g. 15)
+ * @param {number} mapRadius                — grid radius to clip against
+ * @returns {Set<string>}
+ */
+export function hexesInCone(casterHex, aimHex, lengthFeet, mapRadius) {
+  const result = new Set()
+  const cq = casterHex.q ?? 0
+  const cr = casterHex.r ?? 0
+
+  // Aim direction vector (offset from caster)
+  const aim = _hexToXY((aimHex.q ?? 0) - cq, (aimHex.r ?? 0) - cr)
+  const aimLen = Math.sqrt(aim.x * aim.x + aim.y * aim.y)
+  if (aimLen < 1e-9) return result          // cursor on caster hex — nothing
+
+  const lengthHexes = Math.ceil(lengthFeet / 5)
+
+  for (let dq = -lengthHexes; dq <= lengthHexes; dq++) {
+    const r1 = Math.max(-lengthHexes, -dq - lengthHexes)
+    const r2 = Math.min(lengthHexes, -dq + lengthHexes)
+    for (let dr = r1; dr <= r2; dr++) {
+      if (dq === 0 && dr === 0) continue
+
+      // Hex-distance check (3 hexes = 15 ft)
+      const hd = Math.max(Math.abs(dq), Math.abs(dr), Math.abs(-dq - dr))
+      if (hd > lengthHexes) continue
+
+      // Map boundary clip
+      const q = cq + dq
+      const r = cr + dr
+      if (Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) > mapRadius) continue
+
+      // Direction check — must be within the D&D cone half-angle
+      const cand = _hexToXY(dq, dr)
+      const candLen = Math.sqrt(cand.x * cand.x + cand.y * cand.y)
+      if (candLen < 1e-9) continue
+
+      const cosA = (aim.x * cand.x + aim.y * cand.y) / (aimLen * candLen)
+      if (cosA >= _CONE_COS - 1e-9) {
+        result.add(`${q},${r}`)
+      }
+    }
+  }
+  return result
+}
+
 /**
  * Scatter `count` non-overlapping hex positions in an arc/ring at a given
  * distance range from a center hex. Used to place enemies when an encounter

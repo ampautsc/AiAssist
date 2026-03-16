@@ -42,6 +42,7 @@ const _memoryStore = new Map()
  * @property {string}   currentMood          - Current inferred mood
  * @property {number}   dispositionShift     - Cumulative shift (-1.0 to +1.0) from default disposition
  * @property {number}   interactionCount     - Total number of response cycles in this session
+ * @property {Object}   revealedInfo         - Progressive character info revealed to the player
  * @property {number}   createdAt            - Timestamp of first interaction
  * @property {number}   lastUpdatedAt        - Timestamp of most recent update
  */
@@ -84,6 +85,16 @@ function getMemory(sessionId, npcId, options = {}) {
     currentMood: 'neutral',
     dispositionShift: 0,
     interactionCount: 0,
+    revealedInfo: {
+      appearance: null,
+      disposition: null,
+      backstory: null,
+      voice: null,
+      motivations: null,
+      fears: null,
+      mannerisms: null,
+      speechPatterns: null,
+    },
     defaultTrust,
     createdAt: now,
     lastUpdatedAt: now,
@@ -234,6 +245,77 @@ function isSecretRevealed(sessionId, npcId, secretKey) {
 function isSecretHinted(sessionId, npcId, secretKey) {
   const memory = getMemory(sessionId, npcId)
   return memory.secretsHinted.includes(secretKey)
+}
+
+// ── Revealed info (progressive character discovery) ──────────────────────────
+
+/** Valid fields for revealedInfo */
+const REVEALED_FIELDS = [
+  'appearance', 'disposition', 'backstory', 'voice',
+  'motivations', 'fears', 'mannerisms', 'speechPatterns',
+]
+
+/**
+ * Initialize revealedInfo with baseline data (e.g. appearance at session start).
+ *
+ * @param {string} sessionId
+ * @param {string} npcId
+ * @param {Object} initial - Object with field→value pairs to set
+ */
+function initRevealedInfo(sessionId, npcId, initial = {}) {
+  const memory = getMemory(sessionId, npcId)
+  for (const [field, value] of Object.entries(initial)) {
+    if (REVEALED_FIELDS.includes(field) && value != null) {
+      memory.revealedInfo[field] = value
+    }
+  }
+  memory.lastUpdatedAt = Date.now()
+}
+
+/**
+ * Reveal a specific piece of character info to the player.
+ * For array fields (motivations, fears, mannerisms, speechPatterns),
+ * values are merged into the existing array.
+ *
+ * @param {string} sessionId
+ * @param {string} npcId
+ * @param {string} field - One of REVEALED_FIELDS
+ * @param {string|string[]} value - The revealed content
+ */
+function revealInfo(sessionId, npcId, field, value) {
+  if (!REVEALED_FIELDS.includes(field)) return
+  const memory = getMemory(sessionId, npcId)
+
+  const arrayFields = ['motivations', 'fears', 'mannerisms', 'speechPatterns']
+  if (arrayFields.includes(field)) {
+    const incoming = Array.isArray(value) ? value : [value]
+    const existing = memory.revealedInfo[field] || []
+    const merged = [...existing]
+    for (const item of incoming) {
+      if (!merged.includes(item)) merged.push(item)
+    }
+    memory.revealedInfo[field] = merged
+  } else {
+    // String fields: append new info to existing content
+    if (memory.revealedInfo[field] && value) {
+      memory.revealedInfo[field] = `${memory.revealedInfo[field]} ${value}`
+    } else {
+      memory.revealedInfo[field] = value
+    }
+  }
+  memory.lastUpdatedAt = Date.now()
+}
+
+/**
+ * Get the current revealedInfo for an NPC.
+ *
+ * @param {string} sessionId
+ * @param {string} npcId
+ * @returns {Object} revealedInfo with only non-null fields
+ */
+function getRevealedInfo(sessionId, npcId) {
+  const memory = getMemory(sessionId, npcId)
+  return { ...memory.revealedInfo }
 }
 
 // ── Interaction tracking ──────────────────────────────────────────────────────
@@ -488,6 +570,12 @@ module.exports = {
   revealSecret,
   isSecretRevealed,
   isSecretHinted,
+
+  // Revealed info (progressive discovery)
+  initRevealedInfo,
+  revealInfo,
+  getRevealedInfo,
+  REVEALED_FIELDS,
 
   // Interaction tracking
   recordEntityInteraction,

@@ -73,6 +73,11 @@ export function useEncounterSession() {
         ...result.npcResponses,
       ])
 
+      // Update NPC data with latest revealedInfo from server
+      if (result.npcs) {
+        setNpcs(result.npcs)
+      }
+
       return result
     } catch (err) {
       setError(err.message)

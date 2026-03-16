@@ -241,6 +241,7 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
         'Healing Word', 'Faerie Fire', 'Dissonant Whispers',
         'Shatter', 'Invisibility', 'Silence',
         'Greater Invisibility', 'Polymorph', 'Dimension Door',
+        'Misty Step', 'Comprehend Languages',
       ],
       cantrips: ['Vicious Mockery', 'Minor Illusion'],
     },
@@ -251,8 +252,8 @@ CREATURE_TEMPLATES['gem_dragonborn_lore_bard_8'] = {
       cuttingWords: true,
     },
     breathWeapon: {
-      damage:     '2d8',
-      damageType: 'force',
+      damage:     '2d10',
+      damageType: 'radiant',
       save:       'dex',
       dc:          14,
       range:       15,

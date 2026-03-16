@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 function pickPrimaryRequest(rollRequests = []) {
   if (!Array.isArray(rollRequests) || rollRequests.length === 0) {
@@ -59,15 +59,35 @@ function parseNotation(notation = '1d20') {
   return { count, sides, modifier }
 }
 
+/** Flatten pendingDice.dice [{type:'d6', count:2}] → [6, 6] */
+function flattenDiceQueue(dice = []) {
+  const queue = []
+  for (const d of dice) {
+    const sides = parseInt(String(d.type).replace(/^d/i, ''), 10) || 20
+    const count = Math.max(1, d.count || 1)
+    for (let i = 0; i < count; i++) queue.push(sides)
+  }
+  return queue
+}
+
 export default function DiceArena({
+  // Shared
   visible,
-  rollRequests = [],
-  onSeedReady,
   onCancel,
   disabled = false,
+  // Legacy mode (single-throw-per-action)
+  rollRequests = [],
+  onSeedReady,
+  // Stepped mode (per-die-click)
+  pendingDice,        // { reason, dice: [{type,count}], modifier, owner, label }
+  ownerIsAi = false,
+  onDiceComplete,     // (seeds: string[]) => void
 }) {
   const boxRef = useRef(null)
   const hostIdRef = useRef(`dice-arena-${Math.random().toString(36).slice(2)}`)
+  const steppedMode = !!pendingDice
+
+  // Legacy state
   const queuedThrowRef = useRef(false)
   const pendingSeedRef = useRef(null)
   const [isPressed, setIsPressed] = useState(false)
@@ -76,7 +96,31 @@ export default function DiceArena({
   const [displayTotal, setDisplayTotal] = useState(null)
   const [awaitingContinue, setAwaitingContinue] = useState(false)
 
+  // Stepped state
+  const [dieQueue, setDieQueue] = useState([])       // [20, 6, 6] — sides per individual die
+  const [currentDieIdx, setCurrentDieIdx] = useState(0)
+  const [dieResults, setDieResults] = useState([])    // [{value, seed}]
+  const [steppedPhase, setSteppedPhase] = useState('idle') // idle | throwing | complete
+  const autoRollRef = useRef(null)
+  const rollingRef = useRef(false) // guard against double-clicks
+
   const primary = useMemo(() => pickPrimaryRequest(rollRequests), [rollRequests])
+
+  // ── Reset stepped state when pendingDice changes ──
+  useEffect(() => {
+    if (!pendingDice) {
+      setDieQueue([])
+      setCurrentDieIdx(0)
+      setDieResults([])
+      setSteppedPhase('idle')
+      return
+    }
+    const q = flattenDiceQueue(pendingDice.dice)
+    setDieQueue(q)
+    setCurrentDieIdx(0)
+    setDieResults([])
+    setSteppedPhase(q.length > 0 ? 'idle' : 'complete')
+  }, [pendingDice])
 
   useEffect(() => {
     let disposed = false
@@ -89,8 +133,9 @@ export default function DiceArena({
         if (disposed) return
 
         const DiceBox = mod.default || mod
-        const parsed = parseNotation(primary?.notation || '1d20')
-        const count = Math.max(1, Number(primary?.count) || parsed.count)
+        // Stepped mode always throws single dice; legacy uses primary notation
+        const parsed = steppedMode ? { count: 1 } : parseNotation(primary?.notation || '1d20')
+        const count = steppedMode ? 1 : Math.max(1, Number(primary?.count) || parsed.count)
         const scale = count >= 4 ? 4 : count === 3 ? 5 : count === 2 ? 6 : 7
         const throwForce = count >= 3 ? 16 : 13
         const spinForce = count >= 3 ? 22 : 18
@@ -141,6 +186,8 @@ export default function DiceArena({
         setIsReady(true)
       } catch (err) {
         console.error('[DiceArena] Failed to initialize dice-box:', err)
+        // Signal ready so any queued throw fires on the software (no-3D) path
+        if (!disposed) setIsReady(true)
       }
     }
 
@@ -149,7 +196,8 @@ export default function DiceArena({
     return () => {
       disposed = true
     }
-  }, [visible, primary?.notation, primary?.count])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible])
 
   useEffect(() => {
     if (!visible) {
@@ -160,12 +208,83 @@ export default function DiceArena({
       setAwaitingContinue(false)
       queuedThrowRef.current = false
       pendingSeedRef.current = null
+      rollingRef.current = false
+      clearTimeout(autoRollRef.current)
       boxRef.current = null
     }
   }, [visible])
 
+  // ── STEPPED MODE: Roll one die with 3D animation ──
+  const rollOneDie = useCallback(async (sides) => {
+    if (!boxRef.current?.roll) return { value: 0, seed: String(Date.now()) }
+    const seed = String(Date.now())
+    try {
+      if (boxRef.current.clear) await boxRef.current.clear()
+      const result = await Promise.race([
+        boxRef.current.roll(`1d${sides}`),
+        new Promise((resolve) => setTimeout(() => resolve(null), 3500)),
+      ])
+      const value = extractRollTotal(result) ?? 0
+      return { value, seed }
+    } catch (err) {
+      console.error('[DiceArena] single die roll failed:', err)
+      return { value: 0, seed }
+    }
+  }, [])
+
+  // ── STEPPED MODE: Handle one die click ──
+  const handleSteppedRoll = useCallback(async () => {
+    if (rollingRef.current || disabled || currentDieIdx >= dieQueue.length) return
+    rollingRef.current = true
+    setSteppedPhase('throwing')
+    setDisplayTotal(null)
+
+    const sides = dieQueue[currentDieIdx]
+    const { value, seed } = await rollOneDie(sides)
+
+    // Show individual die result briefly
+    setDisplayTotal(value)
+    await new Promise((r) => setTimeout(r, ownerIsAi ? 500 : 800))
+
+    const newResults = [...dieResults, { value, seed }]
+    const nextIdx = currentDieIdx + 1
+    setDieResults(newResults)
+    setCurrentDieIdx(nextIdx)
+
+    if (nextIdx >= dieQueue.length) {
+      // All dice rolled — show final total with modifier
+      const total = newResults.reduce((s, r) => s + r.value, 0) + (pendingDice?.modifier || 0)
+      setDisplayTotal(total)
+      setSteppedPhase('complete')
+
+      // AI auto-continues after brief display
+      if (ownerIsAi) {
+        await new Promise((r) => setTimeout(r, 900))
+        onDiceComplete?.(newResults.map((r) => r.seed))
+      }
+    } else {
+      setSteppedPhase('idle')
+    }
+    rollingRef.current = false
+  }, [disabled, currentDieIdx, dieQueue, dieResults, rollOneDie, ownerIsAi, pendingDice, onDiceComplete])
+
+  // ── STEPPED MODE: AI auto-roll ──
+  useEffect(() => {
+    if (!steppedMode || !ownerIsAi || !isReady || steppedPhase !== 'idle') return
+    if (currentDieIdx >= dieQueue.length) return
+    autoRollRef.current = setTimeout(handleSteppedRoll, 350)
+    return () => clearTimeout(autoRollRef.current)
+  }, [steppedMode, ownerIsAi, isReady, steppedPhase, currentDieIdx, dieQueue.length, handleSteppedRoll])
+
+  // ── STEPPED MODE: Player confirms total ──
+  const handleSteppedConfirm = useCallback(() => {
+    if (steppedPhase !== 'complete') return
+    onDiceComplete?.(dieResults.map((r) => r.seed))
+  }, [steppedPhase, dieResults, onDiceComplete])
+
+  // ── LEGACY MODE: Full throw (existing logic) ──
   const runThrow = async () => {
-    if (disabled || isThrowing || awaitingContinue || !isReady || !boxRef.current?.roll) return
+    if (disabled || isThrowing || awaitingContinue || !isReady) return
     setIsPressed(false)
     setIsThrowing(true)
     setDisplayTotal(null)
@@ -219,7 +338,8 @@ export default function DiceArena({
   const handleRelease = async () => {
     if (disabled || isThrowing || awaitingContinue) return
     setIsPressed(false)
-    if (!isReady || !boxRef.current?.roll) {
+    if (!isReady) {
+      // DiceBox still loading — queue the throw for when it's ready
       queuedThrowRef.current = true
       return
     }
@@ -229,7 +349,7 @@ export default function DiceArena({
   useEffect(() => {
     if (!visible || disabled || isThrowing || awaitingContinue || !isReady || !queuedThrowRef.current) return
     queuedThrowRef.current = false
-    runThrow()
+    runThrow() // eslint-disable-line react-hooks/exhaustive-deps
   }, [visible, disabled, isThrowing, awaitingContinue, isReady])
 
   const handleContinue = async () => {
@@ -244,60 +364,188 @@ export default function DiceArena({
 
   return (
     <div style={S.overlay} data-testid="dice-arena">
-      {/* dice-box container — fills the full overlay so physics world = full screen */}
       <div id={hostIdRef.current} style={S.canvasHost} data-testid="dice-throw-frame" />
 
-      {!isThrowing && !awaitingContinue && (
-        <div style={S.center}>
-          <button
-            type="button"
-            disabled={disabled}
-            onMouseDown={() => setIsPressed(true)}
-            onMouseUp={() => setIsPressed(false)}
-            onMouseLeave={() => setIsPressed(false)}
-            onTouchStart={() => setIsPressed(true)}
-            onTouchEnd={() => setIsPressed(false)}
-            onClick={handleRelease}
-            style={{
-              ...S.focusDie,
-              transform: isPressed ? 'scale(0.96)' : 'scale(1)',
-              boxShadow: isPressed
-                ? '0 0 0 3px rgba(255,255,255,0.18), 0 0 35px rgba(140, 100, 255, 0.65)'
-                : '0 0 0 2px rgba(255,255,255,0.15), 0 0 24px rgba(140, 100, 255, 0.35)',
-              opacity: disabled ? 0.5 : isReady ? 1 : 0.85,
-            }}
-            title={isReady ? 'Click to throw' : 'Loading 3D dice…'}
-          >
-            <div style={S.focusDieLabel}>d{primary.sides || 20}</div>
-            <div style={S.focusDieSub}>{primary.purpose || 'roll'}</div>
-            <div style={S.focusDieSub}>{isReady ? (primary.notation || '1d20') : 'Loading 3D dice…'}</div>
-          </button>
-        </div>
+      {steppedMode ? (
+        /* ── STEPPED MODE ─────────────────────────────────── */
+        <>
+          {/* Header: label + progress */}
+          <div style={S.steppedHeader}>
+            <div style={S.steppedLabel}>
+              {pendingDice?.label || pendingDice?.reason || 'Roll'}
+            </div>
+            <div style={S.steppedProgress}>
+              {dieQueue.length > 1
+                ? `Die ${Math.min(currentDieIdx + 1, dieQueue.length)} of ${dieQueue.length}`
+                : `1d${dieQueue[0] || 20}`}
+              {pendingDice?.modifier
+                ? ` (${pendingDice.modifier >= 0 ? '+' : ''}${pendingDice.modifier})`
+                : ''}
+            </div>
+          </div>
+
+          {/* Dice tray showing all dice (only when >1 die) */}
+          {dieQueue.length > 1 && (
+            <div style={S.diceTray}>
+              {dieQueue.map((sides, idx) => {
+                const isRolled = idx < currentDieIdx
+                const isCurrent = idx === currentDieIdx && steppedPhase !== 'complete'
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      ...S.trayDie,
+                      ...(isRolled ? S.trayDieRolled : {}),
+                      ...(isCurrent ? S.trayDieCurrent : {}),
+                    }}
+                  >
+                    <div style={S.trayDieLabel}>d{sides}</div>
+                    {isRolled && (
+                      <div style={S.trayDieResult}>{dieResults[idx]?.value}</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Clickable die button (player, idle phase) */}
+          {!ownerIsAi && steppedPhase === 'idle' && currentDieIdx < dieQueue.length && (
+            <div style={S.center}>
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseDown={() => setIsPressed(true)}
+                onMouseUp={() => setIsPressed(false)}
+                onMouseLeave={() => setIsPressed(false)}
+                onTouchStart={() => setIsPressed(true)}
+                onTouchEnd={() => setIsPressed(false)}
+                onClick={handleSteppedRoll}
+                style={{
+                  ...S.focusDie,
+                  transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+                  boxShadow: isPressed
+                    ? '0 0 0 3px rgba(255,255,255,0.18), 0 0 35px rgba(140, 100, 255, 0.65)'
+                    : '0 0 0 2px rgba(255,255,255,0.15), 0 0 24px rgba(140, 100, 255, 0.35)',
+                  opacity: disabled ? 0.5 : isReady ? 1 : 0.85,
+                }}
+                title={isReady ? 'Click to roll' : 'Loading 3D dice…'}
+              >
+                <div style={S.focusDieLabel}>d{dieQueue[currentDieIdx]}</div>
+                <div style={S.focusDieSub}>{pendingDice?.reason || 'roll'}</div>
+                <div style={S.focusDieSub}>
+                  {isReady ? 'Click to roll' : 'Loading 3D dice…'}
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* Throwing animation */}
+          {steppedPhase === 'throwing' && (
+            <div style={S.resultBadge} data-testid="dice-result-badge">
+              <div style={S.resultLabel}>
+                {ownerIsAi ? 'Enemy rolling…' : 'Rolling…'}
+              </div>
+              <div style={S.resultValue}>
+                {displayTotal === null ? '…' : displayTotal}
+              </div>
+            </div>
+          )}
+
+          {/* AI idle indicator */}
+          {ownerIsAi && steppedPhase === 'idle' && currentDieIdx < dieQueue.length && (
+            <div style={S.resultBadge}>
+              <div style={S.resultLabel}>Enemy rolling…</div>
+              <div style={S.resultValue}>d{dieQueue[currentDieIdx]}</div>
+            </div>
+          )}
+
+          {/* Complete — player confirms, AI auto-continues */}
+          {steppedPhase === 'complete' && !ownerIsAi && (
+            <button
+              type="button"
+              onClick={handleSteppedConfirm}
+              style={S.resultConfirm}
+              data-testid="dice-result-confirm"
+            >
+              <div style={S.resultLabel}>
+                {pendingDice?.label || pendingDice?.reason || 'Total'}
+              </div>
+              <div style={S.resultValue}>{displayTotal ?? 0}</div>
+              <div style={S.resultTap}>Click to continue</div>
+            </button>
+          )}
+          {steppedPhase === 'complete' && ownerIsAi && (
+            <div style={S.resultBadge} data-testid="dice-result-badge">
+              <div style={S.resultLabel}>
+                {pendingDice?.label || pendingDice?.reason || 'Total'}
+              </div>
+              <div style={S.resultValue}>{displayTotal ?? 0}</div>
+            </div>
+          )}
+        </>
+      ) : (
+        /* ── LEGACY MODE ──────────────────────────────────── */
+        <>
+          {!isThrowing && !awaitingContinue && (
+            <div style={S.center}>
+              <button
+                type="button"
+                disabled={disabled}
+                onMouseDown={() => setIsPressed(true)}
+                onMouseUp={() => setIsPressed(false)}
+                onMouseLeave={() => setIsPressed(false)}
+                onTouchStart={() => setIsPressed(true)}
+                onTouchEnd={() => setIsPressed(false)}
+                onClick={handleRelease}
+                style={{
+                  ...S.focusDie,
+                  transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+                  boxShadow: isPressed
+                    ? '0 0 0 3px rgba(255,255,255,0.18), 0 0 35px rgba(140, 100, 255, 0.65)'
+                    : '0 0 0 2px rgba(255,255,255,0.15), 0 0 24px rgba(140, 100, 255, 0.35)',
+                  opacity: disabled ? 0.5 : isReady ? 1 : 0.85,
+                }}
+                title={isReady ? 'Click to throw' : 'Loading 3D dice…'}
+              >
+                <div style={S.focusDieLabel}>d{primary.sides || 20}</div>
+                <div style={S.focusDieSub}>{primary.purpose || 'roll'}</div>
+                <div style={S.focusDieSub}>
+                  {isReady ? (primary.notation || '1d20') : 'Loading 3D dice…'}
+                </div>
+              </button>
+            </div>
+          )}
+
+          {isThrowing && (
+            <div style={S.resultBadge} data-testid="dice-result-badge">
+              <div style={S.resultLabel}>
+                {displayTotal === null ? 'Rolling…' : 'Result'}
+              </div>
+              <div style={S.resultValue}>
+                {displayTotal === null ? '…' : displayTotal}
+              </div>
+            </div>
+          )}
+
+          {awaitingContinue && (
+            <button
+              type="button"
+              onClick={handleContinue}
+              style={S.resultConfirm}
+              data-testid="dice-result-confirm"
+            >
+              <div style={S.resultLabel}>Result</div>
+              <div style={S.resultValue}>{displayTotal ?? 0}</div>
+              <div style={S.resultTap}>Click to continue</div>
+            </button>
+          )}
+        </>
       )}
 
-      {onCancel && !isThrowing && !awaitingContinue && (
+      {onCancel && !isThrowing && !awaitingContinue && steppedPhase !== 'throwing' && (
         <button type="button" onClick={onCancel} style={S.cancelBtn}>
           Cancel
-        </button>
-      )}
-
-      {isThrowing && (
-        <div style={S.resultBadge} data-testid="dice-result-badge">
-          <div style={S.resultLabel}>{displayTotal === null ? 'Rolling…' : 'Result'}</div>
-          <div style={S.resultValue}>{displayTotal === null ? '…' : displayTotal}</div>
-        </div>
-      )}
-
-      {awaitingContinue && (
-        <button
-          type="button"
-          onClick={handleContinue}
-          style={S.resultConfirm}
-          data-testid="dice-result-confirm"
-        >
-          <div style={S.resultLabel}>Result</div>
-          <div style={S.resultValue}>{displayTotal ?? 0}</div>
-          <div style={S.resultTap}>Click to continue</div>
         </button>
       )}
     </div>
@@ -423,5 +671,73 @@ const S = {
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     opacity: 0.88,
+  },
+
+  /* ── Stepped mode styles ── */
+  steppedHeader: {
+    position: 'absolute',
+    top: 20,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    textAlign: 'center',
+    color: '#f3f3ff',
+    zIndex: 10,
+  },
+  steppedLabel: {
+    fontSize: 18,
+    fontWeight: 700,
+    letterSpacing: 0.6,
+    marginBottom: 4,
+    textTransform: 'capitalize',
+  },
+  steppedProgress: {
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    opacity: 0.7,
+  },
+  diceTray: {
+    position: 'absolute',
+    top: 80,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: 10,
+    zIndex: 10,
+  },
+  trayDie: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    border: '1px solid rgba(255,255,255,0.2)',
+    background: 'rgba(18, 18, 25, 0.7)',
+    color: '#f3f3ff',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+    opacity: 0.5,
+  },
+  trayDieRolled: {
+    opacity: 1,
+    background: 'rgba(60, 180, 80, 0.25)',
+    borderColor: 'rgba(60, 180, 80, 0.5)',
+  },
+  trayDieCurrent: {
+    opacity: 1,
+    background: 'rgba(140, 100, 255, 0.25)',
+    borderColor: 'rgba(140, 100, 255, 0.6)',
+    boxShadow: '0 0 12px rgba(140, 100, 255, 0.4)',
+  },
+  trayDieLabel: {
+    fontSize: 14,
+    fontWeight: 700,
+  },
+  trayDieResult: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#9eff9e',
+    marginTop: 2,
   },
 }

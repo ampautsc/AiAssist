@@ -256,6 +256,8 @@ export const MOCK_ACTIVE_CHARACTER = {
     { id: 'sp-dw', name: 'Dissonant Whispers', level: 1, icon: '🔊', school: 'enchantment', actionType: 'action', range: 60, description: '3d6 psychic + flee on WIS fail' },
     { id: 'sp-ff', name: 'Faerie Fire', level: 1, icon: '✨', school: 'evocation', actionType: 'action', range: 60, concentration: true, description: 'DEX save or outlined, attacks have advantage' },
     { id: 'sp-sb', name: 'Silvery Barbs', level: 1, icon: '🪩', school: 'enchantment', actionType: 'reaction', range: 60, description: 'Force reroll + grant advantage to ally' },
+    { id: 'sp-ms', name: 'Misty Step', level: 2, icon: '🌫️', school: 'conjuration', actionType: 'bonus', range: 0, description: 'Teleport up to 30ft to unoccupied space you can see (Fey Touched)' },
+    { id: 'sp-cl', name: 'Comprehend Languages', level: 1, icon: '📖', school: 'divination', actionType: 'action', range: 0, ritual: true, description: '1hr: understand all spoken/written language (Fey Touched)' },
     { id: 'sp-inv', name: 'Invisibility', level: 2, icon: '👤', school: 'illusion', actionType: 'action', range: 0, concentration: true, description: 'Creature becomes invisible' },
     { id: 'sp-sil', name: 'Silence', level: 2, icon: '🤫', school: 'illusion', actionType: 'action', range: 120, concentration: true, description: '20ft sphere: deafened, no verbal spells' },
     { id: 'sp-sht', name: 'Shatter', level: 2, icon: '💥', school: 'evocation', actionType: 'action', range: 60, description: '3d8 thunder in 10ft sphere, CON save half' },
@@ -273,8 +275,8 @@ export const MOCK_ACTIVE_CHARACTER = {
   classFeatures: [
     { id: 'cf-bi', name: 'Bardic Inspiration', icon: '🎵', actionType: 'bonus', uses: 4, maxUses: 4, die: 'd8', description: 'Grant d8 inspiration to ally within 60ft' },
     { id: 'cf-cw', name: 'Cutting Words', icon: '✂️', actionType: 'reaction', uses: 0, maxUses: 0, description: 'Subtract d8 from enemy roll (uses Bardic Inspiration)', sharePool: 'cf-bi' },
-    { id: 'cf-bw', name: 'Breath Weapon', icon: '🐉', actionType: 'action', uses: 3, maxUses: 3, description: '2d8 force, 15ft cone, DEX save DC 14' },
-    { id: 'cf-df', name: 'Dragon Fear', icon: '😱', actionType: 'action', uses: 1, maxUses: 1, description: 'WIS DC 15 or frightened 1 min, 30ft' },
+    { id: 'cf-bw', name: 'Breath Weapon', icon: '🐉', actionType: 'action', uses: 3, maxUses: 3, description: '2d10 radiant, 15ft cone, DEX save DC 14 — replace one attack', isAttack: true },
+    { id: 'cf-df', name: 'Dragon Fear', icon: '😱', actionType: 'action', sharePool: 'cf-bw', description: 'Roar: WIS DC 15 or frightened 1 min, 30ft — spends a Breath Weapon use' },
     { id: 'cf-gf', name: 'Gem Flight', icon: '🦋', actionType: 'bonus', uses: 3, maxUses: 3, description: 'Spectral wings, fly speed 30ft, 10 rounds' },
   ],
 }

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom'
 import LobbyPage from './pages/LobbyPage'
 import CharacterPage from './pages/CharacterPage'
 import CombatLogPage from './pages/CombatLogPage'
+import LiveCombatPage from './pages/LiveCombatPage'
 
 // ── Inline styles (no external CSS file required) ───────────────────────────
 const styles: Record<string, React.CSSProperties> = {
@@ -135,6 +136,7 @@ export default function App() {
         <NavLink to="/character" style={linkStyle}>Characters</NavLink>
         <NavLink to="/game"      style={linkStyle}>Game Table</NavLink>
         <NavLink to="/combat"    style={linkStyle}>Combat Log</NavLink>
+        <NavLink to="/live-combat" style={linkStyle}>Live Combat</NavLink>
       </nav>
 
       <main style={styles.main}>
@@ -144,6 +146,7 @@ export default function App() {
           <Route path="/character" element={<CharacterPage />} />
           <Route path="/game"      element={<GamePage />} />
           <Route path="/combat"    element={<CombatLogPage />} />
+          <Route path="/live-combat" element={<LiveCombatPage />} />
         </Routes>
       </main>
     </BrowserRouter>

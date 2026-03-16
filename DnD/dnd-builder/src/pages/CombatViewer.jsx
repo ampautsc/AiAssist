@@ -20,7 +20,7 @@ import DiceArena from "../components/DiceArena"
 import { useBattleMap } from "../combat/useBattleMap.js"
 import { useCombatSession } from "../combat/useCombatSession.js"
 import { useDiceAnimation } from "../combat/useDiceAnimation.js"
-import { hexDistance, hexesInRange, scatterPositions } from "../combat/hexUtils.js"
+import { hexDistance, hexesInRange, hexesInCone, scatterPositions } from "../combat/hexUtils.js"
 import { TERRAIN_TYPES } from "../combat/battleMapSchema.js"
 import { MOCK_HUD_DATA } from "../combat/hudMockData.js"
 import { ENCOUNTERS, CREATURE_DISPLAY, getEncounterById } from "../combat/encounters.js"
@@ -553,8 +553,16 @@ export default function CombatViewer() {
   // ── Hex hover for AoE preview ──────────────────────────────────────────
   function handleHexHover(q, r) {
     if (interactionMode !== 'aoe' || !pendingAction) return
-    const radiusHexes = Math.floor((pendingAction.aoeRadius ?? 20) / 5)
-    setAoePreviewKeys(hexesInRange({ q, r }, radiusHexes, MAP_RADIUS))
+    if (pendingAction.aoeShape === 'cone') {
+      // Cone: fan outward from caster toward the hovered hex
+      const caster = map.entities.find(e => e.id === combat.activeId)
+      if (!caster) return
+      const lengthFeet = pendingAction.aoeSize ?? 15
+      setAoePreviewKeys(hexesInCone({ q: caster.q, r: caster.r }, { q, r }, lengthFeet, MAP_RADIUS))
+    } else {
+      const radiusHexes = Math.floor((pendingAction.aoeRadius ?? pendingAction.aoeSize ?? 20) / 5)
+      setAoePreviewKeys(hexesInRange({ q, r }, radiusHexes, MAP_RADIUS))
+    }
   }
 
   // ── Escape to cancel interaction ───────────────────────────────────────

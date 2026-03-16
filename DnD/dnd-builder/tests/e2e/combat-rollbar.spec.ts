@@ -55,7 +55,12 @@ test.describe('Dice Roll Bar', () => {
     const throwBtn = diceArena.locator('button').first()
     await throwBtn.click({ force: true })
 
-    // DiceArena should close after the physics finish
+    // After physics settle, the arena shows a "Click to continue" confirm button
+    const confirmBtn = page.getByTestId('dice-result-confirm')
+    await expect(confirmBtn).toBeVisible({ timeout: 15_000 })
+    await confirmBtn.click({ force: true })
+
+    // DiceArena should close after confirming
     await expect(diceArena).not.toBeVisible({ timeout: 15_000 })
 
     // Roll history should have at least one entry

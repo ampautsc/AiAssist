@@ -146,7 +146,9 @@ export class CombatPage {
   }
 
   /**
-   * If DiceArena opens after an action, click the throw button and wait for it to close.
+   * If DiceArena opens after an action, click the throw button, then click
+   * the "Click to continue" confirm button once physics settle, and wait for
+   * the arena to close.
    * Safe to call even if no dice roll is triggered — will no-op if arena doesn't appear.
    */
   async throwDiceIfVisible(timeoutMs = 15_000) {
@@ -157,7 +159,16 @@ export class CombatPage {
       // No DiceArena appeared — action resolved without dice
       return
     }
+    // Step 1: click the throw (die face) button
     await arena.locator('button').first().click({ force: true })
+    // Step 2: wait for the "Click to continue" confirm button to appear, then click it
+    const confirm = this.page.getByTestId('dice-result-confirm')
+    try {
+      await confirm.waitFor({ state: 'visible', timeout: timeoutMs })
+      await confirm.click({ force: true })
+    } catch {
+      // Some roll paths auto-resolve without a confirm step — best-effort
+    }
     await arena.waitFor({ state: 'hidden', timeout: timeoutMs })
   }
 

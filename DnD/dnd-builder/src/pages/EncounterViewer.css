@@ -502,6 +502,142 @@
   cursor: not-allowed;
 }
 
+/* ── NPC Card Wrapper (for tooltip positioning) ──────────────────────────── */
+
+.npc-card-wrapper {
+  position: relative;
+}
+
+/* ── NPC Info Tooltip ────────────────────────────────────────────────────── */
+
+.npc-tooltip {
+  position: fixed;
+  width: 300px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0.75rem;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: tooltipFadeIn 0.25s ease;
+}
+
+.npc-tooltip::-webkit-scrollbar {
+  width: 4px;
+}
+
+.npc-tooltip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.npc-tooltip::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.npc-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.npc-tooltip-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.npc-tooltip-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Cinzel', serif;
+}
+
+.npc-tooltip-race {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.npc-tooltip-section {
+  margin-bottom: 0.5rem;
+}
+
+.npc-tooltip-section:last-child {
+  margin-bottom: 0;
+}
+
+.npc-tooltip-reveal {
+  animation: tooltipRevealFade 0.4s ease;
+}
+
+@keyframes tooltipRevealFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.npc-tooltip-label {
+  font-size: 0.65rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.npc-tooltip-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.npc-tooltip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.npc-tooltip-list li {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  padding-left: 0.8rem;
+  position: relative;
+}
+
+.npc-tooltip-list li::before {
+  content: '\2022';
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+}
+
+.npc-tooltip-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
 /* ── Scrollbar styling ───────────────────────────────────────────────────── */
 
 .chat-messages::-webkit-scrollbar,

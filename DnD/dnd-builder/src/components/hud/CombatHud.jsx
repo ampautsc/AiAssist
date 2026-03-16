@@ -238,6 +238,8 @@ export default function CombatHud({
   const reaUsed = budget?.reactionUsed     ?? false
   const moveFt  = budget?.movementRemaining ?? 0
 
+  const attackFeatures = features.filter(f => f.isAttack && f.actionType === 'action')
+
   function isBtnOff(key) {
     if (isResolving) return true  // All buttons disabled during resolution
     if (!budget && !serverMenu) return true
@@ -532,22 +534,40 @@ export default function CombatHud({
 
               {/* ── Attack flyout ── */}
               {openMenu === 'attack' && (serverMenu
-                ? (serverMenu.actions || []).filter(a => a.type === 'attack').map(a => (
-                    <FlyItem key={a.optionId} icon="⚔️" disabled={isResolving}
+                ? (serverMenu.actions || []).filter(a => a.type === 'attack' || a.type === 'breath_weapon').map(a => (
+                    <FlyItem key={a.optionId} icon={a.type === 'breath_weapon' ? '🐉' : '⚔️'} disabled={isResolving}
                       testId={`flyout-attack-${a.optionId}`}
-                      onClick={() => fire('attack', { optionId: a.optionId, ...a })}>
+                      onClick={() => fire(a.type, { optionId: a.optionId, ...a })}>
                       {a.label}
                     </FlyItem>
                   ))
-                : weapons.map(w => (
-                    <FlyItem key={w.id} icon={w.icon} disabled={actUsed}
-                      onClick={() => fire('attack', w)}>
-                      {w.name}{' '}
-                      <span style={{ color: '#665', fontSize: 10 }}>
-                        (+{w.attackBonus}, {w.damage})
-                      </span>
-                    </FlyItem>
-                  ))
+                : (
+                  <>
+                    {weapons.map(w => (
+                      <FlyItem key={w.id} icon={w.icon} disabled={actUsed}
+                        onClick={() => fire('attack', w)}>
+                        {w.name}{' '}
+                        <span style={{ color: '#665', fontSize: 10 }}>
+                          (+{w.attackBonus}, {w.damage})
+                        </span>
+                      </FlyItem>
+                    ))}
+                    {attackFeatures.map(f => (
+                      <FlyItem key={f.id} icon={f.icon} disabled={actUsed || (f.uses !== undefined && f.uses <= 0)}
+                        onClick={() => fire('attack', { ...f, featureAttack: true })}>
+                        {f.name}{' '}
+                        <span style={{ color: '#665', fontSize: 10 }}>
+                          ({f.description})
+                        </span>
+                        {f.uses !== undefined && (
+                          <span style={{ color: '#886', fontSize: 10, marginLeft: 4 }}>
+                            [{f.uses}/{f.maxUses}]
+                          </span>
+                        )}
+                      </FlyItem>
+                    ))}
+                  </>
+                )
               )}
 
               {/* ── Loot flyout ── */}

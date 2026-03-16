@@ -27,6 +27,7 @@ const {
 const { getProvider, setProvider } = require('../llm/LLMProvider')
 const { CANNED_RESPONSES }         = require('../llm/MockLLMProvider')
 const EncounterMemory              = require('./EncounterMemoryService')
+const InfoExtraction               = require('./InfoExtractionService')
 
 // ── Per-session repetition tracking ──────────────────────────────────────────
 // Key: `${sessionId}:${npcId}`, Value: string[]
@@ -214,6 +215,28 @@ async function generateResponse(contextPackage, options = {}) {
 
     if (options.entityId) {
       EncounterMemory.recordEntityInteraction(sessionId, character.id, options.entityId)
+    }
+
+    // ── Info extraction: analyze what the NPC revealed ───────────────────
+    // Fire-and-forget — don't block the response on extraction
+    if (source === 'llm' && options.personality) {
+      const currentRevealed = EncounterMemory.getRevealedInfo(sessionId, character.id)
+      InfoExtraction.extractRevealedInfo({
+        responseText: text,
+        personality: options.personality,
+        currentRevealed,
+        playerMessage: options.playerMessage || '',
+      }).then(result => {
+        if (result && result.reveals) {
+          for (const [field, value] of Object.entries(result.reveals)) {
+            if (value != null) {
+              EncounterMemory.revealInfo(sessionId, character.id, field, value)
+            }
+          }
+        }
+      }).catch(err => {
+        console.warn(`[CharacterResponseService] Info extraction failed for ${character.name}: ${err.message}`)
+      })
     }
   }
 

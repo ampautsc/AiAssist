@@ -204,6 +204,50 @@ function rollWithDisadvantage() {
   return { roll1: r1, roll2: r2, result: Math.min(r1, r2), type: 'disadvantage' };
 }
 
+// ── Per-Die Seeded Roll ───────────────────────────────────────────────────────
+// New architecture: each die click generates one seed for one die.
+// No global state mutation — pure function.
+
+/**
+ * Simple seeded float [0, 1) using mulberry32.
+ * @param {number} seed - 32-bit integer seed
+ * @returns {number}
+ */
+function _mulberry32(seed) {
+  let t = (seed + 0x6D2B79F5) | 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+/**
+ * Hash a string to a 32-bit integer.
+ * @param {string} str
+ * @returns {number}
+ */
+function _hashStr(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+/**
+ * Roll a single die deterministically from a user-provided seed.
+ * Each seed produces exactly one result — one click = one die = one seed.
+ * Pure function, no side effects.
+ *
+ * @param {number|string} seed  - User-provided seed (e.g. Date.now() from click)
+ * @param {number}        sides - Die faces (4, 6, 8, 10, 12, 20)
+ * @returns {number} 1-based die result
+ */
+function rollFromSeed(seed, sides) {
+  const numericSeed = typeof seed === 'string' ? _hashStr(seed) : Math.floor(seed);
+  return Math.floor(_mulberry32(numericSeed) * sides) + 1;
+}
+
 module.exports = {
   setDiceMode, getDiceMode,
   setFixedRolls, getRemainingFixedRolls, clearFixedRolls,
@@ -212,4 +256,5 @@ module.exports = {
   dieFns,
   rollDice, parseDiceAndRoll,
   rollWithAdvantage, rollWithDisadvantage,
+  rollFromSeed,
 };

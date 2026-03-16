@@ -220,6 +220,12 @@ function ChatMessage({ message, npcIndex, isPlayer }) {
 
 function NpcCard({ npc, index, isAddressed, onToggle }) {
   const color = getNpcColor(index)
+  const appearance = npc.revealedInfo?.appearance
+  // Show a truncated snippet of the appearance description when available,
+  // otherwise fall back to race · disposition.
+  const cardDetail = appearance
+    ? (appearance.length > 60 ? appearance.slice(0, 57).trimEnd() + '…' : appearance)
+    : `${npc.race} · ${npc.disposition}`
 
   return (
     <div
@@ -233,8 +239,179 @@ function NpcCard({ npc, index, isAddressed, onToggle }) {
       </div>
       <div className="npc-card-info">
         <div className="npc-card-name">{npc.name}</div>
-        <div className="npc-card-detail">{npc.race} · {npc.disposition}</div>
+        <div className="npc-card-detail">{cardDetail}</div>
       </div>
+    </div>
+  )
+}
+
+// ── NPC Info Tooltip ─────────────────────────────────────────────────────────
+// Rendered with position:fixed so it escapes sidebar overflow clipping.
+// Two timers:
+//   showTimer  — delays tooltip appearance on card hover (900ms)
+//   hideTimer  — grace period when mouse leaves card/tooltip (150ms)
+// Moving from card → tooltip cancels hideTimer before it fires.
+
+function NpcCardWithTooltip({ npc, index, isAddressed, onToggle }) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPos, setTooltipPos]   = useState({ top: 0, left: 0 })
+  const wrapperRef = useRef(null)
+  const showTimer  = useRef(null)
+  const hideTimer  = useRef(null)
+
+  const cancelHide = () => {
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current)
+      hideTimer.current = null
+    }
+  }
+
+  const scheduleHide = () => {
+    cancelHide()
+    hideTimer.current = setTimeout(() => setShowTooltip(false), 150)
+  }
+
+  const handleCardMouseEnter = () => {
+    cancelHide()
+    if (showTimer.current) return  // already counting down
+    showTimer.current = setTimeout(() => {
+      showTimer.current = null
+      if (wrapperRef.current) {
+        const rect = wrapperRef.current.getBoundingClientRect()
+        const TOOLTIP_MAX_HEIGHT = 430
+        const TOOLTIP_MARGIN     = 8
+        const rawTop = rect.top
+        const maxTop = window.innerHeight - TOOLTIP_MAX_HEIGHT - TOOLTIP_MARGIN
+        setTooltipPos({ top: Math.min(rawTop, Math.max(TOOLTIP_MARGIN, maxTop)), left: rect.right + 10 })
+      }
+      setShowTooltip(true)
+    }, 900)
+  }
+
+  const handleCardMouseLeave = () => {
+    if (showTimer.current) {
+      clearTimeout(showTimer.current)
+      showTimer.current = null
+    }
+    scheduleHide()
+  }
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="npc-card-wrapper"
+      onMouseEnter={handleCardMouseEnter}
+      onMouseLeave={handleCardMouseLeave}
+    >
+      <NpcCard npc={npc} index={index} isAddressed={isAddressed} onToggle={onToggle} />
+      {showTooltip && (
+        <NpcTooltip
+          npc={npc}
+          index={index}
+          pos={tooltipPos}
+          onMouseEnter={cancelHide}
+          onMouseLeave={scheduleHide}
+        />
+      )}
+    </div>
+  )
+}
+
+function NpcTooltip({ npc, index, pos, onMouseEnter, onMouseLeave }) {
+  const color = getNpcColor(index)
+  const info = npc.revealedInfo || {}
+
+  const hasAnyRevealed = info.disposition || info.backstory || info.voice ||
+    info.motivations?.length || info.fears?.length ||
+    info.mannerisms?.length || info.speechPatterns?.length
+
+  return (
+    <div
+      className="npc-tooltip"
+      style={{ top: pos.top, left: pos.left }}
+      data-testid={`npc-tooltip-${npc.templateKey}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className="npc-tooltip-header" style={{ borderColor: color }}>
+        <div className="npc-tooltip-avatar" style={{ borderColor: color, color }}>
+          {getInitials(npc.name)}
+        </div>
+        <div>
+          <div className="npc-tooltip-name" style={{ color }}>{npc.name}</div>
+          <div className="npc-tooltip-race">{npc.race}</div>
+        </div>
+      </div>
+
+      {info.appearance && (
+        <div className="npc-tooltip-section">
+          <div className="npc-tooltip-label">Appearance</div>
+          <div className="npc-tooltip-text">{info.appearance}</div>
+        </div>
+      )}
+
+      {info.disposition && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Demeanor</div>
+          <div className="npc-tooltip-text">{info.disposition}</div>
+        </div>
+      )}
+
+      {info.voice && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Voice</div>
+          <div className="npc-tooltip-text">{info.voice}</div>
+        </div>
+      )}
+
+      {info.backstory && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Background</div>
+          <div className="npc-tooltip-text">{info.backstory}</div>
+        </div>
+      )}
+
+      {info.motivations?.length > 0 && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Motivations</div>
+          <ul className="npc-tooltip-list">
+            {info.motivations.map((m, i) => <li key={i}>{m}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {info.fears?.length > 0 && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Fears</div>
+          <ul className="npc-tooltip-list">
+            {info.fears.map((f, i) => <li key={i}>{f}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {info.mannerisms?.length > 0 && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Mannerisms</div>
+          <ul className="npc-tooltip-list">
+            {info.mannerisms.map((m, i) => <li key={i}>{m}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {info.speechPatterns?.length > 0 && (
+        <div className="npc-tooltip-section npc-tooltip-reveal">
+          <div className="npc-tooltip-label">Speech</div>
+          <ul className="npc-tooltip-list">
+            {info.speechPatterns.map((s, i) => <li key={i}>{s}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {!info.appearance && !hasAnyRevealed && (
+        <div className="npc-tooltip-section">
+          <div className="npc-tooltip-empty">You don't know much about this person yet...</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -359,7 +536,7 @@ export default function EncounterViewer() {
             {addressedTo.length === 0 ? 'Talking to everyone' : `Talking to ${addressedTo.length}`}
           </div>
           {encounter.npcs.map((npc, i) => (
-            <NpcCard
+            <NpcCardWithTooltip
               key={npc.templateKey}
               npc={npc}
               index={i}
@@ -367,7 +544,7 @@ export default function EncounterViewer() {
               onToggle={toggleAddressed}
             />
           ))}
-          <div className="sidebar-hint">Click to direct messages</div>
+          <div className="sidebar-hint">Click to direct messages · Hover for info</div>
         </div>
 
         {/* Chat Area */}
