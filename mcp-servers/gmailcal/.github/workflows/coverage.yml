@@ -1,0 +1,32 @@
+name: Code Coverage
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    coverage:
+        name: Coverage
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install Rust
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@v2
+
+            - name: Install Tarpaulin
+              run: cargo install cargo-tarpaulin
+
+            - name: Run cargo tarpaulin
+              run: cargo tarpaulin --out Xml
+
+            - name: Upload Coverage to GitHub Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: tarpaulin-report
+                  path: cobertura.xml
